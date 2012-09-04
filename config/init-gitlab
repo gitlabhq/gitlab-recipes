@@ -1,4 +1,9 @@
 #! /bin/bash
+
+# GITLAB
+# Maintainer: @randx
+# App Version: 2.9
+
 ### BEGIN INIT INFO
 # Provides:          gitlab
 # Required-Start:    $local_fs $remote_fs $network $syslog redis-server
@@ -8,6 +13,7 @@
 # Short-Description: GitLab git repository management
 # Description:       GitLab git repository management
 ### END INIT INFO
+
 
 APP_ROOT="/home/gitlab/gitlab"
 DAEMON_OPTS="-c $APP_ROOT/config/unicorn.rb -E production -D"

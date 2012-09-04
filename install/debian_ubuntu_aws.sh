@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# GITLAB
+# Maintainer: @dosire
+# App Version: 2.9
+
 # ABOUT
 # This script performs a complete installation of Gitlab (master branch).
 # Is can be run with one command without needing _any_ user input after that.
