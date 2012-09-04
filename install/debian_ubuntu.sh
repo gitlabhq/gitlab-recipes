@@ -4,6 +4,16 @@
 # Maintainer: @randx
 # App Version: 2.9
 
+# ABOUT
+# This script performs only PARTIAL installation of Gitlab:
+# * packages update
+# * redis, git, postfix etc
+# * ruby setup
+# * git, gitlab users
+# * gitolite fork
+# Is should be run as root or sudo user. 
+
+
 sudo apt-get update
 sudo apt-get upgrade
 
