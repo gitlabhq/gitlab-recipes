@@ -42,6 +42,8 @@ echo "Host localhost
    UserKnownHostsFile=/dev/null" | sudo tee -a /etc/ssh/ssh_config
 
 # Existing script for Step 1 to 3
+
+sudo DEBIAN_FRONTEND='noninteractive' apt-get install -y postfix-policyd-spf-python # Install postfix without prompting.
 curl https://raw.github.com/gitlabhq/gitlab-recipes/master/install/debian_ubuntu.sh | sh
 
 # Install MySQL
