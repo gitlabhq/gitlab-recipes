@@ -34,7 +34,7 @@
 # Give the following command in your local terminal while suptituting the UPPERCASE items
 # 'ssh -i LOCATION_OF_AWS_KEY_PAIR_PRIVATE_KEY PUBLIC_DNS_OF_THE_NEW_SERVER'
 # Execute the curl command below and when its ready follow the printed 'Log in instuctions'
-# curl https://raw.github.com/gitlabhq/gitlabhq/master/lib/support/aws/debian_ubuntu_aws.sh | sh
+# curl https://raw.github.com/gitlabhq/gitlab-recipes/master/install/debian_ubuntu_aws.sh | sh
 
 # Prevent fingerprint prompt for localhost in step 1 to 3.
 echo "Host localhost
@@ -42,7 +42,7 @@ echo "Host localhost
    UserKnownHostsFile=/dev/null" | sudo tee -a /etc/ssh/ssh_config
 
 # Existing script for Step 1 to 3
-curl https://raw.github.com/gitlabhq/gitlabhq/master/doc/debian_ubuntu.sh | sh
+curl https://raw.github.com/gitlabhq/gitlab-recipes/master/install/debian_ubuntu.sh | sh
 
 # Install MySQL
 sudo apt-get install -y makepasswd # Needed to create a unique password non-interactively.
@@ -79,7 +79,7 @@ sudo sed -i '0,/host/s/localhost/'`wget -qO- http://instance-data/latest/meta-da
 
 # Install and configure Nginx
 sudo apt-get install -y nginx
-sudo cp /home/gitlab/gitlab/lib/support/nginx-gitlab /etc/nginx/sites-available/gitlab
+sudo wget https://raw.github.com/gitlabhq/gitlab-recipes/master/nginx/gitlab -P /etc/nginx/sites-available/
 sudo ln -s /etc/nginx/sites-available/gitlab /etc/nginx/sites-enabled/gitlab
 sudo sed -i 's/YOUR_SERVER_IP/'`wget -qO- http://instance-data/latest/meta-data/local-ipv4`'/' /etc/nginx/sites-available/gitlab # Set private ip address (public won't work).
 sudo sed -i 's/YOUR_SERVER_FQDN/'`wget -qO- http://instance-data/latest/meta-data/public-hostname`'/' /etc/nginx/sites-available/gitlab # Set public dns domain name.
@@ -88,7 +88,7 @@ sudo sed -i 's/YOUR_SERVER_FQDN/'`wget -qO- http://instance-data/latest/meta-dat
 sudo -u gitlab cp /home/gitlab/gitlab/config/unicorn.rb.orig /home/gitlab/gitlab/config/unicorn.rb
 
 # Create a Gitlab service
-sudo cp /home/gitlab/gitlab/lib/support/init-gitlab /etc/init.d/gitlab
+sudo wget https://raw.github.com/gitlabhq/gitlab-recipes/master/init.d/gitlab -P /etc/init.d/
 sudo chmod +x /etc/init.d/gitlab && sudo update-rc.d gitlab defaults
 
 ## Gitlab service commands (unicorn and resque)
