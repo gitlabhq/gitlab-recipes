@@ -1,8 +1,7 @@
-
 Gitlab with lighttpd webserver
 ==============================
 
-* Maintainer: @tvn
+* Maintainer: @tvn87
 * App Version: 2.8
 
 This config access gitlab via TCP port instead of sockets because of the
