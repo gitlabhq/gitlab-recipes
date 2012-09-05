@@ -1,3 +1,10 @@
+
+Gitlab with lighttpd webserver
+==============================
+
+* Maintainer: @tvn
+* App Version: 2.8
+
 This config access gitlab via TCP port instead of sockets because of the
 mod_proxy module which seems to be unable to connect via sockets.
 
