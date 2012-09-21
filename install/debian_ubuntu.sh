@@ -13,6 +13,15 @@
 # * gitolite fork
 # It should be run as root.
 
+# WARNINGS
+# * Performs 'apt-get -y update' and 'apt-get -y upgrade'
+
+# NOTES
+# * Double check that your hostname resolves properly.
+#   Lack of proper resolution may lead to incorrect installation.
+#   (eg. when generating within an LXC (Linux Container), as some
+#    versions of 'lxc-debian' generate guests with this issue.)
+
 apt-get -y update
 apt-get -y upgrade
 apt-get -y install sudo
