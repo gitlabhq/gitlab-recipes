@@ -11,7 +11,7 @@
 # * ruby setup
 # * git, gitlab users
 # * gitolite fork
-# Is should be run as root.
+# It should be run as root.
 
 apt-get -y update
 apt-get -y upgrade
