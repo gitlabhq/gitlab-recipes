@@ -54,5 +54,7 @@ sudo -u git -H sh -c "PATH=/home/git/bin:$PATH; gl-setup -q /home/git/gitlab.pub
 sudo chmod -R g+rwX /home/git/repositories/
 sudo chown -R git:git /home/git/repositories/
 
+sudo -u git -H sh -c 'echo -e "Host localhost\n\tStrictHostKeyChecking no\n" >> ~gitlab/.ssh/config'
+
 sudo -u gitlab -H git clone git@localhost:gitolite-admin.git /tmp/gitolite-admin
 sudo rm -rf /tmp/gitolite-admin
