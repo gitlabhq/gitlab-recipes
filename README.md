@@ -11,7 +11,7 @@ For setup within 'lxc' (Linux containers) use the following procedure:
     lxc-create -n debian -t debian
     lxc-start -n debian -f /etc/lxc/debian/config
     cd debian/rootfs
-    wget https://raw.github.com/gitlabhq/gitlab-recipes/master/install/debian_ubuntu.sh
+    wget https://raw.github.com/globalcitizen/gitlab-recipes/master/install/debian_ubuntu.sh
     cd ..
     lxc-start -n debian -f ./config
 
