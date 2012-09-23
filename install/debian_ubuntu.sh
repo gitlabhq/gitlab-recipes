@@ -67,3 +67,36 @@ sudo -u gitlab -H sh -c 'echo "Host localhost\n\tStrictHostKeyChecking no\n" >> 
 
 sudo -u gitlab -H git clone git@localhost:gitolite-admin.git /tmp/gitolite-admin
 rm -rf /tmp/gitolite-admin
+
+gem install charlock_holmes --version 0.6.8
+pip install pygments
+sudo gem install bundler
+cd /home/gitlab
+
+# Get gitlab code. Use this for stable setup
+sudo -H -u gitlab git clone -b stable https://github.com/gitlabhq/gitlabhq.git gitlab
+
+# Skip this for stable setup.
+# Master branch (recent changes, less stable)
+sudo -H -u gitlab git clone -b master https://github.com/gitlabhq/gitlabhq.git gitlab
+
+cd gitlab
+
+# Rename config files
+sudo -u gitlab cp config/gitlab.yml.example config/gitlab.yml
+
+# SQLite
+sudo -u gitlab cp config/database.yml.sqlite config/database.yml
+
+# Install gems
+sudo -u gitlab -H bundle install --without development test --deployment
+
+# Setup database
+sudo -u gitlab bundle exec rake gitlab:app:setup RAILS_ENV=production
+
+sudo cp ./lib/hooks/post-receive /home/git/.gitolite/hooks/common/post-receive
+sudo chown git:git /home/git/.gitolite/hooks/common/post-receive
+
+# Check status
+sudo -u gitlab bundle exec rake gitlab:app:status RAILS_ENV=production
+
