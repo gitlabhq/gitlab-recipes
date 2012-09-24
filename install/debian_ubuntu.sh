@@ -85,15 +85,16 @@ cd gitlab
 # Rename config files
 sudo -u gitlab cp config/gitlab.yml.example config/gitlab.yml
 
-# SQLite
+# Setup SQLite as database
 sudo -u gitlab cp config/database.yml.sqlite config/database.yml
 
 # Install gems
 sudo -u gitlab -H bundle install --without development test --deployment
 
-# Setup database
+# Initialize database
 sudo -u gitlab bundle exec rake gitlab:app:setup RAILS_ENV=production
 
+# Initialize post-receive hook (links commits to gitolite through to gitlab)
 cp ./lib/hooks/post-receive /home/git/.gitolite/hooks/common/post-receive
 chown git:git /home/git/.gitolite/hooks/common/post-receive
 chmod g+x /home/git/.gitolite
@@ -101,3 +102,26 @@ chmod g+x /home/git/.gitolite
 # Check status
 sudo -u gitlab bundle exec rake gitlab:app:status RAILS_ENV=production
 
+# Setup lighttpd as frontend web server
+apt-get -y install lighttpd
+update-rc.d lighttpd defaults
+cd /etc/lighttpd/conf-available
+wget https://raw.github.com/gitlabhq/gitlab-recipes/master/lighttpd/10-gitlab.conf
+#  - comment out SSL pemfile
+sed -i -e 's/^( *ssl.pemfile.*)$/#$1/' 10-gitlab.conf
+cd ../conf-enabled
+ln -s ../conf-available/10-gitlab.conf
+cd /home/gitlab/gitlab/config
+cp unicorn.rb.example unicorn.rb
+sed -i -e 's/listen.*/listen "127.0.0.1:8080"/' unicorn.rb
+
+# Setup init script
+cd /etc/init.d
+wget https://raw.github.com/gitlabhq/gitlab-recipes/master/init.d/gitlab
+chmod a+x gitlab
+update-rc.d gitlab defaults
+
+# Start
+/etc/init.d/gitlab start
+/etc/init.d/lighttpd start
+echo "All done.  Now update /etc/lighttpd/conf-available/10-github.conf with FQDN & restart lighttpd."
