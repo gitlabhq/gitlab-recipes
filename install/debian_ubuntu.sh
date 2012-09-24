@@ -94,8 +94,9 @@ sudo -u gitlab -H bundle install --without development test --deployment
 # Setup database
 sudo -u gitlab bundle exec rake gitlab:app:setup RAILS_ENV=production
 
-sudo cp ./lib/hooks/post-receive /home/git/.gitolite/hooks/common/post-receive
-sudo chown git:git /home/git/.gitolite/hooks/common/post-receive
+cp ./lib/hooks/post-receive /home/git/.gitolite/hooks/common/post-receive
+chown git:git /home/git/.gitolite/hooks/common/post-receive
+chmod g+x /home/git/.gitolite
 
 # Check status
 sudo -u gitlab bundle exec rake gitlab:app:status RAILS_ENV=production
