@@ -108,7 +108,7 @@ update-rc.d lighttpd defaults
 cd /etc/lighttpd/conf-available
 wget https://raw.github.com/gitlabhq/gitlab-recipes/master/lighttpd/10-gitlab.conf
 #  - comment out SSL pemfile
-sed -i -e 's/^( *ssl.pemfile.*)$/#$1/' 10-gitlab.conf
+sed -i -e 's/ *ssl.pemfile.*/# ssl.pemfile = "/some/file"/' 10-gitlab.conf
 cd ../conf-enabled
 ln -s ../conf-available/10-gitlab.conf
 cd /home/gitlab/gitlab/config
