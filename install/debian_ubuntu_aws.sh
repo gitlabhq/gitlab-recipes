@@ -75,8 +75,8 @@ sudo su -l gitlab -c "cd gitlab && bundle install --without development test --d
 sudo su -l gitlab -c "cd gitlab && bundle exec rake gitlab:app:setup RAILS_ENV=production"
 
 # Setup gitlab hooks
-sudo cp /home/gitlab/gitlab/lib/hooks/post-receive /home/git/share/gitolite/hooks/common/post-receive
-sudo chown git:git /home/git/share/gitolite/hooks/common/post-receive
+sudo cp /home/gitlab/gitlab/lib/hooks/post-receive /home/git/.gitolite/hooks/common/post-receive
+sudo chown git:git /home/git/.gitolite/hooks/common/post-receive
 
 # Set the first occurrence of host in the Gitlab config to the publicly available domain name
 sudo sed -i '0,/host/s/localhost/'`wget -qO- http://instance-data/latest/meta-data/public-hostname`'/' /home/gitlab/gitlab/config/gitlab.yml
