@@ -38,6 +38,7 @@ sudo adduser \
 sudo adduser --disabled-login --gecos 'gitlab system' gitlab
 
 sudo usermod -a -G git gitlab
+sudo usermod -a -G gitlab git
 
 sudo -H -u gitlab ssh-keygen -q -N '' -t rsa -f /home/gitlab/.ssh/id_rsa
 
@@ -50,6 +51,8 @@ sudo chmod 777 /home/git/gitlab.pub
 
 sudo -u git -H sed -i 's/0077/0007/g' /home/git/share/gitolite/conf/example.gitolite.rc
 sudo -u git -H sh -c "PATH=/home/git/bin:$PATH; gl-setup -q /home/git/gitlab.pub"
+sudo -u git -H sed -i "s/\(GIT_CONFIG_KEYS\s*=>*\s*\).\{2\}/\1'\.\*'/g" /home/git/.gitolite.rc
+
 
 sudo chmod -R g+rwX /home/git/repositories/
 sudo chown -R git:git /home/git/repositories/
