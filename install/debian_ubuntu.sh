@@ -45,12 +45,12 @@ sudo -H -u gitlab ssh-keygen -q -N '' -t rsa -f /home/gitlab/.ssh/id_rsa
 cd /home/git
 sudo -H -u git git clone git://github.com/gitlabhq/gitolite /home/git/gitolite
 
-sudo -u git -H sh -c "PATH=/home/git/bin:$PATH; /home/git/gitolite/src/gl-system-install"
+sudo -u git -H sh -c "PATH=/home/git/bin:$PATH; /home/git/gitolite/install"
 sudo cp /home/gitlab/.ssh/id_rsa.pub /home/git/gitlab.pub
 sudo chmod 777 /home/git/gitlab.pub
 
 sudo -u git -H sed -i 's/0077/0007/g' /home/git/share/gitolite/conf/example.gitolite.rc
-sudo -u git -H sh -c "PATH=/home/git/bin:$PATH; gl-setup -q /home/git/gitlab.pub"
+sudo -u git -H sh -c "PATH=/home/git/bin:$PATH; gitolite setup -pk /home/git/gitlab.pub"
 sudo -u git -H sed -i "s/\(GIT_CONFIG_KEYS\s*=>*\s*\).\{2\}/\1'\.\*'/g" /home/git/.gitolite.rc
 
 
