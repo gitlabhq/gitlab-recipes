@@ -19,8 +19,8 @@
 # Write a name for the key in "Name" field and Download it. Place it in a known location since it will be used in one of the next steps.
 # Under "Choose a Launch Configuration", select 'More Amazon Machine Images'.
 # Press 'Continue'
-# Enter 'ubuntu/images/ubuntu-precise-12.04-amd64-server-20120424' in the search field and press 'Search'
-# Select the only result (ami-3c994355) and press 'Continue'
+# Enter 'ubuntu/images/ubuntu-precise-12.04-amd64-server-20121001' in the search field and press 'Search'
+# Select the only result (ami-3d4ff254) and press 'Continue'
 # Press 'Edit details' if you want to modify something, for example make the type 'c1.medium' to make the install faster.
 # Press the 'Launch' button
 # Press 'Close'
@@ -61,6 +61,9 @@ userPassword=$(makepasswd --char=10) # Generate a random MySQL password
 echo mysql-server mysql-server/root_password password $userPassword | sudo debconf-set-selections
 echo mysql-server mysql-server/root_password_again password $userPassword | sudo debconf-set-selections
 sudo apt-get install -y mysql-server
+
+# Install postgres
+sudo apt-get install -y postgres libpq-dev
 
 # Gitlab install
 sudo gem install charlock_holmes --version '0.6.8'
