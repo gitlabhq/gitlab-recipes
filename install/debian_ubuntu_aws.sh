@@ -2,13 +2,13 @@
 
 # GITLAB
 # Maintainer: @dosire
-# App Version: 2.9
+# App Version: 3.0
 
 # ABOUT
 # This script performs a complete installation of Gitlab (master branch).
 # Is can be run with one command without needing _any_ user input after that.
 # This script only works on Amazon Web Services (AWS).
-# The operating system used is Ubuntu 12.04 64bit.
+# The operating system used is Ubuntu 12.04 64bit (20121001).
 
 # HOWTO
 # Signup for AWS, a free usage tier is available at http://aws.amazon.com/free/
@@ -45,12 +45,13 @@ echo "Host localhost
    StrictHostKeyChecking no
    UserKnownHostsFile=/dev/null" | sudo tee -a /etc/ssh/ssh_config
 
-sudo DEBIAN_FRONTEND='noninteractive' apt-get install -y postfix-policyd-spf-python postfix # Install postfix without prompting.
+# Install postfix without prompting.
+sudo DEBIAN_FRONTEND='noninteractive' apt-get install -y postfix-policyd-spf-python postfix
 
-# Existing script for Step 1 to 3
+# Existing script for steps 1 to 3
 curl https://raw.github.com/gitlabhq/gitlab-recipes/master/install/debian_ubuntu.sh >> debian_ubuntu.sh
 sed -i 's/postfix//' debian_ubuntu.sh # This will prompt even when postfix is already installed.
-sed -i '/sudo\ apt-get\ upgrade/d' debian_ubuntu.sh # Upgrade can cause prompting for various packages (grub, etc.).
+sed -i '/apt-get\ upgrade/d' debian_ubuntu.sh # Upgrade can cause prompting for various packages (grub, etc.).
 sh debian_ubuntu.sh
 
 # Install MySQL
@@ -61,9 +62,6 @@ userPassword=$(makepasswd --char=10) # Generate a random MySQL password
 echo mysql-server mysql-server/root_password password $userPassword | sudo debconf-set-selections
 echo mysql-server mysql-server/root_password_again password $userPassword | sudo debconf-set-selections
 sudo apt-get install -y mysql-server
-
-# Install postgres
-sudo apt-get install -y postgres libpq-dev
 
 # Gitlab install
 sudo gem install charlock_holmes --version '0.6.8'
