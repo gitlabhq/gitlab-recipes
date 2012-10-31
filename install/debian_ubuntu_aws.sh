@@ -38,7 +38,7 @@
 # where LOCATION_OF_AWS_KEY_PAIR_PRIVATE_KEY is the location of the key saved on your local machine. Permissions of the .pem file have to be at least 600 (chmod 600 NAME_OF_PRIVATE_KEY.pem).
 # PUBLIC_DNS_OF_THE_NEW_SERVER can be viewed by selecting the aws instance created in previous steps and selecting the 'Description' tab
 # Execute the curl command below and when its ready follow the printed 'Log in instuctions'
-# curl https://raw.github.com/gitlabhq/gitlab-recipes/master/install/debian_ubuntu_aws.sh | sh
+# curl https://raw.github.com/gitlabhq/gitlab-recipes/master/install/debian_ubuntu_aws.sh | sudo sh
 
 # Prevent fingerprint prompt for localhost in step 1 to 3.
 echo "Host localhost
@@ -46,7 +46,7 @@ echo "Host localhost
    UserKnownHostsFile=/dev/null" | sudo tee -a /etc/ssh/ssh_config
 
 # Install postfix without prompting.
-sudo DEBIAN_FRONTEND='noninteractive' apt-get install -y postfix-policyd-spf-python postfix
+DEBIAN_FRONTEND='noninteractive' apt-get install -y postfix-policyd-spf-python postfix
 
 # Existing script for steps 1 to 3
 curl https://raw.github.com/gitlabhq/gitlab-recipes/master/install/debian_ubuntu.sh >> debian_ubuntu.sh
@@ -55,60 +55,60 @@ sed -i '/apt-get\ upgrade/d' debian_ubuntu.sh # Upgrade can cause prompting for 
 sh debian_ubuntu.sh
 
 # Install MySQL
-sudo apt-get install -y makepasswd # Needed to create a unique password non-interactively.
+apt-get install -y makepasswd # Needed to create a unique password non-interactively.
 userPassword=$(makepasswd --char=10) # Generate a random MySQL password
 # Note that the lines below creates a cleartext copy of the random password in /var/cache/debconf/passwords.dat
 # This file is normally only readable by root and the password will be deleted by the package management system after install.
 echo mysql-server mysql-server/root_password password $userPassword | sudo debconf-set-selections
 echo mysql-server mysql-server/root_password_again password $userPassword | sudo debconf-set-selections
-sudo apt-get install -y mysql-server
+apt-get install -y mysql-server
 
 # Gitlab install
-sudo gem install charlock_holmes --version '0.6.8'
-sudo pip install pygments
-sudo gem install bundler
-sudo su -l gitlab -c "git clone git://github.com/gitlabhq/gitlabhq.git gitlab" # Using master everywhere.
-sudo su -l gitlab -c "cd gitlab && mkdir tmp"
-sudo su -l gitlab -c "cd gitlab/config && cp gitlab.yml.example gitlab.yml"
-sudo su -l gitlab -c "cd gitlab/config && cp database.yml.example database.yml"
-sudo sed -i 's/"secure password"/"'$userPassword'"/' /home/gitlab/gitlab/config/database.yml # Insert the mysql root password.
-sudo su -l gitlab -c "cd gitlab && bundle install --without development test --deployment"
-sudo su -l gitlab -c "cd gitlab && bundle exec rake gitlab:app:setup RAILS_ENV=production"
+gem install charlock_holmes --version '0.6.8'
+pip install pygments
+gem install bundler
+su -l gitlab -c "git clone git://github.com/gitlabhq/gitlabhq.git gitlab" # Using master everywhere.
+su -l gitlab -c "cd gitlab && mkdir tmp"
+su -l gitlab -c "cd gitlab/config && cp gitlab.yml.example gitlab.yml"
+su -l gitlab -c "cd gitlab/config && cp database.yml.example database.yml"
+sed -i 's/"secure password"/"'$userPassword'"/' /home/gitlab/gitlab/config/database.yml # Insert the mysql root password.
+su -l gitlab -c "cd gitlab && bundle install --without development test --deployment"
+su -l gitlab -c "cd gitlab && bundle exec rake gitlab:app:setup RAILS_ENV=production"
 
 # Setup gitlab hooks
-sudo cp /home/gitlab/gitlab/lib/hooks/post-receive /home/git/.gitolite/hooks/common/post-receive
-sudo chown git:git /home/git/.gitolite/hooks/common/post-receive
-sudo chmod g+rwx /home/git/.gitolite # sort out permissions https://github.com/gitlabhq/gitlabhq/issues/1543
-sudo usermod -g git gitlab
+cp /home/gitlab/gitlab/lib/hooks/post-receive /home/git/.gitolite/hooks/common/post-receive
+chown git:git /home/git/.gitolite/hooks/common/post-receive
+chmod g+rwx /home/git/.gitolite # sort out permissions https://github.com/gitlabhq/gitlabhq/issues/1543
+usermod -g git gitlab
 
 
 # Set the first occurrence of host in the Gitlab config to the publicly available domain name
-sudo sed -i '0,/host/s/localhost/'`wget -qO- http://instance-data/latest/meta-data/public-hostname`'/' /home/gitlab/gitlab/config/gitlab.yml
+sed -i '0,/host/s/localhost/'`wget -qO- http://instance-data/latest/meta-data/public-hostname`'/' /home/gitlab/gitlab/config/gitlab.yml
 
 # Tighten security
 sudo -u git chmod 750 /home/git/gitolite
 sudo -u gitlab chmod 660 /home/gitlab/gitlab/config/*.yml
 
 # Install and configure Nginx
-sudo apt-get install -y nginx
-sudo wget https://raw.github.com/gitlabhq/gitlab-recipes/master/nginx/gitlab -P /etc/nginx/sites-available/
-sudo ln -s /etc/nginx/sites-available/gitlab /etc/nginx/sites-enabled/gitlab
-sudo sed -i 's/YOUR_SERVER_IP/'`wget -qO- http://instance-data/latest/meta-data/local-ipv4`'/' /etc/nginx/sites-available/gitlab # Set private ip address (public won't work).
-sudo sed -i 's/YOUR_SERVER_FQDN/'`wget -qO- http://instance-data/latest/meta-data/public-hostname`'/' /etc/nginx/sites-available/gitlab # Set public dns domain name.
+apt-get install -y nginx
+wget https://raw.github.com/gitlabhq/gitlab-recipes/master/nginx/gitlab -P /etc/nginx/sites-available/
+ln -s /etc/nginx/sites-available/gitlab /etc/nginx/sites-enabled/gitlab
+sed -i 's/YOUR_SERVER_IP/'`wget -qO- http://instance-data/latest/meta-data/local-ipv4`'/' /etc/nginx/sites-available/gitlab # Set private ip address (public won't work).
+sed -i 's/YOUR_SERVER_FQDN/'`wget -qO- http://instance-data/latest/meta-data/public-hostname`'/' /etc/nginx/sites-available/gitlab # Set public dns domain name.
 
 # Configure Unicorn
 sudo -u gitlab cp /home/gitlab/gitlab/config/unicorn.rb.example /home/gitlab/gitlab/config/unicorn.rb
 
 # Create a Gitlab service
-sudo wget https://raw.github.com/gitlabhq/gitlab-recipes/master/init.d/gitlab -P /etc/init.d/
-sudo chmod +x /etc/init.d/gitlab && sudo update-rc.d gitlab defaults
+wget https://raw.github.com/gitlabhq/gitlab-recipes/master/init.d/gitlab -P /etc/init.d/
+chmod +x /etc/init.d/gitlab && sudo update-rc.d gitlab defaults
 
 ## Gitlab service commands (unicorn and resque)
 ## restart doesn't restart resque, only start/stop effect it.
 sudo -u gitlab service gitlab start
 
 # nginx Service commands
-sudo service nginx restart
+service nginx restart
 
 # Go to gitlab directory by default on next login.
 echo 'cd /home/gitlab/gitlab' >> /home/ubuntu/.bashrc
