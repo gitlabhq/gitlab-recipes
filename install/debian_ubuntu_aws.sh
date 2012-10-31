@@ -49,7 +49,7 @@ echo "Host localhost
 DEBIAN_FRONTEND='noninteractive' apt-get install -y postfix-policyd-spf-python postfix
 
 # Existing script for steps 1 to 3
-curl https://raw.github.com/gitlabhq/gitlab-recipes/master/install/debian_ubuntu.sh >> debian_ubuntu.sh
+curl https://raw.github.com/jedahan/gitlab-recipes/master/install/debian_ubuntu.sh >> debian_ubuntu.sh
 sed -i 's/postfix//' debian_ubuntu.sh # This will prompt even when postfix is already installed.
 sed -i '/apt-get\ upgrade/d' debian_ubuntu.sh # Upgrade can cause prompting for various packages (grub, etc.).
 sh debian_ubuntu.sh
