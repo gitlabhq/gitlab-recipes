@@ -26,7 +26,7 @@ apt-get install -y sqlite3 libsqlite3-dev
 apt-get install -y postgres libpq-dev
 
 # MySQL
-apt-get install -y mysql-server mysql-client libmysqlclient-dev
+DEBIAN_FRONTEND='noninteractive' apt-get install -y mysql-server mysql-client libmysqlclient-dev
 
 # INSTALL RUBY
 wget http://ftp.ruby-lang.org/pub/ruby/1.9/ruby-1.9.3-p194.tar.gz
