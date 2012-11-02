@@ -43,12 +43,17 @@ sudo usermod -a -G gitlab git
 sudo -H -u gitlab ssh-keygen -q -N '' -t rsa -f /home/gitlab/.ssh/id_rsa
 
 cd /home/git
-sudo -H -u git git clone -b gl-v304 git://github.com/gitlabhq/gitolite /home/git/gitolite
+sudo -u git -H mkdir bin
+sudo -u git sh -c 'echo -e "PATH=\$PATH:/home/git/bin\nexport PATH" >> /home/git/.profile'
+sudo -u git sh -c 'gitolite/install -ln /home/git/bin'
 
-sudo -u git -H sh -c "PATH=/home/git/bin:$PATH; /home/git/gitolite/src/gl-system-install"
 sudo cp /home/gitlab/.ssh/id_rsa.pub /home/git/gitlab.pub
-sudo chmod 777 /home/git/gitlab.pub
-sudo -u git -H sh -c "PATH=/home/git/bin:$PATH; gl-setup -q /home/git/gitlab.pub"
+sudo chmod 0444 /home/git/gitlab.pub
+
+sudo -u git -H sh -c "PATH=/home/git/bin:$PATH; gitolite setup -pk /home/git/gitlab.pub"
+
+
+
 
 
 sudo chmod -R g+rwX /home/git/repositories/
