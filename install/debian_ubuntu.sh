@@ -45,6 +45,9 @@ sudo -H -u gitlab ssh-keygen -q -N '' -t rsa -f /home/gitlab/.ssh/id_rsa
 cd /home/git
 sudo -H -u git git clone git://github.com/gitlabhq/gitolite /home/git/gitolite
 
+# check out the old version of gitolite. temporary fix.
+sudo -u git -H git checkout v2.3.1 /home/git/gitolite
+
 sudo -u git -H sh -c "PATH=/home/git/bin:$PATH; /home/git/gitolite/src/gl-system-install"
 sudo cp /home/gitlab/.ssh/id_rsa.pub /home/git/gitlab.pub
 sudo chmod 777 /home/git/gitlab.pub
