@@ -10,7 +10,7 @@
 
 Add the service to chkconfig with:
 
-    chkconfig -add gitlab
+    chkconfig --add gitlab
 
 Related services (redis, mysql, nginx) should also be added to chkconfig.
 
