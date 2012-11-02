@@ -44,6 +44,7 @@ sudo -H -u gitlab ssh-keygen -q -N '' -t rsa -f /home/gitlab/.ssh/id_rsa
 
 cd /home/git
 sudo -u git -H mkdir bin
+sudo -H -u git git clone -b gl-v304 https://github.com/gitlabhq/gitolite.git /home/git/gitolite
 sudo -u git sh -c 'echo -e "PATH=\$PATH:/home/git/bin\nexport PATH" >> /home/git/.profile'
 sudo -u git sh -c 'gitolite/install -ln /home/git/bin'
 
