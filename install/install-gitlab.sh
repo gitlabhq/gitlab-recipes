@@ -60,10 +60,6 @@ tmpfolder=/tmp
 ### functions
 configure_exim () {
 
-	echo -e "\n\nYou have chosen exim4. Please provide your e-mailadres so we can test the funcitonality later on:"	
-	# your mailadress
-	read yourmail 
-	
 	sudo apt-get install -y exim4
 
 	# configure exim
@@ -87,6 +83,11 @@ configure_exim () {
 
 		echo "*:${smarthostusrname}:${smarthostpasswd}" > /etc/exim4/passwd.client
 		sudo chown root:Debian-exim /etc/exim4/passwd.client && chmod 640 /etc/exim4/passwd.client
+		
+		echo -e "\n\nPlease provide your e-mailadres so we can test the funcitonality of the mailserver:"	
+		# your mailadress
+		read yourmail 
+	
 		echo "The mailfunctionality seems to work" | mail -r Gitserver -s "Gitserver testmail" ${yourmail}
 		
 		echo -e "\n\nYou schould receive a testmail within a minute. If not, please configure\nthe mailserver yourself after the installation of GitLab. \n\nPress any key to continue..."
