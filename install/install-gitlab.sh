@@ -270,7 +270,7 @@ elif [ "${checksendmail}" != "" ]; then
 
 	while [ "${confirm3}" != "yes" ] && [ "${confirm3}" != "no" ]; do
 	
-		echo -e "\n\nYou already have sendmail installed, do you want to install Exim4 instead\nincluding some help to get it working? (yes/no) (if you don't send mail using the sendmail MTA and this stuff is too complicated for you answer 'yes', if sendmail works fine on this host answer 'no')"
+		echo -e "\n\nYou already have sendmail installed, do you want to install Exim4 instead\nincluding some help to get it working? (yes/no) \n\n(if you don't send mail using the sendmail MTA and this stuff is too complicated for you answer 'yes', \nif sendmail works fine on this host answer 'no')"
 		read confirm3
 	
 		if [ "${confirm3}" != "yes" ] && [ "${confirm3}" != "no" ]; then
@@ -398,7 +398,7 @@ if [ "${domainpoint}" = "yes" ]; then
 	echo -e "Please provide the domainname that points to "
 	read domainname
 	
-	sed -i "/host: localhost/ c host: ${domainname}" /home/gitlab/gitlab/config/gitlab.yml
+	sed -i "/  host: localhost/ c host: ${domainname}" /home/gitlab/gitlab/config/gitlab.yml
 	
 fi
 
@@ -407,7 +407,7 @@ read ipmach
 
 if [ "${domainname}" = "" ]; then
 	
-	sed -i "/host: localhost/ c host: ${ipmach}" /home/gitlab/gitlab/config/gitlab.yml
+	sed -i "/  host: localhost/ c host: ${ipmach}" /home/gitlab/gitlab/config/gitlab.yml
 	
 fi
 		
@@ -420,14 +420,14 @@ if [ "${porteighty}" !=  "" ]; then
 	echo -e "Another process is bound to port 80. Please give a alternative port for GitLab to run on:"
 	read gitport
 		
-	sed -i "/port: 80/ c port: ${gitport}" /home/gitlab/gitlab/config/gitlab.yml
+	sed -i "/  port: 80/ c port: ${gitport}" /home/gitlab/gitlab/config/gitlab.yml
 	
 else
 
 	echo -e "PLease provide a port for GitLab to run on. (Port 80, the default non ssl port, is not used so you could use it):"
 	read gitport
 	
-	sed -i "/port: 80/ c port: ${gitport}" /home/gitlab/gitlab/config/gitlab.yml	
+	sed -i "/  port: 80/ c port: ${gitport}" /home/gitlab/gitlab/config/gitlab.yml	
 
 fi
 
