@@ -12,7 +12,7 @@
 # 
 # NOTE: the installer will upgrade your system without a promt! Because of this and other reasons like security we highly encourage you to run this on a dedicated VPS! Alway make backups of important files if there are any before using this installer!
 #
-# HOW TO INSTALL: apt-get install -y curl && bash <(curl -s https://raw.github.com/richardland/gitlabhq/master/doc/install/install_on_debian_or_ubuntu.sh)
+# HOW TO INSTALL: apt-get install -y curl && bash <(curl -s https://raw.github.com/richardland/gitlab-recipes/master/install/install-gitlab.sh)
 #
 # This installer is mainly based on https://github.com/gitlabhq/gitlabhq/blob/master/doc/install/installation.md
 # 
@@ -32,6 +32,7 @@
 #			- help fillign in the IP and portnumbers of nginx hostfile			(als o in /home/gitlab/gitlab/config/gitlab.yml  so link in welcome mail is OK)
 #			- enable ssl
 #			- maybe change the way port 80 is detected. Outgoung connection TO port 80 is now also detected as wrapped port
+#			- ask in the beginning if the port 80 thing (like apache) shouldnt be stopped and GitLab take the port instead
 #			- changing cosmetics (clearing screen, progressbars and rerouting stdout to dev/null)
 #			- tekstual changes
 #			- ask for username and password so account doesnt have default credentials
@@ -269,7 +270,7 @@ elif [ "${checksendmail}" != "" ]; then
 
 	while [ "${confirm3}" != "yes" ] && [ "${confirm3}" != "no" ]; do
 	
-		echo -e "\n\nYou already have sendmail installed, do you want to install Exim4 instead\nincluding some help to get it working? (yes/no) (if you don't send mail using the sendmail MTA and this stuff is too complicated for you answer 'yes', if sendmail works fine on this host answer 'yes')"
+		echo -e "\n\nYou already have sendmail installed, do you want to install Exim4 instead\nincluding some help to get it working? (yes/no) (if you don't send mail using the sendmail MTA and this stuff is too complicated for you answer 'yes', if sendmail works fine on this host answer 'no')"
 		read confirm3
 	
 		if [ "${confirm3}" != "yes" ] && [ "${confirm3}" != "no" ]; then
@@ -289,7 +290,7 @@ fi
 
 
 ### upgrade and install the required packages:
-echo -e "If you did not install MySQl before, you will need to provide a root password for it in the next step. Make shure you write it down! You will need to provide it to GitLab for a succesfull installation.\n\n Press any key to continue"
+echo -e "If you did not install MySQl before, you will need to provide a root password for it in the next step. Make sure you write it down! You will need to provide it to GitLab for a succesfull installation.\n\n Press any key to continue"
 read confirm
 
 sudo apt-get upgrade -y && sudo apt-get install -y nano mysql-server mysql-client libmysqlclient-dev wget curl gcc checkinstall libxml2-dev libxslt1-dev libcurl4-openssl-dev libreadline6-dev libc6-dev libssl-dev libmysql++-dev make build-essential zlib1g-dev libicu-dev redis-server openssh-server git-core python-dev python-pip libyaml-dev libpq-dev
@@ -419,14 +420,14 @@ if [ "${porteighty}" !=  "" ]; then
 	echo -e "Another process is bound to port 80. Please give a alternative port for GitLab to run on:"
 	read gitport
 		
-	sed -i "/port: 80/ c host: ${gitport}" /home/gitlab/gitlab/config/gitlab.yml
+	sed -i "/port: 80/ c port: ${gitport}" /home/gitlab/gitlab/config/gitlab.yml
 	
 else
 
 	echo -e "PLease provide a port for GitLab to run on. (Port 80, the default non ssl port, is not used so you could use it):"
 	read gitport
 	
-	sed -i "/port: 80/ c host: ${gitport}" /home/gitlab/gitlab/config/gitlab.yml	
+	sed -i "/port: 80/ c port: ${gitport}" /home/gitlab/gitlab/config/gitlab.yml	
 
 fi
 
@@ -482,17 +483,13 @@ fi
 # Change **YOUR_SERVER_IP**, port and **YOUR_SERVER_FQDN**
 # to the IP address and fully-qualified domain name
 
-sed -i "/YOUR_SERVER_IP:80/ c listen ${ipmach}:${gitport}" /etc/nginx/sites-enabled/gitlab
+sed -i "/YOUR_SERVER_IP:80/ c listen ${ipmach}:${gitport};" /etc/nginx/sites-enabled/gitlab
 
 if [ "${domainname}" != "" ]; then
 	
 	sed -i "/server_name YOUR_SERVER_FQDN;/ c server_name ${domainname};" /home/gitlab/gitlab/config/gitlab.yml
 	
 fi
-
-
-
-sudo editor /etc/nginx/sites-enabled/gitlab
 
 # Restart nginx:
 sudo /etc/init.d/nginx restart
