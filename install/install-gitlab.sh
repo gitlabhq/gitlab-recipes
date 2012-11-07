@@ -13,6 +13,12 @@
 # NOTE: the installer will upgrade your system without a promt! Because of this and other reasons like security we highly encourage you to run this on a dedicated VPS! Alway make backups of important files if there are any before using this installer!
 #
 # HOW TO INSTALL: apt-get install -y curl && bash <(curl -s https://raw.github.com/richardland/gitlab-recipes/master/install/install-gitlab.sh)
+# 
+# What do you need before creating a perfect install with this installer?
+# 	- a dedicated VPS (with no other things on it than clean Debian or derivative)
+#	- mailserver adderss or IP (mailserver should support SSL)
+# 	- logincredentials for the mailserver (username and password)
+# 
 #
 # This installer is mainly based on https://github.com/gitlabhq/gitlabhq/blob/master/doc/install/installation.md
 # 
@@ -20,8 +26,8 @@
 #	* A 100% working GitLab installation after running this script (no maual steps needed).
 #	* We help you with the mailserver (excpecially when choosing exim in combination with a smarthost setup). 
 #		In our opninion this is the most reasenable setup because you use a other mailserver in stead of directly sending mail. 
-#		This prevensts SPAM issues caused by spf misconfiguration and prevents open relay and such. 
-#		A lot of people dont know how to configure a mailserver (wheter it is postfix or any other MTA). We do the job for you. 
+#		This prevensts SPAM issues caused by SPF misconfiguration and prevents open relay and such. 
+#		A lot of people dont know how to configure a mailserver (wheter it is postfix or any other MTA). We do this job for you. 
 #		All you need is a external mailserver (also Google is an option), a username and a password. Just like you mailclient uses.
 #	* We also give the option not to install any mailserver if you are happy with your current setup.
 # 	* not using path dependant commands, i.e. we dont want to cd in to directories where possible
