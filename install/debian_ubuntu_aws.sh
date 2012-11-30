@@ -60,7 +60,7 @@ userPassword=$(makepasswd --char=10) # Generate a random MySQL password
 # This file is normally only readable by root and the password will be deleted by the package management system after install.
 echo mysql-server mysql-server/root_password password $userPassword | sudo debconf-set-selections
 echo mysql-server mysql-server/root_password_again password $userPassword | sudo debconf-set-selections
-sudo apt-get install -y mysql-server
+sudo apt-get install -y mysql-server libpq-dev
 
 # Gitlab install
 sudo gem install charlock_holmes --version '0.6.8'
