@@ -141,5 +141,5 @@ echo '5iveL!fe'
 # sudo -u gitlab bundle exec rake environment resque:work QUEUE=* RAILS_ENV=production BACKGROUND=no
 
 # Monitoring commands for the web server:
-# sudo tail -f /var/log/nginx/access.log
-# sudo tail -f /var/log/nginx/error.log
+# sudo tail -f /var/log/nginx/gitlab_access.log
+# sudo tail -f /var/log/nginx/gitlab_error.log
