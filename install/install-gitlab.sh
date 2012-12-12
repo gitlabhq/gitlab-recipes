@@ -47,8 +47,8 @@
 
 
 ### settings (MOST PEOPLE DONT NEED TO EDIT ANYTHING!)
-# DEBUG mode (gives info about what is run). To enable set to "yes"
-debug=no
+# DEBUG mode (gives info about what is run). Is on because this is a bit of a beta script. To disable set to anything else than yes
+debug=yes
 # minimum amount of diskpace we need in GB (used for warning)
 minfreedisk=2
 # minimum amount of free RAM in MB (used for warning)
@@ -63,7 +63,7 @@ configure_exim () {
 	sudo apt-get install -y exim4
 
 	# configure exim
-	echo -e "\n\nIn the next step you will be asked some questions in orde to configure exim. \nWe suggest to use \"mail sent by smarthost; no local mail\". \nAfter this question only these two questions are really important:\n - \"IP address or host name of the outgoing smarthost\" \n   (fill in something like mail.youdomainname.com or smtp.gmail.com)\n - \"Root and postmaster mail recipient\". (fill in your own mailadress)\n\nThis way you can use a external mailserver just like your mailclient would do. \nIf you choose this, we will help you with the setup. \n(mailserver should support SSL though).\n\nIf you choose a different setup than smarthost you have to configure \nthe mailserver yourself after the install of GitLab.\nBest thing to do this is with the command 'dpkg-reconfigure exim4-config' \n\nPress any key to continue..."
+	echo -e "\n\nIn the next step you will be asked some questions in orde to configure exim. \nWe suggest to use \"mail sent by smarthost; no local mail\". \nAfter this question only these two questions are really important:\n - \"IP address or host name of the outgoing smarthost\" \n   (fill in something like mail.youdomainname.com or smtp.gmail.com)\n - \"Root and postmaster mail recipient\". (fill in your own mailadress)\n\nThis way you can use a external mailserver just like your mailclient would do. \nIf you do this, we can help you with the setup. \n(mailserver should support SSL though).\n\nIf you choose a different setup than smarthost you have to configure \nthe mailserver yourself after the install of GitLab.\nBest thing to do this is with the command 'dpkg-reconfigure exim4-config' \n\nPress any key to continue..."
 	read confirm4
 	
 	sudo dpkg-reconfigure exim4-config
@@ -277,7 +277,7 @@ elif [ "${checksendmail}" != "" ]; then
 
 	while [ "${confirm3}" != "yes" ] && [ "${confirm3}" != "no" ]; do
 	
-		echo -e "\n\nYou already have sendmail installed, do you want to install Exim4 instead\nincluding some help to get it working? (yes/no) \n\n(if you don't send mail using the sendmail MTA and this stuff is too complicated for you answer 'yes', \nif sendmail works fine on this host answer 'no')"
+		echo -e "\n\nYou already have sendmail installed, do you want to install Exim4 instead\nincluding some help to get it working? (yes/no) \n\n(if you don't send mail using the sendmail MTA and/or this stuff is too complicated for you just answer 'yes', \nif sendmail works fine on this host answer 'no')"
 		read confirm3
 	
 		if [ "${confirm3}" != "yes" ] && [ "${confirm3}" != "no" ]; then
@@ -384,7 +384,7 @@ sudo -u gitlab cp /home/gitlab/gitlab/config/unicorn.rb.example /home/gitlab/git
 # edit gitlab.yml for correct e-mailsender
 echo -e "What (existing) sender e-mailadres do you like to use for GitLab mails? (for account creation and notifications)"
 read mailsender
-sed -i "/from: / c from: ${mailsender}" /home/gitlab/gitlab/config/gitlab.yml
+sed -i "/from: / c \ \ from: ${mailsender}" /home/gitlab/gitlab/config/gitlab.yml
 
 # edit gitlab.yml for correct hostname
 while [ "${domainpoint}" != "yes" ] && [ "${domainpoint}" != "no" ]; do
@@ -405,7 +405,7 @@ if [ "${domainpoint}" = "yes" ]; then
 	echo -e "Please provide the domainname that points to "
 	read domainname
 	
-	sed -i "/  host: localhost/ c host: ${domainname}" /home/gitlab/gitlab/config/gitlab.yml
+	sed -i "/  host: localhost/ c \ \ host: ${domainname}" /home/gitlab/gitlab/config/gitlab.yml
 	
 fi
 
@@ -414,7 +414,7 @@ read ipmach
 
 if [ "${domainname}" = "" ]; then
 	
-	sed -i "/  host: localhost/ c host: ${ipmach}" /home/gitlab/gitlab/config/gitlab.yml
+	sed -i "/  host: localhost/ c \ \ host: ${ipmach}" /home/gitlab/gitlab/config/gitlab.yml
 	
 fi
 		
@@ -427,14 +427,14 @@ if [ "${porteighty}" !=  "" ]; then
 	echo -e "Another process is bound to port 80. Please give a alternative port for GitLab to run on:"
 	read gitport
 		
-	sed -i "/  port: 80/ c port: ${gitport}" /home/gitlab/gitlab/config/gitlab.yml
+	sed -i "/  port: 80/ c \ \ port: ${gitport}" /home/gitlab/gitlab/config/gitlab.yml
 	
 else
 
 	echo -e "PLease provide a port for GitLab to run on. (Port 80, the default non ssl port, is not used so you could use it):"
 	read gitport
 	
-	sed -i "/  port: 80/ c port: ${gitport}" /home/gitlab/gitlab/config/gitlab.yml	
+	sed -i "/  port: 80/ c \ \ port: ${gitport}" /home/gitlab/gitlab/config/gitlab.yml	
 
 fi
 
@@ -446,7 +446,7 @@ sudo gem install bundler
 sudo -u gitlab -H sh -c "cd /home/gitlab/gitlab && bundle install --without development test sqlite postgres  --deployment"
 
 # setup gitlab
-sudo -u gitlab sh -c "cd /home/gitlab/gitlab && bundle exec rake gitlab:app:setup RAILS_ENV=production"
+sudo -u gitlab sh -c "cd /home/gitlab/gitlab && bundle exec rake gitlab:app:setup RAILS_ENV=production --trace"
 
 # setup GitLab hooks
 sudo cp /home/gitlab/gitlab/lib/hooks/post-receive /home/git/.gitolite/hooks/common/post-receive
@@ -494,7 +494,7 @@ sed -i "/YOUR_SERVER_IP:80/ c listen ${ipmach}:${gitport};" /etc/nginx/sites-ena
 
 if [ "${domainname}" != "" ]; then
 	
-	sed -i "/server_name YOUR_SERVER_FQDN;/ c server_name ${domainname};" /home/gitlab/gitlab/config/gitlab.yml
+	sed -i "/server_name YOUR_SERVER_FQDN;/ c \ \ server_name ${domainname};" /home/gitlab/gitlab/config/gitlab.yml
 	
 fi
 
