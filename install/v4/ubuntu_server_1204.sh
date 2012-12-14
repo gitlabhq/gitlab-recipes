@@ -39,7 +39,7 @@ sudo apt-get install -y wget curl build-essential checkinstall libxml2-dev libxs
 # Python 
 
 # Install Python
-sudo apt-get install python
+sudo apt-get install -y python
 
 # Make sure that Python is 2.x (3.x is not supported at the moment)
 python --version
@@ -171,7 +171,7 @@ sudo update-rc.d gitlab defaults 21
 #==
 #== 7. Nginx
 #==
-sudo apt-get install nginx
+sudo apt-get install -y nginx
 sudo wget https://raw.github.com/gitlabhq/gitlab-recipes/master/nginx/gitlab -P /etc/nginx/sites-available/
 sudo ln -s /etc/nginx/sites-available/gitlab /etc/nginx/sites-enabled/gitlab
 
