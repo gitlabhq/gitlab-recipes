@@ -179,6 +179,7 @@ sudo ln -s /etc/nginx/sites-available/gitlab /etc/nginx/sites-enabled/gitlab
 sudo sed -i 's/YOUR_SERVER_IP:80/80/' /etc/nginx/sites-available/gitlab # Set Domain
 sudo sed -i "s/YOUR_SERVER_FQDN/$domain_var/" /etc/nginx/sites-available/gitlab
 
+sudo sed -i "s/user www-data;/user gitlab;/" /etc/nginx/nginx.conf # Use gitlab user to run nginx workers
 
 # Start all
 
