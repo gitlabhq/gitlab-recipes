@@ -33,7 +33,7 @@ fi
 #==
 #== 1. Packages
 #==
-sudo apt-get install -y wget curl build-essential checkinstall libxml2-dev libxslt-dev libcurl4-openssl-dev libreadline6-dev libc6-dev libssl-dev zlib1g-dev libicu-dev redis-server openssh-server git-core libyaml-dev
+sudo apt-get install -y wget curl build-essential checkinstall libxml2-dev libxslt-dev libcurl4-openssl-dev libreadline6-dev libc6-dev libssl-dev zlib1g-dev libicu-dev redis-server openssh-server git-core libyaml-dev ruby1.9.1
 
 
 # Python 
@@ -60,12 +60,6 @@ sudo DEBIAN_FRONTEND='noninteractive' apt-get install -y postfix-policyd-spf-pyt
 #==
 #== 2. RUBY
 #==
-wget http://ftp.ruby-lang.org/pub/ruby/1.9/ruby-1.9.3-p327.tar.gz
-tar xfvz ruby-1.9.3-p327.tar.gz
-cd ruby-1.9.3-p327
-./configure
-make
-sudo make install
 sudo gem install bundler
 
 #==
