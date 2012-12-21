@@ -137,7 +137,7 @@ cd /home/gitlab
 sudo -u gitlab -H git clone https://github.com/gitlabhq/gitlabhq.git gitlab
 cd /home/gitlab/gitlab
 # Checkout v4
-sudo -u gitlab -H git checkout fa203e8b67b3e8fd25ab1edd0ccbedc6072563b2
+sudo -u gitlab -H git checkout v4.0.0rc1
 
 # Copy the example GitLab config
 sudo -u gitlab -H cp config/gitlab.yml.example config/gitlab.yml
