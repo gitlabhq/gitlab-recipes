@@ -18,10 +18,6 @@
 # curl https://raw.github.com/gitlabhq/gitlab-recipes/master/install/v4/ubuntu_server_1204.sh | sudo domain_var=gitlab.example.com sh
 #
 
-echo "Host localhost
-   StrictHostKeyChecking no
-   UserKnownHostsFile=/dev/null" | sudo tee -a /etc/ssh/ssh_config
-
 
 #==
 #== 0. FQDN 
@@ -33,6 +29,14 @@ else
   echo "Please pass domain_var"
   exit
 fi
+
+echo "Host localhost
+   StrictHostKeyChecking no
+   UserKnownHostsFile=/dev/null" | sudo tee -a /etc/ssh/ssh_config
+
+echo "Host $domain_var
+   StrictHostKeyChecking no
+   UserKnownHostsFile=/dev/null" | sudo tee -a /etc/ssh/ssh_config
 
 
 #==
@@ -149,6 +153,7 @@ sudo -u gitlab -H cp config/gitlab.yml.example config/gitlab.yml
 sudo -u gitlab -H cp config/database.yml.mysql config/database.yml
 sudo sed -i 's/"secure password"/"'$userPassword'"/' /home/gitlab/gitlab/config/database.yml # Insert the mysql root password.
 sudo sed -i "s/  host: localhost/  host: $domain_var/" /home/gitlab/gitlab/config/gitlab.yml
+sudo sed -i "s/ssh_host: localhost/ssh_host: $domain_var/" /home/gitlab/gitlab/config/gitlab.yml
 sudo sed -i "s/notify@localhost/notify@$domain_var/" /home/gitlab/gitlab/config/gitlab.yml
 
 # Copy the example Unicorn config
