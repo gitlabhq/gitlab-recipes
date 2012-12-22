@@ -11,9 +11,10 @@
 # * ruby setup
 # * git, gitlab users
 # * gitolite fork
-# Is should be run as root or sudo user. 
+# Is should be run as root or sudo user w/o password. 
 #
 # USAGE
+# !IMPORTANT run as root or sudo without prompting password cause script ignore any input.
 # curl https://raw.github.com/gitlabhq/gitlab-recipes/master/install/v4/ubuntu_server_1204.sh | sudo domain_var=gitlab.example.com sh
 #
 
