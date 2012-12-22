@@ -14,9 +14,8 @@
 # Is should be run as root or sudo user w/o password. 
 #
 # USAGE
-# 1. sudo apt-get update 
 # !IMPORTANT run as root or sudo without prompting password cause script ignore any input.
-# 2. curl https://raw.github.com/gitlabhq/gitlab-recipes/master/install/v4/ubuntu_server_1204.sh | sudo domain_var=gitlab.example.com sh
+# curl https://raw.github.com/gitlabhq/gitlab-recipes/master/install/v4/ubuntu_server_1204.sh | sudo domain_var=gitlab.example.com sh
 #
 
 
@@ -35,6 +34,7 @@ fi
 #==
 #== 1. Packages
 #==
+sudo apt-get update
 sudo apt-get install -y wget curl build-essential checkinstall libxml2-dev libxslt-dev libcurl4-openssl-dev libreadline6-dev libc6-dev libssl-dev zlib1g-dev libicu-dev redis-server openssh-server git-core libyaml-dev
 
 
