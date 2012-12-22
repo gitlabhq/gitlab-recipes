@@ -14,8 +14,9 @@
 # Is should be run as root or sudo user w/o password. 
 #
 # USAGE
+# 1. sudo apt-get update 
 # !IMPORTANT run as root or sudo without prompting password cause script ignore any input.
-# curl https://raw.github.com/gitlabhq/gitlab-recipes/master/install/v4/ubuntu_server_1204.sh | sudo domain_var=gitlab.example.com sh
+# 2. curl https://raw.github.com/gitlabhq/gitlab-recipes/master/install/v4/ubuntu_server_1204.sh | sudo domain_var=gitlab.example.com sh
 #
 
 
