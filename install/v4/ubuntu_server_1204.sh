@@ -116,9 +116,8 @@ sudo -u git -H sh -c "PATH=/home/git/bin:$PATH; gitolite setup -pk /home/git/git
 sudo chmod -R ug+rwXs /home/git/repositories/
 sudo chown -R git:git /home/git/repositories/
 
-echo "Host localhost
-   StrictHostKeyChecking no
-   UserKnownHostsFile=/dev/null" | sudo tee -a /etc/ssh/ssh_config
+sudo chmod 750 /home/git/.gitolite/
+sudo chown -R git:git /home/git/.gitolite/
 
 
 sudo -u gitlab -H git clone git@localhost:gitolite-admin.git /tmp/gitolite-admin
@@ -149,7 +148,7 @@ sudo -u gitlab -H git checkout 4-0-stable
 sudo -u gitlab -H cp config/gitlab.yml.example config/gitlab.yml
 sudo -u gitlab -H cp config/database.yml.mysql config/database.yml
 sudo sed -i 's/"secure password"/"'$userPassword'"/' /home/gitlab/gitlab/config/database.yml # Insert the mysql root password.
-sudo sed -i "s/host: localhost/host: $domain_var/" /home/gitlab/gitlab/config/gitlab.yml
+sudo sed -i "s/  host: localhost/  host: $domain_var/" /home/gitlab/gitlab/config/gitlab.yml
 sudo sed -i "s/notify@localhost/notify@$domain_var/" /home/gitlab/gitlab/config/gitlab.yml
 
 # Copy the example Unicorn config
