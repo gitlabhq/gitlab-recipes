@@ -18,6 +18,10 @@
 # curl https://raw.github.com/gitlabhq/gitlab-recipes/master/install/v4/ubuntu_server_1204.sh | sudo domain_var=gitlab.example.com sh
 #
 
+echo "Host localhost
+   StrictHostKeyChecking no
+   UserKnownHostsFile=/dev/null" | sudo tee -a /etc/ssh/ssh_config
+
 
 #==
 #== 0. FQDN 
