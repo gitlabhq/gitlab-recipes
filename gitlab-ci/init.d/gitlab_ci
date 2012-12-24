@@ -14,8 +14,8 @@
 # Description:       GitLab git repository management
 ### END INIT INFO
 
-
-APP_ROOT="/home/gitlab_ci/gitlab-ci"
+USER="gitlab_ci"
+APP_ROOT="/home/$USER/gitlab-ci"
 DAEMON_OPTS="-p 3000 -d -e production"
 PID_PATH="$APP_ROOT/tmp/pids"
 THIN_PID="$PID_PATH/thin.pid"
@@ -42,8 +42,8 @@ start() {
     exit 1
   else
     if [ `whoami` = root ]; then
-      sudo -u gitlab_ci -H sh -l -c "nohup bundle exec thin start $DAEMON_OPTS  > /dev/null  2>&1 &"
-      sudo -u gitlab_ci -H sh -l -c "mkdir -p $PID_PATH && nohup bundle exec rake environment resque:work QUEUE=runner RAILS_ENV=production PIDFILE=$RESQUE_PID  > /dev/null  2>&1 &"
+      sudo -u $USER -H sh -l -c "nohup bundle exec thin start $DAEMON_OPTS  > /dev/null  2>&1 &"
+      sudo -u $USER -H sh -l -c "mkdir -p $PID_PATH && nohup bundle exec rake environment resque:work QUEUE=runner RAILS_ENV=production PIDFILE=$RESQUE_PID  > /dev/null  2>&1 &"
       echo "$DESC started"
     fi
   fi
