@@ -1,0 +1,105 @@
+#!/bin/bash
+
+# GITLAB
+# Maintainer: @troyanov (based on @elvanja's script)
+# App Version: 4.0
+
+#chkconfig: - 90 55
+# processname: unicorn
+# processname: resque
+# description: Runs unicorn and resque for nginx integration.
+
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+USER=gitlab
+APP_ROOT="/home/$USER/gitlab"
+
+# The PID and LOCK files used by unicorn and resque
+UPID=$APP_ROOT/tmp/pids/unicorn.pid
+ULOCK=/var/lock/subsys/unicorn
+RPID=$APP_ROOT/tmp/pids/resque_worker.pid
+RLOCK=/var/lock/subsys/resque
+
+# The options to use when running unicorn
+OPTS="-c $APP_ROOT/config/unicorn.rb -E production -D"
+
+# Ruby path
+RUBY_PATH="PATH=$PATH:/usr/local/bin:/usr/local/lib && export PATH && "
+
+start() {
+  cd $APP_ROOT
+  # Start unicorn
+  echo -n $"Starting unicorn: "
+  daemon --pidfile=$UPID --user=$USER "$RUBY_PATH bundle exec unicorn_rails $OPTS"
+  retval=$?
+  echo
+  [ $retval -eq 0 ] && touch $ULOCK
+ 
+  # Start resque
+  echo -n $"Starting resque: "
+  daemon --pidfile=$RPID --user=$USER "$RUBY_PATH ./resque.sh"
+  [ $? -eq 0 ] && touch $RLOCK
+  retval=$?
+  echo
+  [ $retval -eq 0 ] && touch $RLOCK
+
+  return $retval
+}
+
+stop() {
+  cd $APP_ROOT
+
+    # Stop unicorn
+    echo -n $"Stopping unicorn: "
+    killproc -p $UPID
+    retval=$?
+    echo
+    [ $retval -eq 0 ] && rm -f $ULOCK
+
+    # Stop resque
+    echo -n $"Stopping resque: "
+    killproc -p $RPID
+    retval=$?
+    echo
+    [ $retval -eq 0 ] && rm -f $RLOCK
+    return $retval
+}
+
+restart() {
+  stop
+  start
+}
+
+rh_status() {
+    status -p $UPID unicorn
+    status -p $RPID resque
+}
+
+rh_status_q() {
+    rh_status >/dev/null 2>&1
+}
+
+
+case "$1" in
+  start)
+        rh_status_q && exit 0
+        $1
+        ;;
+  stop)
+        rh_status_q || exit 0
+        $1
+        ;;
+  restart)
+        $1
+        ;;
+  status)
+        rh_status
+        ;;
+  *)
+        echo "Usage: $NAME {start|stop|restart|status}" >&2
+        exit 1
+        ;;
+esac
+exit 0
