@@ -70,10 +70,13 @@ restart() {
   cd $APP_ROOT
   check_pid
   if [ "$PID" -ne 0 -a "$STATUS" -ne 0 ]; then
-    echo -n "Restarting $DESC: "
+    echo "Restarting $DESC..."
     kill -USR2 `cat $UNICORN_PID`
-    kill -USR2 `cat $RESQUE_PID`
-    echo "$NAME."
+    kill -QUIT `cat $RESQUE_PID`
+    if [ `whoami` = root ]; then
+      sudo -u gitlab -H bash -l -c "mkdir -p $PID_PATH && nohup bundle exec rake environment resque:work QUEUE=post_receive,mailer,system_hook RAILS_ENV=production PIDFILE=$RESQUE_PID  > /dev/null  2>&1 &"
+    fi
+    echo "$DESC restarted."
   else
     echo "Error, $NAME not running!"
     exit 1
@@ -109,15 +112,15 @@ case "$1" in
         restart
         ;;
   reload|force-reload)
-        echo -n "Reloading $DESC configuration: "
+        echo -n "Reloading $NAME configuration: "
         kill -HUP `cat $PID`
-        echo "$NAME."
+        echo "done."
         ;;
   status)
         status
         ;;
   *)
-        echo "Usage: $NAME {start|stop|restart|reload}" >&2
+        echo "Usage: sudo service gitlab {start|stop|restart|reload}" >&2
         exit 1
         ;;
 esac
