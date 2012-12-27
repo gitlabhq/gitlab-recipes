@@ -33,7 +33,7 @@ RLOCK=/var/lock/subsys/resque
 OPTS="-c $APP_PATH/config/unicorn.rb -E production -D"
 
 # Ruby related path update
-RUBY_PATH_PATCH="PATH=$PATH:/usr/local/bin:/usr/local/lib && export PATH &&
+RUBY_PATH_PATCH="PATH=$PATH:/usr/local/bin:/usr/local/lib && export PATH && "
 
 start() {
   cd $APP_PATH
