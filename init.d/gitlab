@@ -19,7 +19,7 @@ APP_ROOT="/home/gitlab/gitlab"
 DAEMON_OPTS="-c $APP_ROOT/config/unicorn.rb -E production"
 PID_PATH="$APP_ROOT/tmp/pids"
 UNICORN_PID="$PID_PATH/unicorn.pid"
-RESQUE_PID="$PID_PATH/sidekiq.pid"
+SIDEKIQ_PID="$PID_PATH/sidekiq.pid"
 STOP_SIDEKIQ="RAILS_ENV=production bundle exec rake sidekiq:stop"
 START_SIDEKIQ="RAILS_ENV=production bundle exec rake sidekiq:start"
 NAME="unicorn"
@@ -59,7 +59,6 @@ stop() {
     kill -QUIT `cat $UNICORN_PID`
     sudo -u gitlab -H bash -l -c "mkdir -p $PID_PATH && $STOP_SIDEKIQ  > /dev/null  2>&1 &"
     rm "$UNICORN_PID" >> /dev/null
-    rm "$RESQUE_PID" >> /dev/null
     echo "$DESC stopped"
   else
     ## Program is not running, exit with error.
@@ -89,7 +88,8 @@ status() {
   cd $APP_ROOT
   check_pid
   if [ "$PID" -ne 0 -a "$STATUS" -ne 0 ]; then
-    echo "$DESC with PID $PID is running."
+    echo "$DESC / Unicorn with PID $PID is running."
+    echo "$DESC / Sidekiq with PID $SIDEKIQ_PID is running."
   else
     echo "$DESC is not running."
     exit 1
