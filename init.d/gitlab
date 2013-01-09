@@ -20,6 +20,8 @@ DAEMON_OPTS="-c $APP_ROOT/config/unicorn.rb -E production"
 PID_PATH="$APP_ROOT/tmp/pids"
 UNICORN_PID="$PID_PATH/unicorn.pid"
 RESQUE_PID="$PID_PATH/sidekiq.pid"
+STOP_SIDEKIQ="RAILS_ENV=production bundle exec rake sidekiq:stop"
+START_SIDEKIQ="RAILS_ENV=production bundle exec rake sidekiq:start"
 NAME="unicorn"
 DESC="Gitlab service"
 
@@ -43,7 +45,7 @@ start() {
   else
     if [ `whoami` = root ]; then
       sudo -u gitlab -H bash -l -c "nohup bundle exec unicorn_rails $DAEMON_OPTS  > /dev/null  2>&1 &"
-      sudo -u gitlab -H bash -l -c "mkdir -p $PID_PATH && RAILS_ENV=production bundle exec rake sidekiq:start  > /dev/null  2>&1 &"
+      sudo -u gitlab -H bash -l -c "mkdir -p $PID_PATH && $START_SIDEKIQ  > /dev/null  2>&1 &"
       echo "$DESC started"
     fi
   fi
@@ -55,7 +57,7 @@ stop() {
   if [ "$PID" -ne 0 -a "$STATUS" -ne 0 ]; then
     ## Program is running, stop it.
     kill -QUIT `cat $UNICORN_PID`
-    kill -QUIT `cat $RESQUE_PID`
+    sudo -u gitlab -H bash -l -c "mkdir -p $PID_PATH && $STOP_SIDEKIQ  > /dev/null  2>&1 &"
     rm "$UNICORN_PID" >> /dev/null
     rm "$RESQUE_PID" >> /dev/null
     echo "$DESC stopped"
@@ -72,9 +74,9 @@ restart() {
   if [ "$PID" -ne 0 -a "$STATUS" -ne 0 ]; then
     echo "Restarting $DESC..."
     kill -USR2 `cat $UNICORN_PID`
-    kill -QUIT `cat $RESQUE_PID`
+    sudo -u gitlab -H bash -l -c "mkdir -p $PID_PATH && $STOP_SIDEKIQ  > /dev/null  2>&1 &"
     if [ `whoami` = root ]; then
-      sudo -u gitlab -H bash -l -c "RAILS_ENV=production bundle exec rake sidekiq:start  > /dev/null  2>&1 &"
+      sudo -u gitlab -H bash -l -c "mkdir -p $PID_PATH && $START_SIDEKIQ  > /dev/null  2>&1 &"
     fi
     echo "$DESC restarted."
   else
