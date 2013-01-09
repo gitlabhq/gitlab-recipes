@@ -28,6 +28,7 @@ DESC="Gitlab service"
 check_pid(){
   if [ -f $UNICORN_PID ]; then
     PID=`cat $UNICORN_PID`
+    SPID=`cat $SIDEKIQ_PID`
     STATUS=`ps aux | grep $PID | grep -v grep | wc -l`
   else
     STATUS=0
@@ -89,7 +90,7 @@ status() {
   check_pid
   if [ "$PID" -ne 0 -a "$STATUS" -ne 0 ]; then
     echo "$DESC / Unicorn with PID $PID is running."
-    echo "$DESC / Sidekiq with PID $SIDEKIQ_PID is running."
+    echo "$DESC / Sidekiq with PID $SPID is running."
   else
     echo "$DESC is not running."
     exit 1
