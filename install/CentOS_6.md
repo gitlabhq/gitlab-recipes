@@ -24,7 +24,7 @@ When it is required you should be either the 'git' or 'gitlab' user it will be i
 
 The best way to become that user is by logging in as root and typing
 
-	su - gitlab
+    su - gitlab
 
 **Note about security:**
 Many setup guides of Linux software simply state: "disable selinux and firewall".
@@ -60,150 +60,128 @@ The end result is a bare minimum CentOS installation that effectively only has n
 
 *logged in as root*
 
-	rpm -Uvh http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
+    rpm -Uvh http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
 
 ### Install the required tools for gitlab and gitolite
 
 *logged in as root*
 
-	yum -y groupinstall 'Development Tools'
+    yum -y groupinstall 'Development Tools'
 
-	### 'Additional Development'
-	yum -y install vim-enhanced httpd readline readline-devel ncurses-devel gdbm-devel glibc-devel \
-	               tcl-devel openssl-devel curl-devel expat-devel db4-devel byacc \
-	               sqlite-devel gcc-c++ libyaml libyaml-devel libffi libffi-devel \
-	               libxml2 libxml2-devel libxslt libxslt-devel libicu libicu-devel \
-	               system-config-firewall-tui python-devel redis sudo mysql-server wget \
-	               mysql-devel crontabs logwatch logrotate sendmail-cf qtwebkit qtwebkit-devel \
+    ### 'Additional Development'
+    yum -y install vim-enhanced httpd readline readline-devel ncurses-devel gdbm-devel glibc-devel \
+                   tcl-devel openssl-devel curl-devel expat-devel db4-devel byacc \
+                   sqlite-devel gcc-c++ libyaml libyaml-devel libffi libffi-devel \
+                   libxml2 libxml2-devel libxslt libxslt-devel libicu libicu-devel \
+                   system-config-firewall-tui python-devel redis sudo mysql-server wget \
+                   mysql-devel crontabs logwatch logrotate sendmail-cf qtwebkit qtwebkit-devel \
                    perl-Time-HiRes
 
 ### Update CentOS to the latest set of patches
 
 *logged in as root*
 
-	yum -y update
+    yum -y update
 
 ## Configure redis
 Just make sure it is started at the next reboot
 
 *logged in as root*
 
-	chkconfig redis on
+    chkconfig redis on
 
 ## Configure mysql
 Make sure it is started at the next reboot and start it immediately so we can configure it.
 
 *logged in as root*
 
-	chkconfig mysqld on
-	service mysqld start
+    chkconfig mysqld on
+    service mysqld start
 
 Secure MySQL by entering a root password and say "Yes" to all questions with the next command
 
-	/usr/bin/mysql_secure_installation
-
-Create gitlab database tables and grants.
-
-Login to MySQL
-
-    mysql -u root -p
-
-Create a user for GitLab. (change $password to a real password)
-
-    CREATE USER 'gitlab'@'localhost' IDENTIFIED BY '$password';
-
-Create the GitLab production database
-
-    CREATE DATABASE IF NOT EXISTS `gitlabhq_production` DEFAULT CHARACTER SET `utf8` COLLATE `utf8_unicode_ci`;
-
-Grant the GitLab user necessary permissopns on the table.
-
-    GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER ON `gitlabhq_production`.* TO 'gitlab'@'localhost';
-
-Quit the database session
-
-    \q
-
-Try connecting to the new database with the new user
-
-    mysql -u gitlab -p -D gitlabhq_production
+    /usr/bin/mysql_secure_installation
 
 ## Configure httpd
 
 We use Apache HTTPD in front of gitlab
 Just make sure it is started at the next reboot
 
-	chkconfig httpd on
+    chkconfig httpd on
 
 We want to be able to reach gitlab using the normal http ports (i.e. not the :3000 thing)
-So we create a file called **/etc/httpd/conf.d/gitlab.conf** with this content (replace the git.example.org with your hostname!!)
+So we create a file called **/etc/httpd/conf.d/gitlab.conf** with this content (replace the git.example.org with your hostname!!). 
 
-	<VirtualHost *:80>
-	  ServerName git.example.org
-	  ProxyRequests Off
-	    <Proxy *>
-	       Order deny,allow
-	       Allow from all
-	    </Proxy>
-	    ProxyPreserveHost On
-	    ProxyPass / http://localhost:3000/
-	    ProxyPassReverse / http://localhost:3000/
-	</VirtualHost>
-	 
+    <VirtualHost *:80>
+      ServerName git.example.org
+      ProxyRequests Off
+        <Proxy *>
+           Order deny,allow
+           Allow from all
+        </Proxy>
+        ProxyPreserveHost On
+        ProxyPass / http://localhost:3000/
+        ProxyPassReverse / http://localhost:3000/
+    </VirtualHost>
+
+OPTIONAL: If you want to run other websites on the same system you'll need to enable in **/etc/httpd/conf/httpd.conf** the setting
+
+    NameVirtualHost *:80
+
 Poke an selinux hole for httpd so it can httpd can be in front of gitlab
 
-	setsebool -P httpd_can_network_connect on
+    setsebool -P httpd_can_network_connect on
 
 ## Configure firewall
 
 Poke an iptables hole so uses can access the httpd (http and https ports) and ssh.
 The quick way is to put this in the file called **/etc/sysconfig/iptables**
 
-	# Firewall configuration written by system-config-firewall
-	# Manual customization of this file is not recommended.
-	*filter
-	:INPUT ACCEPT [0:0]
-	:FORWARD ACCEPT [0:0]
-	:OUTPUT ACCEPT [0:0]
-	-A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
-	-A INPUT -p icmp -j ACCEPT
-	-A INPUT -i lo -j ACCEPT
-	-A INPUT -m state --state NEW -m tcp -p tcp --dport 22 -j ACCEPT
-	-A INPUT -m state --state NEW -m tcp -p tcp --dport 80 -j ACCEPT
-	-A INPUT -m state --state NEW -m tcp -p tcp --dport 443 -j ACCEPT
-	-A INPUT -j REJECT --reject-with icmp-host-prohibited
-	-A FORWARD -j REJECT --reject-with icmp-host-prohibited
-	COMMIT
+    # Firewall configuration written by system-config-firewall
+    # Manual customization of this file is not recommended.
+    *filter
+    :INPUT ACCEPT [0:0]
+    :FORWARD ACCEPT [0:0]
+    :OUTPUT ACCEPT [0:0]
+    -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+    -A INPUT -p icmp -j ACCEPT
+    -A INPUT -i lo -j ACCEPT
+    -A INPUT -m state --state NEW -m tcp -p tcp --dport 22 -j ACCEPT
+    -A INPUT -m state --state NEW -m tcp -p tcp --dport 80 -j ACCEPT
+    -A INPUT -m state --state NEW -m tcp -p tcp --dport 443 -j ACCEPT
+    -A INPUT -j REJECT --reject-with icmp-host-prohibited
+    -A FORWARD -j REJECT --reject-with icmp-host-prohibited
+    COMMIT
 
 
 ## Configure email
 
-	cd /etc/mail
-	vim /etc/mail/sendmail.mc
+    cd /etc/mail
+    vim /etc/mail/sendmail.mc
 
 Add a line with the smtp gateway hostname
 
-	define(`SMART_HOST', `smtp.example.com')dnl
+    define(`SMART_HOST', `smtp.example.com')dnl
 
 Then comment out this line 
 
-	EXPOSED_USER(`root')dnl
+    EXPOSED_USER(`root')dnl
 
-by putting 'dnl ' in front of it
+by putting 'dnl ' in front of it like this
 
-	dnl EXPOSED_USER(`root')dnl
+    dnl EXPOSED_USER(`root')dnl
  
 Now enable these settings
 
-	make
-	chkconfig sendmail on
+    make
+    chkconfig sendmail on
 
 
 ## Reboot
 Now that we have the basics right we reboot the system to load the new kernel and everything.
 After the reboot all of the so far installed services will startup automatically.
 
-	reboot
+    reboot
 
 ----------
 
@@ -212,19 +190,19 @@ Download and compile it:
 
 *logged in as root*
 
-	mkdir /tmp/ruby && cd /tmp/ruby
-	wget http://ftp.ruby-lang.org/pub/ruby/1.9/ruby-1.9.3-p327.tar.gz
-	tar xfvz ruby-1.9.3-p327.tar.gz
-	cd ruby-1.9.3-p327
-	./configure
-	make
-	make install
+    mkdir /tmp/ruby && cd /tmp/ruby
+    wget http://ftp.ruby-lang.org/pub/ruby/1.9/ruby-1.9.3-p327.tar.gz
+    tar xfvz ruby-1.9.3-p327.tar.gz
+    cd ruby-1.9.3-p327
+    ./configure
+    make
+    make install
 
 Install the Bundler Gem:
 
 *logged in as root*
 
-	gem install bundler
+    gem install bundler
 
 ----------
 
@@ -237,22 +215,22 @@ Install the Bundler Gem:
       --system \
       --shell /bin/bash \
       --comment 'Git Version Control' \
-	  --create-home \
+      --create-home \
       --home-dir /home/git \
       git
 
     adduser \
       --shell /bin/bash \
       --comment 'GitLab user' \
-	  --create-home \
+      --create-home \
       --home-dir /home/gitlab \
       gitlab
 
-	usermod -a -G git gitlab 
+    usermod -a -G git gitlab 
 
 Because the gitlab user will need a password later on, we configure it right now, so we are finished with all the user stuff.
 
-	passwd gitlab # please choose a good password :)  
+    passwd gitlab # please choose a good password :)  
 
 *logged in as root*
 
@@ -265,16 +243,16 @@ Now we want all logging of the system to be forwarded to a central email address
 
 *logged in as root*
 
-	echo adminlogs@example.com > /root/.forward
-	chown root /root/.forward
-	chmod 600 /root/.forward
-	restorecon /root/.forward
+    echo adminlogs@example.com > /root/.forward
+    chown root /root/.forward
+    chmod 600 /root/.forward
+    restorecon /root/.forward
 
-	echo adminlogs@example.com > /home/gitlab/.forward
-	chown gitlab /home/gitlab/.forward
-	chmod 600 /home/gitlab/.forward
-	restorecon /home/gitlab/.forward
-	
+    echo adminlogs@example.com > /home/gitlab/.forward
+    chown gitlab /home/gitlab/.forward
+    chmod 600 /home/gitlab/.forward
+    restorecon /home/gitlab/.forward
+    
 ----------
 
 # 4. Gitolite
@@ -317,25 +295,26 @@ GitLab assumes *full and unshared* control over this Gitolite installation.
     chmod -R ug+rwXs,o-rwx /home/git/repositories/
     chown -R git:git /home/git/repositories/
 
-	# Make sure the gitlab user can access the required directories
-	chmod g+x /home/git
+    # Make sure the gitlab user can access the required directories
+    chmod g+x /home/git
 
 ### Make the git account known and allowed to the gitlab user
 
-*logged in as gitlab*
+*logged in as root*
 
-	ssh git@localhost  # type 'yes' and press <Enter>.
+    su - gitlab
+
+*logged in as **gitlab***    
+    
+    ssh git@localhost  # type 'yes' and press <Enter>.
 
 The expected behaviour is that you get a message similar to this and then immediately the connection is closed again:
 
-	PTY allocation request failed on channel 0
-	hello gitlab, this is git@gitlab running gitolite3 v3.2-gitlab-patched-0-g2d29cf7 on git 1.7.1
+    PTY allocation request failed on channel 0
+    hello gitlab, this is git@gitlab running gitolite3 v3.2-gitlab-patched-0-g2d29cf7 on git 1.7.1
 
 ## Test if everything works so far
-*logged in as root*
-
-	# Login as the gitlab user
-	su - gitlab
+*logged in as **gitlab***
 
     # Clone the admin repo so SSH adds localhost to known_hosts ...
     # ... and to be sure your users have access to Gitolite
@@ -388,46 +367,48 @@ Copy the example Unicorn config
 
 Edit the unicorn config
 
-	vim /home/gitlab/gitlab/config/unicorn.rb
+    vim /home/gitlab/gitlab/config/unicorn.rb
 
 Change the listen parameter so that it reads:
 
-	listen "127.0.0.1:3000"  # listen to port 3000 on the loopback interface
+    listen "127.0.0.1:3000"  # listen to port 3000 on the loopback interface
 
 Also review the other settings to match your setup.
 
 ## Configure GitLab DB settings
 
-	# MySQL
+    # MySQL
     cp /home/gitlab/gitlab/config/database.yml{.mysql,}
 
 Edit the database config and set the correct username/password
 
-	vim /home/gitlab/gitlab/config/database.yml
+    vim /home/gitlab/gitlab/config/database.yml
 
 The config should look something like this (where supersecret is replaced with your real password):
 
-	production:
-	  adapter: mysql2
-	  encoding: utf8
-	  reconnect: false
-	  database: gitlabhq_production
-	  pool: 5
-	  username: gitlab
-	  password: supersecret
-	  # host: localhost
-	  # socket: /tmp/mysql.sock
-	
+    production:
+      adapter: mysql2
+      encoding: utf8
+      reconnect: false
+      database: gitlabhq_production
+      pool: 5
+      username: gitlab
+      password: supersecret
+      # host: localhost
+      # socket: /tmp/mysql.sock
+    
 ## Install Gems
-*logged in as root*
+*logged in as **root***
 
     cd /home/gitlab/gitlab
 
     gem install charlock_holmes --version '0.6.9'
 
+    su - gitlab
+
 *logged in as gitlab*
 
-	cd /home/gitlab/gitlab
+    cd /home/gitlab/gitlab
 
     # For mysql db
     bundle install --deployment --without development test postgres
@@ -445,20 +426,22 @@ used for the `email.from` setting in `config/gitlab.yml`)
 
 ## Setup GitLab Hooks
 
-*logged in as root*
+*logged in as **root***
 
-	cd /home/gitlab/gitlab
+    cd /home/gitlab/gitlab
     cp ./lib/hooks/post-receive /home/git/.gitolite/hooks/common/post-receive
     chown git:git /home/git/.gitolite/hooks/common/post-receive
 
 ## Initialise Database and Activate Advanced Features
 
-*logged in as gitlab*
+    su - gitlab
 
-	cd /home/gitlab/gitlab
+*logged in as **gitlab***
+
+    cd /home/gitlab/gitlab
     bundle exec rake gitlab:app:setup RAILS_ENV=production
 
-**It is very likely you get an error about the database already existing. In that case go into mysql and drop the gitlabhq_production database and repeat the previous action.**
+The previous command will ask you for the root password of the mysql database and create the defined database and user.
 
 ## Install Init Script
 
@@ -468,11 +451,11 @@ Download the init script (will be /etc/init.d/gitlab):
 
     curl https://raw.github.com/gitlabhq/gitlab-recipes/master/init.d/gitlab-centos > /etc/init.d/gitlab
     chmod +x /etc/init.d/gitlab
-	chkconfig --add gitlab
+    chkconfig --add gitlab
 
 Make GitLab start on boot:
 
-	chkconfig gitlab on
+    chkconfig gitlab on
 
 Start your GitLab instance:
 
@@ -485,19 +468,20 @@ Start your GitLab instance:
 
 Check if GitLab and its environment is configured correctly:
 
-*logged in as gitlab*
+    su - gitlab
 
-	cd /home/gitlab/gitlab
+*logged in as **gitlab***
+
+    cd /home/gitlab/gitlab
     bundle exec rake gitlab:env:info RAILS_ENV=production
 
 To make sure you didn't miss anything run a more thorough check with:
 
-	cd /home/gitlab/gitlab
+    cd /home/gitlab/gitlab
     bundle exec rake gitlab:check RAILS_ENV=production
 
 If you are all green: congratulations, you successfully installed GitLab!
 Although this is the case, there are still a few steps to go.
-
 
 # Done!
 
