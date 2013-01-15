@@ -1,4 +1,5 @@
 **This installation guide was created for CentOS 6.3 in combination with gitlab 4.0 and tested on it.**
+We also tried this on RHEL 6.3 and found that there are subtle differences that we so far have only documeted in part.
 
 Please read `doc/install/requirements.md` for hardware and platform requirements.
 
@@ -36,17 +37,17 @@ This guide does not disable any of them, we simply configure them as they were i
 # Overview
 
 The GitLab installation consists of setting up the following components:
-1. Installing the operating system (CentOS 6.3 Minimal) and Packages / Dependencies
+
+1. Installing the base operating system (CentOS 6.3 Minimal) and Packages / Dependencies
 2. Ruby
 3. System Users
 4. Gitolite
-5. Database
-6. GitLab
-7. Nginx
+5. GitLab
+
 
 ----------
 
-# Installing the operating system (CentOS 6.3 Minimal)
+# 1. Installing the operating system (CentOS 6.3 Minimal)
 
 We start with a completely clean CentOS 6.3 "minimal" installation which can be accomplished by downloading the appropriate installation iso file. Just boot the system of the iso file and install the system.
 
@@ -76,6 +77,10 @@ The end result is a bare minimum CentOS installation that effectively only has n
                    system-config-firewall-tui python-devel redis sudo mysql-server wget \
                    mysql-devel crontabs logwatch logrotate sendmail-cf qtwebkit qtwebkit-devel \
                    perl-Time-HiRes
+
+**IMPORTANT NOTE About Redhat EL 6** 
+
+During an installation on an official RHEL 6.3 we found that some packages (in our case gdbm-devel, libffi-devel and libicu-devel) were NOT installed. You MUST make sure that all the packages are installed. The simplest way is to run the above command for a second time and you'll see quite easily of everything is either already installed or "No package XXX available". When you run into this issue you can try installing these required packages from the CentOS distribution.
 
 ### Update CentOS to the latest set of patches
 
@@ -152,7 +157,6 @@ The quick way is to put this in the file called **/etc/sysconfig/iptables**
     -A INPUT -j REJECT --reject-with icmp-host-prohibited
     -A FORWARD -j REJECT --reject-with icmp-host-prohibited
     COMMIT
-
 
 ## Configure email
 
@@ -329,8 +333,7 @@ Check the [Trouble Shooting Guide](https://github.com/gitlabhq/gitlab-public-wik
 and make sure you have followed all of the above steps carefully.
 
 ----------
-
-# 6. GitLab
+# 5. GitLab
 
 *logged in as gitlab*
 
@@ -398,6 +401,10 @@ The config should look something like this (where supersecret is replaced with y
       # socket: /tmp/mysql.sock
     
 ## Install Gems
+*logged in as **gitlab***
+
+    logout
+
 *logged in as **root***
 
     cd /home/gitlab/gitlab
@@ -406,7 +413,7 @@ The config should look something like this (where supersecret is replaced with y
 
     su - gitlab
 
-*logged in as gitlab*
+*logged in as **gitlab***
 
     cd /home/gitlab/gitlab
 
@@ -425,6 +432,9 @@ used for the `email.from` setting in `config/gitlab.yml`)
     git config --global user.email "gitlab@localhost"
 
 ## Setup GitLab Hooks
+*logged in as **gitlab***
+
+    logout
 
 *logged in as **root***
 
@@ -433,6 +443,8 @@ used for the `email.from` setting in `config/gitlab.yml`)
     chown git:git /home/git/.gitolite/hooks/common/post-receive
 
 ## Initialise Database and Activate Advanced Features
+
+*logged in as **root***
 
     su - gitlab
 
@@ -445,7 +457,11 @@ The previous command will ask you for the root password of the mysql database an
 
 ## Install Init Script
 
-Download the init script (will be /etc/init.d/gitlab):
+Download the init script (will be /etc/init.d/gitlab)
+
+*logged in as **gitlab***
+
+    logout
 
 *logged in as root*
 
@@ -462,7 +478,6 @@ Start your GitLab instance:
     service gitlab start
     # or
     /etc/init.d/gitlab start
-
 
 ## Check Application Status
 
