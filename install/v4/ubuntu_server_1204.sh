@@ -172,7 +172,7 @@ sudo chown git:git /home/git/.gitolite/hooks/common/post-receive
 
 sudo -u gitlab -H bundle exec rake gitlab:app:setup RAILS_ENV=production
 
-sudo wget https://raw.github.com/gitlabhq/gitlab-recipes/master/init.d/gitlab -P /etc/init.d/
+sudo wget https://raw.github.com/gitlabhq/gitlab-recipes/4-0-stable/init.d/gitlab -P /etc/init.d/
 sudo chmod +x /etc/init.d/gitlab
 
 sudo update-rc.d gitlab defaults 21
@@ -182,7 +182,7 @@ sudo update-rc.d gitlab defaults 21
 #== 7. Nginx
 #==
 sudo apt-get install -y nginx
-sudo wget https://raw.github.com/gitlabhq/gitlab-recipes/master/nginx/gitlab -P /etc/nginx/sites-available/
+sudo wget https://raw.github.com/gitlabhq/gitlab-recipes/4-0-stable/nginx/gitlab -P /etc/nginx/sites-available/
 sudo ln -s /etc/nginx/sites-available/gitlab /etc/nginx/sites-enabled/gitlab
 
 
