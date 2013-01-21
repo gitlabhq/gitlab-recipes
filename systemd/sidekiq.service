@@ -1,3 +1,8 @@
+#
+# GITLAB
+# Maintainer: @davispuh
+# App Version: 4.1
+#
 [Unit]
 Description=GitLab Sidekiq Service
 After=syslog.target network.target remote-fs.target nss-lookup.target redis.service
