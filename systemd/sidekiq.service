@@ -12,10 +12,8 @@ Wants=redis.service
 Type=simple
 PIDFile=/home/gitlab/gitlab/tmp/pids/sidekiq.pid
 WorkingDirectory=/home/gitlab/gitlab/
-ExecStart=/bin/bundle exec rake sidekiq:start RAILS_ENV=production
-ExecStop=/bin/bundle exec rake sidekiq:stop RAILS_ENV=production
-User=gitlab
-Group=gitlab
+ExecStart=/bin/su - gitlab "bundle exec rake sidekiq:start RAILS_ENV=production"
+ExecStop=/bin/su - gitlab "bundle exec rake sidekiq:stop RAILS_ENV=production"
 
 [Install]
 WantedBy=multi-user.target
