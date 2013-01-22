@@ -10,6 +10,7 @@
 	
 	ProxyPass / http://127.0.0.1:3000/
 	ProxyPassReverse / http://127.0.0.1:3000/
+	ProxyPreserveHost On
 
 	CustomLog /var/log/apache2/gitlab/access.log combined
 	ErrorLog  /var/log/apache2/gitlab/error.log
@@ -25,6 +26,7 @@
 
 	ProxyPass / http://127.0.0.1:3000/
 	ProxyPassReverse / http://127.0.0.1:3000/
+	ProxyPreserveHost On
 
 	CustomLog /var/log/apache2/gitlab/access.log combined
 	ErrorLog  /var/log/apache2/gitlab/error.log
