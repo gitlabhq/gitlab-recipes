@@ -1,8 +1,8 @@
 #!/bin/bash
 #
 # GitLab
-# Maintainer: @elvanja
-# App Version: 2.8.2
+# Maintainer: @elvanja, @troyanov
+# App Version: 4.0
 
 # chkconfig: 2345 82 55
 # processname: unicorn
@@ -36,62 +36,81 @@ OPTS="-c $APP_PATH/config/unicorn.rb -E production -D"
 RUBY_PATH_PATCH="PATH=$PATH:/usr/local/bin:/usr/local/lib && export PATH && "
 
 start() {
-    cd $APP_PATH
+  cd $APP_PATH
 
-    # Start unicorn
-    echo -n $"Starting unicorn: "
-    daemon --pidfile=$UPID --user=$USER "$RUBY_PATH_PATCH bundle exec unicorn_rails $OPTS"
-    [ $? -eq 0 ] && touch $ULOCK
-    echo
+  # Start unicorn
+  echo -n $"Starting unicorn: "
+  daemon --pidfile=$UPID --user=$USER "$RUBY_PATH_PATCH bundle exec unicorn_rails $OPTS"
+  unicorn=$?
+  [ $unicorn -eq 0 ] && touch $ULOCK
+  echo
 
-    # Start resque
-    echo -n $"Starting resque: "
-    daemon --pidfile=$RPID --user=$USER "$RUBY_PATH_PATCH ./resque.sh"
-    [ $? -eq 0 ] && touch $RLOCK
-    echo
+  # Start resque
+  echo -n $"Starting resque: "
+  daemon --pidfile=$RPID --user=$USER "$RUBY_PATH_PATCH ./resque.sh"
+  resque=$?
+  [ $resque -eq 0 ] && touch $RLOCK
+  echo
+
+  retval=$unicorn || $resque
+  return $retval
 }
 
 stop() {
-    cd $APP_PATH
+  cd $APP_PATH
 
-    # Stop unicorn
-    echo -n $"Stopping unicorn: "
-    killproc -p $UPID
-    [ $? -eq 0 ] && rm -f $ULOCK
-    echo
+  # Stop unicorn
+  echo -n $"Stopping unicorn: "
+  killproc -p $UPID
+  unicorn=$?
+  [ $unicorn -eq 0 ] && rm -f $ULOCK
+  echo
 
-    # Stop resque
-    echo -n $"Stopping resque: "
-    killproc -p $RPID
-    [ $? -eq 0 ] && rm -f $RLOCK
-    echo
+  # Stop resque
+  echo -n $"Stopping resque: "
+  killproc -p $RPID
+  resque=$?
+  [ $resque -eq 0 ] && rm -f $RLOCK
+  echo
+
+  retval=$unicorn || $resque
+  return $retval
 }
 
-c_status() {
-    status -p $UPID unicorn
-    status -p $RPID resque
+restart() {
+  stop
+  start
+}
+
+get_status() {
+  status -p $UPID unicorn
+  status -p $RPID resque
+}
+
+query_status() {
+  get_status >/dev/null 2>&1
 }
 
 case "$1" in
-    start)
-        start
-        ;;
-    stop)
-        stop
-        ;;
-    status)
-        c_status
-        ;;
-    restart)
-        stop
-        start
-        ;;
-    *)
-        N=/etc/init.d/$NAME
-        echo "Usage: $N {start|stop|status|restart)" >&2
-        exit 1
-        ;;
+  start)
+    query_status && exit 0
+    start
+    ;;
+  stop)
+    query_status || exit 0
+    stop
+    ;;
+  restart)
+    restart
+    ;;
+  status)
+    get_status
+    ;;
+  *)
+    N=/etc/init.d/$NAME
+    echo "Usage: $N {start|stop|restart|status}" >&2
+    exit 1
+    ;;
 esac
 
 exit 0
-

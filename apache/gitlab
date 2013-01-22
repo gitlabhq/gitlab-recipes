@@ -1,7 +1,7 @@
 # require apache module mod_proxy and mod_proxy_http
 <VirtualHost *:80>
-	ServerName gitlab.domain.com
-	#ServerAlias git.domain.com
+	ServerName gitlab.example.com
+	#ServerAlias git.example.com
 
 	# Uncomment if you want redirect from HTTP to HTTPS
 	#RewriteEngine   on
@@ -10,13 +10,14 @@
 	
 	ProxyPass / http://127.0.0.1:3000/
 	ProxyPassReverse / http://127.0.0.1:3000/
+	ProxyPreserveHost On
 
 	CustomLog /var/log/apache2/gitlab/access.log combined
 	ErrorLog  /var/log/apache2/gitlab/error.log
 </VirtualHost>
 <VirtualHost *:443>
-	ServerName gitlab.domain.com
-	ServerAdmin gitlab@domain.com
+	ServerName gitlab.example.com
+	ServerAdmin gitlab@example.com
 
 	SSLEngine On
 	SSLCertificateFile /etc/apache2/ssl/server.crt
@@ -25,6 +26,7 @@
 
 	ProxyPass / http://127.0.0.1:3000/
 	ProxyPassReverse / http://127.0.0.1:3000/
+	ProxyPreserveHost On
 
 	CustomLog /var/log/apache2/gitlab/access.log combined
 	ErrorLog  /var/log/apache2/gitlab/error.log

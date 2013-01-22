@@ -2,7 +2,7 @@
 
 # GITLAB
 # Maintainer: @randx
-# App Version: 4.0
+# App Version: 4.1
 
 ### BEGIN INIT INFO
 # Provides:          gitlab
@@ -19,13 +19,16 @@ APP_ROOT="/home/gitlab/gitlab"
 DAEMON_OPTS="-c $APP_ROOT/config/unicorn.rb -E production"
 PID_PATH="$APP_ROOT/tmp/pids"
 UNICORN_PID="$PID_PATH/unicorn.pid"
-RESQUE_PID="$PID_PATH/resque_worker.pid"
+SIDEKIQ_PID="$PID_PATH/sidekiq.pid"
+STOP_SIDEKIQ="RAILS_ENV=production bundle exec rake sidekiq:stop"
+START_SIDEKIQ="RAILS_ENV=production bundle exec rake sidekiq:start"
 NAME="unicorn"
 DESC="Gitlab service"
 
 check_pid(){
   if [ -f $UNICORN_PID ]; then
     PID=`cat $UNICORN_PID`
+    SPID=`cat $SIDEKIQ_PID`
     STATUS=`ps aux | grep $PID | grep -v grep | wc -l`
   else
     STATUS=0
@@ -43,7 +46,7 @@ start() {
   else
     if [ `whoami` = root ]; then
       sudo -u gitlab -H bash -l -c "nohup bundle exec unicorn_rails $DAEMON_OPTS  > /dev/null  2>&1 &"
-      sudo -u gitlab -H bash -l -c "mkdir -p $PID_PATH && nohup bundle exec rake environment resque:work QUEUE=post_receive,mailer,system_hook RAILS_ENV=production PIDFILE=$RESQUE_PID  > /dev/null  2>&1 &"
+      sudo -u gitlab -H bash -l -c "mkdir -p $PID_PATH && $START_SIDEKIQ  > /dev/null  2>&1 &"
       echo "$DESC started"
     fi
   fi
@@ -55,9 +58,8 @@ stop() {
   if [ "$PID" -ne 0 -a "$STATUS" -ne 0 ]; then
     ## Program is running, stop it.
     kill -QUIT `cat $UNICORN_PID`
-    kill -QUIT `cat $RESQUE_PID`
+    sudo -u gitlab -H bash -l -c "mkdir -p $PID_PATH && $STOP_SIDEKIQ  > /dev/null  2>&1 &"
     rm "$UNICORN_PID" >> /dev/null
-    rm "$RESQUE_PID" >> /dev/null
     echo "$DESC stopped"
   else
     ## Program is not running, exit with error.
@@ -70,10 +72,13 @@ restart() {
   cd $APP_ROOT
   check_pid
   if [ "$PID" -ne 0 -a "$STATUS" -ne 0 ]; then
-    echo -n "Restarting $DESC: "
+    echo "Restarting $DESC..."
     kill -USR2 `cat $UNICORN_PID`
-    kill -USR2 `cat $RESQUE_PID`
-    echo "$NAME."
+    sudo -u gitlab -H bash -l -c "mkdir -p $PID_PATH && $STOP_SIDEKIQ  > /dev/null  2>&1 &"
+    if [ `whoami` = root ]; then
+      sudo -u gitlab -H bash -l -c "mkdir -p $PID_PATH && $START_SIDEKIQ  > /dev/null  2>&1 &"
+    fi
+    echo "$DESC restarted."
   else
     echo "Error, $NAME not running!"
     exit 1
@@ -84,7 +89,8 @@ status() {
   cd $APP_ROOT
   check_pid
   if [ "$PID" -ne 0 -a "$STATUS" -ne 0 ]; then
-    echo "$DESC with PID $PID is running."
+    echo "$DESC / Unicorn with PID $PID is running."
+    echo "$DESC / Sidekiq with PID $SPID is running."
   else
     echo "$DESC is not running."
     exit 1
@@ -109,15 +115,15 @@ case "$1" in
         restart
         ;;
   reload|force-reload)
-        echo -n "Reloading $DESC configuration: "
+        echo -n "Reloading $NAME configuration: "
         kill -HUP `cat $PID`
-        echo "$NAME."
+        echo "done."
         ;;
   status)
         status
         ;;
   *)
-        echo "Usage: $NAME {start|stop|restart|reload}" >&2
+        echo "Usage: sudo service gitlab {start|stop|restart|reload}" >&2
         exit 1
         ;;
 esac
