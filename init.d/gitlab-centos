@@ -6,7 +6,7 @@
 
 # chkconfig: 2345 82 55
 # processname: unicorn
-# processname: rescue
+# processname: sidekiq
 # description: Runs unicorn and sidekiq for nginx integration.
 
 # Related (kudos @4sak3n0ne):
