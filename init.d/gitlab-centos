@@ -26,8 +26,8 @@ APP_PATH=/home/$USER/gitlab
 # The PID and LOCK files used by unicorn and sidekiq
 UPID=$APP_PATH/tmp/pids/unicorn.pid
 ULOCK=/var/lock/subsys/unicorn
-RPID=$APP_PATH/tmp/pids/sidekiq.pid
-RLOCK=/var/lock/subsys/sidekiq
+SPID=$APP_PATH/tmp/pids/sidekiq.pid
+SLOCK=/var/lock/subsys/sidekiq
 
 # The options to use when running unicorn
 OPTS="-c $APP_PATH/config/unicorn.rb -E production -D"
@@ -47,9 +47,9 @@ start() {
 
   # Start sidekiq
   echo -n $"Starting sidekiq: "
-  daemon --pidfile=$RPID --user=$USER "$RUBY_PATH_PATCH RAILS_ENV=production bundle exec rake sidekiq:start"
+  daemon --pidfile=$SPID --user=$USER "$RUBY_PATH_PATCH RAILS_ENV=production bundle exec rake sidekiq:start"
   sidekiq=$?
-  [ $sidekiq -eq 0 ] && touch $RLOCK
+  [ $sidekiq -eq 0 ] && touch $SLOCK
   echo
 
   retval=$unicorn || $sidekiq
@@ -68,9 +68,9 @@ stop() {
 
   # Stop sidekiq
   echo -n $"Stopping sidekiq: "
-  killproc -p $RPID
+  killproc -p $SPID
   sidekiq=$?
-  [ $sidekiq -eq 0 ] && rm -f $RLOCK
+  [ $sidekiq -eq 0 ] && rm -f $SLOCK
   echo
 
   retval=$unicorn || $sidekiq
@@ -84,7 +84,7 @@ restart() {
 
 get_status() {
   status -p $UPID unicorn
-  status -p $RPID sidekiq
+  status -p $SPID sidekiq
 }
 
 query_status() {
