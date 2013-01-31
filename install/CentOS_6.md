@@ -94,6 +94,7 @@ Just make sure it is started at the next reboot
 *logged in as root*
 
     chkconfig redis on
+    service redis start
 
 ## Configure mysql
 Make sure it is started at the next reboot and start it immediately so we can configure it.
