@@ -45,8 +45,8 @@ start() {
     exit 1
   else
     if [ `whoami` = root ]; then
-      sudo -u gitlab -H bash -l -c "nohup bundle exec unicorn_rails $DAEMON_OPTS  > /dev/null  2>&1 &"
-      sudo -u gitlab -H bash -l -c "mkdir -p $PID_PATH && $START_SIDEKIQ  > /dev/null  2>&1 &"
+      su --session-command="nohup bundle exec unicorn_rails $DAEMON_OPTS  > /dev/null  2>&1 &" -s /bin/bash gitlab
+      su --session-command="mkdir -p $PID_PATH && $START_SIDEKIQ  > /dev/null  2>&1 &" -s /bin/bash  gitlab
       echo "$DESC started"
     fi
   fi
@@ -58,7 +58,7 @@ stop() {
   if [ "$PID" -ne 0 -a "$STATUS" -ne 0 ]; then
     ## Program is running, stop it.
     kill -QUIT `cat $UNICORN_PID`
-    sudo -u gitlab -H bash -l -c "mkdir -p $PID_PATH && $STOP_SIDEKIQ  > /dev/null  2>&1 &"
+    su --session-command="mkdir -p $PID_PATH && $STOP_SIDEKIQ  > /dev/null  2>&1 &"  -s /bin/bash gitlab
     rm "$UNICORN_PID" >> /dev/null
     echo "$DESC stopped"
   else
@@ -74,9 +74,9 @@ restart() {
   if [ "$PID" -ne 0 -a "$STATUS" -ne 0 ]; then
     echo "Restarting $DESC..."
     kill -USR2 `cat $UNICORN_PID`
-    sudo -u gitlab -H bash -l -c "mkdir -p $PID_PATH && $STOP_SIDEKIQ  > /dev/null  2>&1 &"
+    su --session-command="mkdir -p $PID_PATH && $STOP_SIDEKIQ  > /dev/null  2>&1 &" -s /bin/bash gitlab
     if [ `whoami` = root ]; then
-      sudo -u gitlab -H bash -l -c "mkdir -p $PID_PATH && $START_SIDEKIQ  > /dev/null  2>&1 &"
+      su --session-command="mkdir -p $PID_PATH && $START_SIDEKIQ  > /dev/null  2>&1 &" -s /bin/bash gitlab
     fi
     echo "$DESC restarted."
   else
