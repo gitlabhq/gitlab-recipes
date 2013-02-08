@@ -7,4 +7,4 @@ GitLab recipes for setup on different platforms, update etc...
 
     # GITLAB
     # Maintainer: @randx
-    # App Version: 2.9
+    # App Version: 5.0

@@ -3,7 +3,7 @@
 # App Version: 4.0
 
 upstream gitlab {
-  server unix:/home/gitlab/gitlab/tmp/sockets/gitlab.socket;
+  server unix:/home/git/gitlab/tmp/sockets/gitlab.socket;
 }
 
 server {
