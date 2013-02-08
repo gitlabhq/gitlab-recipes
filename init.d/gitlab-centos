@@ -1,13 +1,13 @@
 #!/bin/bash
 #
 # GitLab
-# Maintainer: @elvanja, @troyanov
-# App Version: 4.0
+# Maintainer: @elvanja, @troyanov, @eiyaya
+# App Version: 4.1
 
 # chkconfig: 2345 82 55
 # processname: unicorn
-# processname: rescue
-# description: Runs unicorn and resque for nginx integration.
+# processname: sidekiq
+# description: Runs unicorn and sidekiq for nginx integration.
 
 # Related (kudos @4sak3n0ne):
 # https://github.com/gitlabhq/gitlabhq/issues/1049#issuecomment-8386882
@@ -23,17 +23,17 @@ NAME=gitlab
 USER=$NAME
 APP_PATH=/home/$USER/gitlab
 
-# The PID and LOCK files used by unicorn and resque
+# The PID and LOCK files used by unicorn and sidekiq
 UPID=$APP_PATH/tmp/pids/unicorn.pid
 ULOCK=/var/lock/subsys/unicorn
-RPID=$APP_PATH/tmp/pids/resque_worker.pid
-RLOCK=/var/lock/subsys/resque
+SPID=$APP_PATH/tmp/pids/sidekiq.pid
+SLOCK=/var/lock/subsys/sidekiq
 
 # The options to use when running unicorn
 OPTS="-c $APP_PATH/config/unicorn.rb -E production -D"
 
 # Ruby related path update
-RUBY_PATH_PATCH="PATH=$PATH:/usr/local/bin:/usr/local/lib && export PATH && "
+RUBY_PATH_PATCH="PATH=$PATH:/usr/local/bin:/usr/local/lib:/home/gitlab/bin && export PATH && "
 
 start() {
   cd $APP_PATH
@@ -45,14 +45,14 @@ start() {
   [ $unicorn -eq 0 ] && touch $ULOCK
   echo
 
-  # Start resque
-  echo -n $"Starting resque: "
-  daemon --pidfile=$RPID --user=$USER "$RUBY_PATH_PATCH ./resque.sh"
-  resque=$?
-  [ $resque -eq 0 ] && touch $RLOCK
+  # Start sidekiq
+  echo -n $"Starting sidekiq: "
+  daemon --pidfile=$SPID --user=$USER "$RUBY_PATH_PATCH RAILS_ENV=production bundle exec rake sidekiq:start"
+  sidekiq=$?
+  [ $sidekiq -eq 0 ] && touch $SLOCK
   echo
 
-  retval=$unicorn || $resque
+  retval=$unicorn || $sidekiq
   return $retval
 }
 
@@ -66,14 +66,14 @@ stop() {
   [ $unicorn -eq 0 ] && rm -f $ULOCK
   echo
 
-  # Stop resque
-  echo -n $"Stopping resque: "
-  killproc -p $RPID
-  resque=$?
-  [ $resque -eq 0 ] && rm -f $RLOCK
+  # Stop sidekiq
+  echo -n $"Stopping sidekiq: "
+  killproc -p $SPID
+  sidekiq=$?
+  [ $sidekiq -eq 0 ] && rm -f $SLOCK
   echo
 
-  retval=$unicorn || $resque
+  retval=$unicorn || $sidekiq
   return $retval
 }
 
@@ -84,7 +84,7 @@ restart() {
 
 get_status() {
   status -p $UPID unicorn
-  status -p $RPID resque
+  status -p $SPID sidekiq
 }
 
 query_status() {
