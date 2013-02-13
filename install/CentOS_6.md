@@ -455,6 +455,11 @@ used for the `email.from` setting in `config/gitlab.yml`)
     bundle exec rake gitlab:app:setup RAILS_ENV=production
 
 The previous command will ask you for the root password of the mysql database and create the defined database and user.
+Create the satellites (needed for Automerge)
+
+*logged in as **gitlab***
+
+    bundle exec rake gitlab:satellites:create RAILS_ENV=production
 
 ## Install Init Script
 
