@@ -2,7 +2,7 @@
 #
 # GitLab
 # Maintainer: @elvanja, @troyanov
-# App Version: 4.0
+# App Version: 4.2
 
 # chkconfig: 2345 82 55
 # processname: unicorn
