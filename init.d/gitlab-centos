@@ -2,7 +2,7 @@
 #
 # GitLab
 # Maintainer: @elvanja, @troyanov
-# App Version: 4.0
+# App Version: 4.2
 
 # chkconfig: 2345 82 55
 # processname: unicorn
@@ -26,14 +26,18 @@ APP_PATH=/home/$USER/gitlab
 # The PID and LOCK files used by unicorn and resque
 UPID=$APP_PATH/tmp/pids/unicorn.pid
 ULOCK=/var/lock/subsys/unicorn
-RPID=$APP_PATH/tmp/pids/resque_worker.pid
-RLOCK=/var/lock/subsys/resque
+RPID=$APP_PATH/tmp/pids/sidekiq.pid
+RLOCK=/var/lock/subsys/sidekiq
 
 # The options to use when running unicorn
 OPTS="-c $APP_PATH/config/unicorn.rb -E production -D"
 
 # Ruby related path update
-RUBY_PATH_PATCH="PATH=$PATH:/usr/local/bin:/usr/local/lib && export PATH && "
+
+# If you follow gitlab-recipes guide* to install gitlab on centOS 6.3, root will not have access to ruby 1.9.
+# In this case we prepend ruby 1.9 paths to $PATH.
+# * https://github.com/gitlabhq/gitlab-recipes/blob/4-2-stable/install/CentOS_6.md
+RUBY_PATH_PATCH="PATH=/usr/local/bin:/usr/local/lib:$PATH && export PATH && "
 
 start() {
   cd $APP_PATH
@@ -45,14 +49,14 @@ start() {
   [ $unicorn -eq 0 ] && touch $ULOCK
   echo
 
-  # Start resque
-  echo -n $"Starting resque: "
-  daemon --pidfile=$RPID --user=$USER "$RUBY_PATH_PATCH ./resque.sh"
-  resque=$?
-  [ $resque -eq 0 ] && touch $RLOCK
+  # Start sidekiq
+  echo -n $"Starting sidekiq: "
+  daemon --pidfile=$RPID --user=$USER "$RUBY_PATH_PATCH bundle exec rake sidekiq:start RAILS_ENV=production"
+  sidekiq=$?
+  [ $sidekiq -eq 0 ] && touch $RLOCK
   echo
 
-  retval=$unicorn || $resque
+  retval=$unicorn || $sidekiq
   return $retval
 }
 
@@ -66,14 +70,14 @@ stop() {
   [ $unicorn -eq 0 ] && rm -f $ULOCK
   echo
 
-  # Stop resque
-  echo -n $"Stopping resque: "
+  # Stop sidekiq
+  echo -n $"Stopping sidekiq: "
   killproc -p $RPID
-  resque=$?
-  [ $resque -eq 0 ] && rm -f $RLOCK
+  sidekiq=$?
+  [ $sidekiq -eq 0 ] && rm -f $RLOCK
   echo
 
-  retval=$unicorn || $resque
+  retval=$unicorn || $sidekiq
   return $retval
 }
 
@@ -84,7 +88,7 @@ restart() {
 
 get_status() {
   status -p $UPID unicorn
-  status -p $RPID resque
+  status -p $RPID sidekiq
 }
 
 query_status() {
