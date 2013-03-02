@@ -69,7 +69,7 @@ sudo gem install bundler
 sudo su -l gitlab -c "git clone git://github.com/gitlabhq/gitlabhq.git gitlab" # Using master everywhere.
 sudo su -l gitlab -c "cd gitlab && mkdir tmp"
 sudo su -l gitlab -c "cd gitlab/config && cp gitlab.yml.example gitlab.yml"
-sudo su -l gitlab -c "cd gitlab/config && cp database.yml.example database.yml"
+sudo su -l gitlab -c "cd gitlab/config && cp database.yml.mysql database.yml"
 sudo sed -i 's/"secure password"/"'$userPassword'"/' /home/gitlab/gitlab/config/database.yml # Insert the mysql root password.
 sudo su -l gitlab -c "cd gitlab && bundle install --without development test --deployment"
 sudo su -l gitlab -c "cd gitlab && bundle exec rake gitlab:app:setup RAILS_ENV=production"
@@ -84,10 +84,6 @@ sudo usermod -g git gitlab
 # Set the first occurrence of host in the Gitlab config to the publicly available domain name
 sudo sed -i '0,/host/s/localhost/'`wget -qO- http://instance-data/latest/meta-data/public-hostname`'/' /home/gitlab/gitlab/config/gitlab.yml
 
-# Tighten security
-sudo -u git chmod 750 /home/git/gitolite
-sudo -u gitlab chmod 660 /home/gitlab/gitlab/config/*.yml
-
 # Install and configure Nginx
 sudo apt-get install -y nginx
 sudo wget https://raw.github.com/gitlabhq/gitlab-recipes/master/nginx/gitlab -P /etc/nginx/sites-available/
@@ -97,6 +93,10 @@ sudo sed -i 's/YOUR_SERVER_FQDN/'`wget -qO- http://instance-data/latest/meta-dat
 
 # Configure Unicorn
 sudo -u gitlab cp /home/gitlab/gitlab/config/unicorn.rb.example /home/gitlab/gitlab/config/unicorn.rb
+
+# Tighten security
+sudo -u git chmod 750 /home/git/gitolite
+sudo -u gitlab chmod 660 /home/gitlab/gitlab/config/*.yml
 
 # Create a Gitlab service
 sudo wget https://raw.github.com/gitlabhq/gitlab-recipes/master/init.d/gitlab -P /etc/init.d/
