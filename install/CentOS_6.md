@@ -367,6 +367,7 @@ Edit the gitlab config to make sure to change "localhost" to the fully-qualified
     vim /home/gitlab/gitlab/config/gitlab.yml
 
 Copy the example Unicorn config
+
     cp /home/gitlab/gitlab/config/unicorn.rb{.example,}
 
 Edit the unicorn config
