@@ -9,6 +9,7 @@
 	#RewriteRule     ^(.*)$ https://%{SERVER_NAME}$1 [L,R]
 	
 	ProxyPass /uploads !
+	ProxyPass /error !
 	ProxyPass / http://127.0.0.1:3000/
 	ProxyPassReverse / http://127.0.0.1:3000/
 	ProxyPreserveHost On
@@ -17,7 +18,7 @@
 	ErrorLog  /var/log/apache2/gitlab/error.log
 
 	# Modify path to your need (needed for downloading attachments)
-	DocumentRoot /var/www/gitlab/public
+	DocumentRoot /home/git/gitlab/public
 
 	<Location />
 		Order allow,deny
@@ -34,6 +35,7 @@
 	#SSLCertificateChainFile /etc/apache2/ssl/cacert.pem
 
 	ProxyPass /uploads !
+	ProxyPass /error !
 	ProxyPass / http://127.0.0.1:3000/
 	ProxyPassReverse / http://127.0.0.1:3000/
 	ProxyPreserveHost On
@@ -42,7 +44,7 @@
 	ErrorLog  /var/log/apache2/gitlab/error.log
 
 	# Modify path to your need (needed for downloading attachments)
-	DocumentRoot /var/www/gitlab/public
+	DocumentRoot /home/git/gitlab/public
 
 	<Location />
 		Order allow,deny
