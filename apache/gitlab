@@ -8,12 +8,22 @@
 	#RewriteCond     %{SERVER_PORT} ^80$
 	#RewriteRule     ^(.*)$ https://%{SERVER_NAME}$1 [L,R]
 	
+	ProxyPass /uploads !
+	ProxyPass /error !
 	ProxyPass / http://127.0.0.1:3000/
 	ProxyPassReverse / http://127.0.0.1:3000/
 	ProxyPreserveHost On
 
 	CustomLog /var/log/apache2/gitlab/access.log combined
 	ErrorLog  /var/log/apache2/gitlab/error.log
+
+	# Modify path to your need (needed for downloading attachments)
+	DocumentRoot /home/git/gitlab/public
+
+	<Location />
+		Order allow,deny
+		Allow from all
+	</Location>
 </VirtualHost>
 <VirtualHost *:443>
 	ServerName gitlab.example.com
@@ -24,10 +34,20 @@
 	SSLCertificateKeyFile /etc/apache2/ssl/server.key
 	#SSLCertificateChainFile /etc/apache2/ssl/cacert.pem
 
+	ProxyPass /uploads !
+	ProxyPass /error !
 	ProxyPass / http://127.0.0.1:3000/
 	ProxyPassReverse / http://127.0.0.1:3000/
 	ProxyPreserveHost On
 
 	CustomLog /var/log/apache2/gitlab/access.log combined
 	ErrorLog  /var/log/apache2/gitlab/error.log
+
+	# Modify path to your need (needed for downloading attachments)
+	DocumentRoot /home/git/gitlab/public
+
+	<Location />
+		Order allow,deny
+		Allow from all
+	</Location>
 </VirtualHost>
