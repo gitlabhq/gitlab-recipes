@@ -6,6 +6,7 @@
 # Modified from http://blog.phusion.nl/2012/04/21/tutorial-setting-up-gitlab-on-debian-6/
 
 # You need from run openssl to generate the ssl certificate.
+# $ cd /etc/nginx
 # $ sudo openssl req -new -x509 -nodes -days 3560 -out gitlab.crt -keyout gitlab.key
 # $ sudo chmod o-r gitlab.key
  
@@ -18,7 +19,7 @@ server {
     listen       80;
     server_name Domain_NAME;
     root /nowhere;
-    rewrite ^ https://gitlab.stardrad.com$request_uri permanent;
+    rewrite ^ https://Domain_NAME$request_uri permanent;
 }
 server {
     listen 443;
@@ -28,7 +29,7 @@ server {
     ssl on;
     ssl_certificate gitlab.crt;
     ssl_certificate_key gitlab.key;     
-    ssl_protocols  SSLv3 TLSv1 TLSv2;        
+    ssl_protocols  SSLv3;        
     ssl_ciphers AES:HIGH:!ADH:!MD5;        
     ssl_prefer_server_ciphers   on;   
     
