@@ -15,7 +15,7 @@
 ### END INIT INFO
 
 
-APP_ROOT="/home/git/gitlab"
+APP_ROOT="/home/gitlab/gitlab"
 DAEMON_OPTS="-c $APP_ROOT/config/unicorn.rb -E production"
 PID_PATH="$APP_ROOT/tmp/pids"
 UNICORN_PID="$PID_PATH/unicorn.pid"
