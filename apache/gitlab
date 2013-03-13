@@ -24,6 +24,7 @@
 	SSLCertificateKeyFile /etc/apache2/ssl/server.key
 	#SSLCertificateChainFile /etc/apache2/ssl/cacert.pem
 
+	RequestHeader set X-Forwarded-Proto "https"
 	ProxyPass / http://127.0.0.1:3000/
 	ProxyPassReverse / http://127.0.0.1:3000/
 	ProxyPreserveHost On
