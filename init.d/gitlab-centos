@@ -1,8 +1,8 @@
 #!/bin/bash
 #
 # GitLab
-# Maintainer: @elvanja, @troyanov, @eiyaya
-# App Version: 4.1
+# Maintainer: @elvanja, @troyanov, @eiyaya, @foyo23
+# App Version: 5.0.0
 
 # chkconfig: 2345 82 55
 # processname: unicorn
@@ -17,7 +17,7 @@
 . /etc/rc.d/init.d/functions
 
 # The name of the service
-NAME=gitlab
+NAME=git
 
 # The username and path to the gitlab source
 USER=git
@@ -33,7 +33,7 @@ SLOCK=/var/lock/subsys/sidekiq
 OPTS="-c $APP_PATH/config/unicorn.rb -E production -D"
 
 # Ruby related path update
-RUBY_PATH_PATCH="PATH=$PATH:/usr/local/bin:/usr/local/lib:/home/gitlab/bin && export PATH && "
+RUBY_PATH_PATCH="PATH=$PATH:/usr/local/bin:/usr/local/lib:/home/git/bin && export PATH && "
 
 start() {
   cd $APP_PATH
