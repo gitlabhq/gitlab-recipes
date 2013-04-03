@@ -20,7 +20,7 @@
 NAME=gitlab
 
 # The username and path to the gitlab source
-USER=$NAME
+USER=git
 APP_PATH=/home/$USER/gitlab
 
 # The PID and LOCK files used by unicorn and sidekiq
