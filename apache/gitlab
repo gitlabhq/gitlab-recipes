@@ -7,9 +7,9 @@
 	#RewriteEngine   on
 	#RewriteCond     %{SERVER_PORT} ^80$
 	#RewriteRule     ^(.*)$ https://%{SERVER_NAME}$1 [L,R]
-	
-	ProxyPass / http://127.0.0.1:3000/
-	ProxyPassReverse / http://127.0.0.1:3000/
+
+	ProxyPass / http://0.0.0.0:9292/
+	ProxyPassReverse / http://0.0.0.0:9292/
 	ProxyPreserveHost On
 
 	CustomLog /var/log/apache2/gitlab/access.log combined
@@ -24,8 +24,8 @@
 	SSLCertificateKeyFile /etc/apache2/ssl/server.key
 	#SSLCertificateChainFile /etc/apache2/ssl/cacert.pem
 
-	ProxyPass / http://127.0.0.1:3000/
-	ProxyPassReverse / http://127.0.0.1:3000/
+	ProxyPass / http://0.0.0.0:9292/
+	ProxyPassReverse / http://0.0.0.0:9292/
 	ProxyPreserveHost On
 
 	CustomLog /var/log/apache2/gitlab/access.log combined
