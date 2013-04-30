@@ -1,5 +1,5 @@
 **This installation guide was created for CentOS 6.3 in combination with gitlab 4.0 and tested on it.**
-We also tried this on RHEL 6.3 and found that there are subtle differences that we so far have only documeted in part.
+We also tried this on RHEL 6.3 and found that there are subtle differences that we so far have only documented in part.
 
 Please read `doc/install/requirements.md` for hardware and platform requirements.
 
@@ -465,8 +465,7 @@ Download the init script (will be /etc/init.d/gitlab)
     logout
 
 *logged in as root*
-
-    curl https://raw.github.com/gitlabhq/gitlab-recipes/master/init.d/gitlab-centos > /etc/init.d/gitlab
+    curl https://raw.github.com/gitlabhq/gitlab-recipes/4-0-stable/init.d/gitlab-centos > /etc/init.d/gitlab
     chmod +x /etc/init.d/gitlab
     chkconfig --add gitlab
 
