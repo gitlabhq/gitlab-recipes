@@ -1,6 +1,6 @@
 # GITLAB
 # Maintainer: @yin8086
-# App Version: 4.1
+# App Version: 5.1
 
 # Modified from nginx http version
 # Modified from http://blog.phusion.nl/2012/04/21/tutorial-setting-up-gitlab-on-debian-6/
@@ -10,27 +10,28 @@
 # $ sudo chmod o-r gitlab.key
 
 upstream gitlab {
-  server unix:/home/gitlab/gitlab/tmp/sockets/gitlab.socket;
+  server unix:/home/git/gitlab/tmp/sockets/gitlab.socket;
+  # server 127.0.0.1:9292;
 }
 
 # This is a normal HTTP host which redirects all traffic to the HTTPS host.
 server {
     listen       80;
-    server_name Domain_NAME;
+    server_name YOUR_SERVER_FQDN;
     server_tokens off;
     root /nowhere;
-    rewrite ^ https://gitlab.stardrad.com$request_uri permanent;
+    rewrite ^ $server_name$request_uri permanent;
 }
 server {
     listen 443;
-    server_name Domain_NAME;
+    server_name YOUR_SERVER_FQDN;
     server_tokens off;
-    root /home/gitlab/gitlab/public;
+    root /home/git/gitlab/public;
 
     ssl on;
     ssl_certificate gitlab.crt;
     ssl_certificate_key gitlab.key;
-    ssl_protocols  SSLv3 TLSv1 TLSv2;
+    ssl_protocols  SSLv3 TLSv1 TLSv1.2;
     ssl_ciphers AES:HIGH:!ADH:!MD5;
     ssl_prefer_server_ciphers   on;
 
