@@ -30,7 +30,7 @@ SPID=$APP_PATH/tmp/pids/sidekiq.pid
 SLOCK=/var/lock/subsys/sidekiq
 
 # The options to use when running puma
-OPTS="-C $APP_PATH/config/puma.rb -e production"
+OPTS="-C $APP_PATH/config/puma.rb -e production -d"
 
 # Ruby related path update
 RUBY_PATH_PATCH="PATH=$PATH:/usr/local/bin:/usr/local/lib:/home/git/bin && export PATH && "
