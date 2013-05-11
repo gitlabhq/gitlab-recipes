@@ -33,7 +33,8 @@ SLOCK=/var/lock/subsys/sidekiq
 OPTS="-C $APP_PATH/config/puma.rb -e production -d"
 
 # Ruby related path update
-RUBY_PATH_PATCH="PATH=$PATH:/usr/local/bin:/usr/local/lib:/home/git/bin && export PATH && "
+RVM_PATH="/usr/local/rvm/bin"
+RUBY_PATH_PATCH="PATH=$PATH:/usr/local/bin:/usr/local/lib:$RVM_PATH && export PATH && "
 
 start() {
   cd $APP_PATH
