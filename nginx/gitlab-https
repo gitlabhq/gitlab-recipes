@@ -20,7 +20,7 @@ server {
     server_name YOUR_SERVER_FQDN;
     server_tokens off;
     root /nowhere;
-    rewrite ^ $server_name$request_uri permanent;
+    rewrite ^ https://$server_name$request_uri permanent;
 }
 server {
     listen 443;
