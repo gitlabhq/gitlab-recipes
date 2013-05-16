@@ -1,0 +1,61 @@
+# GITLAB
+# Maintainer: @yin8086
+# App Version: 4.1
+
+# Modified from nginx http version
+# Modified from http://blog.phusion.nl/2012/04/21/tutorial-setting-up-gitlab-on-debian-6/
+
+# You need from run openssl to generate the ssl certificate.
+# $ sudo openssl req -new -x509 -nodes -days 3560 -out gitlab.crt -keyout gitlab.key
+# $ sudo chmod o-r gitlab.key
+
+upstream gitlab {
+  server unix:/home/gitlab/gitlab/tmp/sockets/gitlab.socket;
+}
+
+# This is a normal HTTP host which redirects all traffic to the HTTPS host.
+server {
+    listen       80;
+    server_name Domain_NAME;
+    server_tokens off;
+    root /nowhere;
+    rewrite ^ https://gitlab.stardrad.com$request_uri permanent;
+}
+server {
+    listen 443;
+    server_name Domain_NAME;
+    server_tokens off;
+    root /home/gitlab/gitlab/public;
+
+    ssl on;
+    ssl_certificate gitlab.crt;
+    ssl_certificate_key gitlab.key;
+    ssl_protocols  SSLv3 TLSv1 TLSv2;
+    ssl_ciphers AES:HIGH:!ADH:!MD5;
+    ssl_prefer_server_ciphers   on;
+
+    # individual nginx logs for this gitlab vhost
+    access_log  /var/log/nginx/gitlab_access.log;
+    error_log   /var/log/nginx/gitlab_error.log;
+
+    location / {
+        # serve static files from defined root folder;.
+        # @gitlab is a named location for the upstream fallback, see below
+        try_files $uri $uri/index.html $uri.html @gitlab;
+    }
+
+    # if a file, which is not found in the root folder is requested,
+    # then the proxy pass the request to the upsteam (gitlab unicorn)
+    location @gitlab {
+        proxy_read_timeout 300; # https://github.com/gitlabhq/gitlabhq/issues/694
+        proxy_connect_timeout 300; # https://github.com/gitlabhq/gitlabhq/issues/694
+        proxy_redirect     off;
+
+        proxy_set_header   X-Forwarded-Proto https;
+        proxy_set_header X-Forwarded-Ssl on;
+        proxy_set_header   Host              $http_host;
+        proxy_set_header   X-Real-IP         $remote_addr;
+
+        proxy_pass http://gitlab;
+    }
+}
