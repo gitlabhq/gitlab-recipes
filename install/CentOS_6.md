@@ -14,8 +14,6 @@ This guide installs gitlab on a bare system from scratch using MySQL as the data
 The following steps have been known to work.
 If you deviate from this guide, do it with caution and make sure you don't
 violate any assumptions GitLab makes about its environment.
-For things like AWS installation scripts, init scripts or config files for
-alternative web server have a look at the "Advanced Setup Tips" section.
 
 **Important Note:**
 If you find a bug/error in this guide please submit an issue or pull request
@@ -55,7 +53,7 @@ The GitLab installation consists of setting up the following components:
 
 We start with a completely clean CentOS 6.3 "minimal" installation which can be accomplished by downloading the appropriate installation iso file. Just boot the system of the iso file and install the system.
 
-Note that during the installation you use the *"Configure Network"* option (it's a button in the same screen wher you speciify the hostname) to enable the *"Connect automatically"* option for the network interface and hand (usually eth0). 
+Note that during the installation you use the *"Configure Network"* option (it's a button in the same screen where you specify the hostname) to enable the *"Connect automatically"* option for the network interface and hand (usually eth0). 
 **If you forget this option the network will NOT start at boot.**
 
 The end result is a bare minimum CentOS installation that effectively only has network connectivity and no services at all.
