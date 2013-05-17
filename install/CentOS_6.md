@@ -2,7 +2,7 @@
 # Maintainer: @nielsbasjes
 # App Version: 5.1
 
-**This installation guide was created for CentOS 6.3 in combination with gitlab 5.1 and tested on it.**
+**This installation guide was created for CentOS 6.4 in combination with gitlab 5.1 and tested on it.**
 We also tried this on RHEL 6.3 and found that there are subtle differences that we so far have only documented in part.
 
 Please read `doc/install/requirements.md` for hardware and platform requirements.
@@ -21,13 +21,13 @@ following the contribution guide (see `CONTRIBUTING.md`).
 
 **Note about accounts:**
 In most cases you are required to run commands as the 'root' user.
-When it is required you should be either the 'git' or 'gitlab' user it will be indicated with a line like this
+When it is required you should be either the 'git' or 'root' user it will be indicated with a line like this
 
 *logged in as **git***
 
 The best way to become that user is by logging in as root and typing
 
-    su - gitlab
+    su - git
 
 **Note about security:**
 Many setup guides of Linux software simply state: "disable selinux and firewall".
@@ -40,7 +40,7 @@ This guide does not disable any of them, we simply configure them as they were i
 
 The GitLab installation consists of setting up the following components:
 
-1. Installing the base operating system (CentOS 6.3 Minimal) and Packages / Dependencies
+1. Installing the base operating system (CentOS 6.4 Minimal) and Packages / Dependencies
 2. Ruby
 3. System Users
 4. GitLab shell
@@ -49,14 +49,14 @@ The GitLab installation consists of setting up the following components:
 
 ----------
 
-# 1. Installing the operating system (CentOS 6.3 Minimal)
+# 1. Installing the operating system (CentOS 6.4 Minimal)
 
-We start with a completely clean CentOS 6.3 "minimal" installation which can be accomplished by downloading the appropriate installation iso file. Just boot the system of the iso file and install the system.
+We start with a completely clean CentOS 6.4 "minimal" installation which can be accomplished by downloading the appropriate installation iso file. Just boot the system of the iso file and install the system.
 
 Note that during the installation you use the *"Configure Network"* option (it's a button in the same screen where you specify the hostname) to enable the *"Connect automatically"* option for the network interface and hand (usually eth0). 
 **If you forget this option the network will NOT start at boot.**
 
-The end result is a bare minimum CentOS installation that effectively only has network connectivity and no services at all.
+The end result is a bare minimum CentOS installation that effectively only has network connectivity and (almost) no services at all.
 
 ## Updating and adding basic software and services
 ### Add EPEL repository
@@ -65,7 +65,7 @@ The end result is a bare minimum CentOS installation that effectively only has n
 
     rpm -Uvh http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
 
-### Install the required tools for gitlab and gitolite
+### Install the required tools for gitlab
 
 *logged in as **root***
 
@@ -82,7 +82,7 @@ The end result is a bare minimum CentOS installation that effectively only has n
 
 **IMPORTANT NOTE About Redhat EL 6** 
 
-During an installation on an official RHEL 6.3 we found that some packages (in our case gdbm-devel, libffi-devel and libicu-devel) were NOT installed. You MUST make sure that all the packages are installed. The simplest way is to run the above command for a second time and you'll see quite easily of everything is either already installed or "No package XXX available". When you run into this issue you can try installing these required packages from the CentOS distribution.
+During an installation on an official RHEL 6.3 we found that some packages (in our case gdbm-devel, libffi-devel and libicu-devel) were NOT installed. You MUST make sure that all the packages are installed. Someone told me that you can get these "packages direct from RHEL by enabling the “RHEL Server Optional” Channel in RHN.". I haven't tried this yet.
 
 ### Update CentOS to the latest set of patches
 
@@ -96,7 +96,6 @@ Just make sure it is started at the next reboot
 *logged in as **root***
 
     chkconfig redis on
-    service redis start
 
 ## Configure mysql
 Make sure it is started at the next reboot and start it immediately so we can configure it.
@@ -117,7 +116,7 @@ Just make sure it is started at the next reboot
 
     chkconfig httpd on
 
-We want to be able to reach gitlab using the normal http ports (i.e. not the :3000 thing)
+We want to be able to reach gitlab using the normal http ports (i.e. not the :9292 thing)
 So we create a file called **/etc/httpd/conf.d/gitlab.conf** with this content (replace the git.example.org with your hostname!!). 
 
     <VirtualHost *:80>
@@ -136,7 +135,7 @@ OPTIONAL: If you want to run other websites on the same system you'll need to en
 
     NameVirtualHost *:80
 
-Poke an selinux hole for httpd so it can httpd can be in front of gitlab
+Poke a selinux hole for httpd so it can httpd can be in front of gitlab
 
     setsebool -P httpd_can_network_connect on
 
@@ -269,6 +268,7 @@ Now we want all logging of the system to be forwarded to a central email address
     \q
 
 Try connecting to the new database with the new user
+
     mysql -u gitlab -p -D gitlabhq_production
 
 ----------
@@ -287,7 +287,6 @@ GitLab Shell is a ssh access and repository management software developed specia
 
     # Clone gitlab shell
     git clone https://github.com/gitlabhq/gitlab-shell.git
-
     cd gitlab-shell
 
     # switch to right version
@@ -339,8 +338,8 @@ Edit the gitlab config to make sure to change "localhost" to the fully-qualified
 *logged in as **root***
 
     # Make sure GitLab can write to the log/ and tmp/ directories
-    chown -R git /home/git/gitlab/log/
-    chown -R git /home/git/gitlab/tmp/
+    chown -R git    /home/git/gitlab/log/
+    chown -R git    /home/git/gitlab/tmp/
     chmod -R u+rwX  /home/git/gitlab/log/
     chmod -R u+rwX  /home/git/gitlab/tmp/
 
@@ -352,12 +351,12 @@ Edit the gitlab config to make sure to change "localhost" to the fully-qualified
     # Create directories for sockets/pids and make sure GitLab can write to them
     mkdir /home/git/gitlab/tmp/pids/
     mkdir /home/git/gitlab/tmp/sockets/
-    chmod -R u+rwX  /home/git/gitlab/tmp/pids/
-    chmod -R u+rwX  /home/git/gitlab/tmp/sockets/
+    chmod -R u+rwX /home/git/gitlab/tmp/pids/
+    chmod -R u+rwX /home/git/gitlab/tmp/sockets/
 
     # Create public/uploads directory otherwise backup will fail
     mkdir /home/git/gitlab/public/uploads
-    chmod -R u+rwX  /home/git/gitlab/public/uploads
+    chmod -R u+rwX /home/git/gitlab/public/uploads
 
     # Copy the example Puma config
     cp /home/git/gitlab/config/puma.rb{.example,}
@@ -371,14 +370,13 @@ Edit the gitlab config to make sure to change "localhost" to the fully-qualified
 **Important Note:**
 Make sure to edit both `gitlab.yml` and `puma.rb` to match your setup.
 
-Speficially for our setup behind Apache edit the puma config
+Specifically for our setup behind Apache edit the puma config
 
     vim /home/git/gitlab/config/puma.rb
 
 Change the bind parameter so that it reads:
 
     bind 'tcp://127.0.0.1:9292'
-
 
 ## Configure GitLab DB settings
 
@@ -389,7 +387,7 @@ Edit the database config and set the correct username/password
 
     vim /home/git/gitlab/config/database.yml
 
-The config should look something like this (where supersecret is replaced with your real password):
+The config should look something like this (where *supersecret* is replaced with your real password):
 
     production:
       adapter: mysql2
@@ -423,7 +421,7 @@ The config should look something like this (where supersecret is replaced with y
     bundle install --deployment --without development test postgres
 
 
-## Initialise Database and Activate Advanced Features
+## Initialize Database and Activate Advanced Features
 
 *logged in as **git***
 
