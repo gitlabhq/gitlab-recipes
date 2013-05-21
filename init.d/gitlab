@@ -115,9 +115,15 @@ case "$1" in
         restart
         ;;
   reload|force-reload)
-        echo -n "Reloading $NAME configuration: "
-        kill -HUP `cat $PID`
-        echo "done."
+        check_pid
+        if [ "$PID" -ne 0 -a "$STATUS" -ne 0 ]; then
+          echo -n "Reloading $NAME configuration: "
+          kill -SIGUSR2 $PID
+          echo "done."
+        else
+          echo "$DESC is not running."
+          exit 1
+        fi
         ;;
   status)
         status
