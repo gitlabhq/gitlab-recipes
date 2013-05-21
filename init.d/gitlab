@@ -34,23 +34,25 @@ SSTATUS=0
 check_pid(){
   if [ -f $WEB_SERVER_PID ]; then
     PID=`cat $WEB_SERVER_PID`
-    # This is bad way to do this, but it's not used very seriously -> ok
-    STATUS=`ps aux | grep $PID | grep -v grep | wc -l`
+    if ! test -d /proc/$PID; then
+      PID=0
+    fi
   fi
   if [ -f $SIDEKIQ_PID ]; then
     SPID=`cat $SIDEKIQ_PID`
-    # This is bad way to do this, but it's not used very seriously -> ok
-    SSTATUS=`ps aux | grep $SPID | grep -v grep | wc -l`
+    if ! test -d /proc/$SPID; then
+      SPID=0
+    fi
   fi
 }
 
 web_server_running() {
-  test "$PID" -ne 0 -a "$STATUS" -ne 0
+  test "$PID" -ne 0
   return $?
 }
 
 sidekiq_running() {
-  test "$SPID" -ne 0 -a "$SSTATUS" -ne 0
+  test "$SPID" -ne 0
   return $?
 }
 
