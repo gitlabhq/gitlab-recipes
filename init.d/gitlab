@@ -28,10 +28,10 @@ RUN_AS="git"
 
 # Calling check_pid will change these
 PID=0
-STATUS=0
 SPID=0
-SSTATUS=0
 check_pid(){
+  PID=0
+  SPID=0
   if [ -f $WEB_SERVER_PID ]; then
     PID=`cat $WEB_SERVER_PID`
     if ! test -d /proc/$PID; then
