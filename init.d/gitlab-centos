@@ -2,7 +2,7 @@
 #
 # GitLab
 # Maintainer: @elvanja, @troyanov, @eiyaya, @foyo23
-# App Version: 5.1.0
+# App Version: 5.2.0
 
 # chkconfig: 2345 82 55
 # processname: puma
@@ -20,34 +20,36 @@
 NAME=git
 
 # The username and path to the gitlab source
-USER=git
-APP_PATH=/home/$USER/gitlab
+APP_USER=git
+APP_ROOT=/home/$APP_USER/gitlab
 
 # The PID and LOCK files used by puma and sidekiq
-WPID=$APP_PATH/tmp/pids/puma.pid
+PID_PATH="$APP_ROOT/tmp/pids"
+WEB_SERVER_PID="$PID_PATH/puma.pid"
+SIDEKIQ_PID="$PID_PATH/sidekiq.pid"
+
 WLOCK=/var/lock/subsys/puma
-SPID=$APP_PATH/tmp/pids/sidekiq.pid
 SLOCK=/var/lock/subsys/sidekiq
 
 # The options to use when running puma
-OPTS="-C $APP_PATH/config/puma.rb -e production -d"
+OPTS="-C $APP_ROOT/config/puma.rb -e production -d"
 
 # Ruby related path update
 RUBY_PATH_PATCH="PATH=$PATH:/usr/local/bin:/usr/local/lib:/home/git/bin && export PATH && "
 
 start() {
-  cd $APP_PATH
+  cd $APP_ROOT
 
   # Start puma
   echo -n $"Starting puma: "
-  daemon --pidfile=$WPID --user=$USER "$RUBY_PATH_PATCH bundle exec puma $OPTS"
+  daemon --pidfile=$WEB_SERVER_PID --user=$APP_USER "$RUBY_PATH_PATCH bundle exec puma $OPTS"
   puma=$?
   [ $puma -eq 0 ] && touch $WLOCK
   echo
 
   # Start sidekiq
   echo -n $"Starting sidekiq: "
-  daemon --pidfile=$SPID --user=$USER "$RUBY_PATH_PATCH RAILS_ENV=production bundle exec rake sidekiq:start"
+  daemon --pidfile=$SIDEKIQ_PID --user=$APP_USER "$RUBY_PATH_PATCH RAILS_ENV=production bundle exec rake sidekiq:start"
   sidekiq=$?
   [ $sidekiq -eq 0 ] && touch $SLOCK
   echo
@@ -57,18 +59,18 @@ start() {
 }
 
 stop() {
-  cd $APP_PATH
+  cd $APP_ROOT
 
   # Stop puma
   echo -n $"Stopping puma: "
-  killproc -p $WPID
+  killproc -p $WEB_SERVER_PID
   puma=$?
   [ $puma -eq 0 ] && rm -f $WLOCK
   echo
 
   # Stop sidekiq
   echo -n $"Stopping sidekiq: "
-  killproc -p $SPID
+  killproc -p $SIDEKIQ_PID
   sidekiq=$?
   [ $sidekiq -eq 0 ] && rm -f $SLOCK
   echo
@@ -83,8 +85,8 @@ restart() {
 }
 
 get_status() {
-  status -p $WPID puma
-  status -p $SPID sidekiq
+  status -p $WEB_SERVER_PID puma
+  status -p $SIDEKIQ_PID sidekiq
 }
 
 query_status() {
