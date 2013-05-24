@@ -2,12 +2,12 @@
 #
 # GitLab
 # Maintainer: @elvanja, @troyanov, @eiyaya, @foyo23
-# App Version: 5.0.0
+# App Version: 5.2.0
 
 # chkconfig: 2345 82 55
-# processname: unicorn
+# processname: puma
 # processname: sidekiq
-# description: Runs unicorn and sidekiq for nginx integration.
+# description: Runs puma and sidekiq for nginx integration.
 
 # Related (kudos @4sak3n0ne):
 # https://github.com/gitlabhq/gitlabhq/issues/1049#issuecomment-8386882
@@ -20,60 +20,62 @@
 NAME=git
 
 # The username and path to the gitlab source
-USER=git
-APP_PATH=/home/$USER/gitlab
+APP_USER=git
+APP_ROOT=/home/$APP_USER/gitlab
 
-# The PID and LOCK files used by unicorn and sidekiq
-UPID=$APP_PATH/tmp/pids/unicorn.pid
-ULOCK=/var/lock/subsys/unicorn
-SPID=$APP_PATH/tmp/pids/sidekiq.pid
+# The PID and LOCK files used by puma and sidekiq
+PID_PATH="$APP_ROOT/tmp/pids"
+WEB_SERVER_PID="$PID_PATH/puma.pid"
+SIDEKIQ_PID="$PID_PATH/sidekiq.pid"
+
+WLOCK=/var/lock/subsys/puma
 SLOCK=/var/lock/subsys/sidekiq
 
-# The options to use when running unicorn
-OPTS="-c $APP_PATH/config/unicorn.rb -E production -D"
+# The options to use when running puma
+OPTS="-C $APP_ROOT/config/puma.rb -e production -d"
 
 # Ruby related path update
 RUBY_PATH_PATCH="PATH=$PATH:/usr/local/bin:/usr/local/lib:/home/git/bin && export PATH && "
 
 start() {
-  cd $APP_PATH
+  cd $APP_ROOT
 
-  # Start unicorn
-  echo -n $"Starting unicorn: "
-  daemon --pidfile=$UPID --user=$USER "$RUBY_PATH_PATCH bundle exec unicorn_rails $OPTS"
-  unicorn=$?
-  [ $unicorn -eq 0 ] && touch $ULOCK
+  # Start puma
+  echo -n $"Starting puma: "
+  daemon --pidfile=$WEB_SERVER_PID --user=$APP_USER "$RUBY_PATH_PATCH bundle exec puma $OPTS"
+  puma=$?
+  [ $puma -eq 0 ] && touch $WLOCK
   echo
 
   # Start sidekiq
   echo -n $"Starting sidekiq: "
-  daemon --pidfile=$SPID --user=$USER "$RUBY_PATH_PATCH RAILS_ENV=production bundle exec rake sidekiq:start"
+  daemon --pidfile=$SIDEKIQ_PID --user=$APP_USER "$RUBY_PATH_PATCH RAILS_ENV=production bundle exec rake sidekiq:start"
   sidekiq=$?
   [ $sidekiq -eq 0 ] && touch $SLOCK
   echo
 
-  retval=$unicorn || $sidekiq
+  retval=$puma || $sidekiq
   return $retval
 }
 
 stop() {
-  cd $APP_PATH
+  cd $APP_ROOT
 
-  # Stop unicorn
-  echo -n $"Stopping unicorn: "
-  killproc -p $UPID
-  unicorn=$?
-  [ $unicorn -eq 0 ] && rm -f $ULOCK
+  # Stop puma
+  echo -n $"Stopping puma: "
+  killproc -p $WEB_SERVER_PID
+  puma=$?
+  [ $puma -eq 0 ] && rm -f $WLOCK
   echo
 
   # Stop sidekiq
   echo -n $"Stopping sidekiq: "
-  killproc -p $SPID
+  killproc -p $SIDEKIQ_PID
   sidekiq=$?
   [ $sidekiq -eq 0 ] && rm -f $SLOCK
   echo
 
-  retval=$unicorn || $sidekiq
+  retval=$puma || $sidekiq
   return $retval
 }
 
@@ -83,8 +85,8 @@ restart() {
 }
 
 get_status() {
-  status -p $UPID unicorn
-  status -p $SPID sidekiq
+  status -p $WEB_SERVER_PID puma
+  status -p $SIDEKIQ_PID sidekiq
 }
 
 query_status() {
