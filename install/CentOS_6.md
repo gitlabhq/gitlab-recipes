@@ -1,8 +1,8 @@
 # GITLAB
 # Maintainer: @nielsbasjes
-# App Version: 5.1
+# App Version: 5.2
 
-**This installation guide was created for CentOS 6.4 in combination with gitlab 5.1 and tested on it.**
+**This installation guide was created for CentOS 6.4 in combination with gitlab 5.2 and tested on it.**
 We also tried this on RHEL 6.3 and found that there are subtle differences that we so far have only documented in part.
 
 Please read `doc/install/requirements.md` for hardware and platform requirements.
@@ -89,6 +89,12 @@ During an installation on an official RHEL 6.3 we found that some packages (in o
 *logged in as **root***
 
     yum -y update
+
+## Git
+For some reason gitlab has been written in such a way that it will only work correctly with git version 1.8.x or newer. At the time of writing [this commit](https://github.com/gitlabhq/gitlabhq/commit/b1a8fdd84d5a7cdbdb5ef3829b59a73db0f4d2dd) was the culprit that enforced this requirement.
+In case this has not been resolved when you read this you must either update your git to > 1.8.x or revert the above mentioned change manually.
+
+Have a look at [this HowTo](http://www.pickysysadmin.ca/2013/05/21/commit-comments-not-appearing-in-gitlab-on-centos/) on one possible way of updating the git version.
 
 ## Configure redis
 Just make sure it is started at the next reboot
@@ -290,7 +296,7 @@ GitLab Shell is a ssh access and repository management software developed specia
     cd gitlab-shell
 
     # switch to right version
-    git checkout v1.3.0
+    git checkout v1.4.0
 
     cp config.yml.example config.yml
 
@@ -319,10 +325,10 @@ GitLab Shell is a ssh access and repository management software developed specia
     cd /home/git/gitlab
    
     # Checkout to stable release
-    git checkout 5-1-stable
+    git checkout 5-2-stable
 
 **Note:**
-You can change `5-1-stable` to `master` if you want the *bleeding edge* version, but
+You can change `5-2-stable` to `master` if you want the *bleeding edge* version, but
 do so with caution!
 
 ## Configure it
@@ -438,7 +444,9 @@ Download the init script (will be /etc/init.d/gitlab)
 
 *logged in as **root***
 
-    curl https://raw.github.com/gitlabhq/gitlab-recipes/5-1-stable/init.d/gitlab-centos > /etc/init.d/gitlab
+**Double check the url for this next one!!**
+
+    curl https://raw.github.com/gitlabhq/gitlab-recipes/5-2-stable/init.d/gitlab-centos > /etc/init.d/gitlab
     chmod +x /etc/init.d/gitlab
     chkconfig --add gitlab
 
