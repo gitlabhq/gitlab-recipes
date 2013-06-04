@@ -19,6 +19,7 @@ APP_ROOT="/home/git/gitlab"
 DAEMON_OPTS="-C $APP_ROOT/config/puma.rb -e production"
 PID_PATH="$APP_ROOT/tmp/pids"
 WEB_SERVER_PID="$PID_PATH/puma.pid"
+WEB_SERVER_SOCKET="$APP_ROOT/tmp/sockets/gitlab.socket"
 SIDEKIQ_PID="$PID_PATH/sidekiq.pid"
 STOP_SIDEKIQ="RAILS_ENV=production bundle exec rake sidekiq:stop"
 START_SIDEKIQ="RAILS_ENV=production bundle exec rake sidekiq:start"
@@ -45,6 +46,7 @@ start() {
     exit 1
   else
     if [ `whoami` = root ]; then
+      rm -f "$WEB_SERVER_SOCKET"
       sudo -u git -H bash -l -c "RAILS_ENV=production bundle exec puma $DAEMON_OPTS"
       sudo -u git -H bash -l -c "mkdir -p $PID_PATH && $START_SIDEKIQ  > /dev/null  2>&1 &"
       echo "$DESC started"
@@ -60,6 +62,7 @@ stop() {
     kill -QUIT `cat $WEB_SERVER_PID`
     sudo -u git -H bash -l -c "mkdir -p $PID_PATH && $STOP_SIDEKIQ  > /dev/null  2>&1 &"
     rm "$WEB_SERVER_PID" >> /dev/null
+    rm -f "$WEB_SERVER_SOCKET"
     echo "$DESC stopped"
   else
     ## Program is not running, exit with error.
