@@ -434,6 +434,12 @@ The config should look something like this (where *supersecret* is replaced with
     cd /home/git/gitlab
     bundle exec rake gitlab:setup RAILS_ENV=production
 
+Create the satellites (needed for Automerge)
+
+*logged in as **gitlab***
+
+    bundle exec rake gitlab:satellites:create RAILS_ENV=production
+
 ## Install Init Script
 
 Download the init script (will be /etc/init.d/gitlab)
