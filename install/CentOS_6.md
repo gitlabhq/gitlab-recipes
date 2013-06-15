@@ -90,11 +90,26 @@ During an installation on an official RHEL 6.3 we found that some packages (in o
 
     yum -y update
 
-## Git
-For some reason gitlab has been written in such a way that it will only work correctly with git version 1.8.x or newer. At the time of writing [this commit](https://github.com/gitlabhq/gitlabhq/commit/b1a8fdd84d5a7cdbdb5ef3829b59a73db0f4d2dd) was the culprit that enforced this requirement.
-In case this has not been resolved when you read this you must either update your git to > 1.8.x or revert the above mentioned change manually.
+## Updating git to 1.8.x
+For some reason gitlab has been written in such a way that it will only work correctly with git version 1.8.x or newer. At the time of writing [this commit](https://github.com/gitlabhq/gitlabhq/commit/b1a8fdd84d5a7cdbdb5ef3829b59a73db0f4d2dd) was just one of the culprits that enforced this requirement.
 
-Have a look at [this HowTo](http://www.pickysysadmin.ca/2013/05/21/commit-comments-not-appearing-in-gitlab-on-centos/) on one possible way of updating the git version.
+The problem is that the available rpms for CentOS stop at git 1.7.1 which is too old for gitlab.
+
+The required course of action is to manually update git to 1.8.x or newer.
+
+**NOTE**: This installation does it a bit blunt: We simply install git from source into /usr. This blunt method means we must (in order to keep things a bit clean) uninstall the rpm based git version before we proceed. Yet we need git in order to clone the source of git to our local system.
+
+*logged in as **root***
+
+    cd /tmp
+    yum -y install git perl-ExtUtils-MakeMaker
+    git clone git://github.com/git/git.git
+    yum erase git
+    cd /tmp/git
+    git checkout v1.8.3.1
+    autoconf
+    ./configure --prefix=/usr
+    make install
 
 ## Configure redis
 Just make sure it is started at the next reboot
