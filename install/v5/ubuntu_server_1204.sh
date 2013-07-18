@@ -24,8 +24,9 @@
 #  = Required Script Configuration Values =
 #  ========================================
 gitlab_release=5-3-stable
+aptget_arguments="-y -q"
 
-if [ "$#" -lt 1 ] || [ "$1" = "-h" ] || [ "$1" = "--help" ] || [[ $1 == -* ]]; then
+if [ "$1" = "-h" ] || [ "$1" = "--help" ] || [[ $1 == -* ]]; then
    echo "Usage: $0 domain.com" >&2
    exit
 fi
@@ -53,19 +54,19 @@ echo "Host $domain_var
 #  ====================
 #  
 sudo apt-get update
-sudo apt-get install -y build-essential zlib1g-dev libyaml-dev libssl-dev libgdbm-dev libreadline-dev libncurses5-dev libffi-dev curl wget git-core openssh-server redis-server checkinstall libxml2-dev libxslt-dev libcurl4-openssl-dev libicu-dev
+sudo apt-get install $aptget_arguments build-essential zlib1g-dev libyaml-dev libssl-dev libgdbm-dev libreadline-dev libncurses5-dev libffi-dev curl wget git-core openssh-server redis-server checkinstall libxml2-dev libxslt-dev libcurl4-openssl-dev libicu-dev
 
 #  =======================
 #  = Python Installation =
 #  =======================
 #  
-sudo apt-get install -y python
+sudo apt-get install $aptget_arguments python
 
 # Make sure that Python is 2.x (3.x is not supported at the moment)
 python --version
 
 # If it's Python 3 you might need to install Python 2 separately
-sudo apt-get install python2.7
+sudo apt-get install $aptget_arguments python2.7
 
 # Make sure you can access Python via python2
 python2 --version
@@ -77,7 +78,7 @@ sudo ln -s /usr/bin/python /usr/bin/python2
 #  = Postfix Install =
 #  ===================
 #  
-sudo DEBIAN_FRONTEND='noninteractive' apt-get install -y postfix-policyd-spf-python postfix # Install postfix without prompting.
+sudo DEBIAN_FRONTEND='noninteractive' apt-get install $aptget_arguments postfix-policyd-spf-python postfix # Install postfix without prompting.
 
 
 #  =====================
@@ -125,13 +126,13 @@ sudo -u git -H ./bin/install
 #  = MySQL Installation =
 #  ======================
 #  
-sudo apt-get install -y makepasswd # Needed to create a unique password non-interactively.
+sudo apt-get install $aptget_arguments makepasswd # Needed to create a unique password non-interactively.
 mysqlPassword=$(makepasswd --char=10) # Generate a random MySQL password
 # Note that the lines below creates a cleartext copy of the random password in /var/cache/debconf/passwords.dat
 # This file is normally only readable by root and the password will be deleted by the package management system after install.
 echo mysql-server mysql-server/root_password password $mysqlPassword | sudo debconf-set-selections
 echo mysql-server mysql-server/root_password_again password $mysqlPassword | sudo debconf-set-selections
-sudo apt-get install -y mysql-server mysql-client libmysqlclient-dev
+sudo apt-get install $aptget_arguments mysql-server mysql-client libmysqlclient-dev
 
 #  =======================
 #  = GitLab Installation =
@@ -249,9 +250,13 @@ fi
 #  = Install Nginx =
 #  =================
 echo "=== Attempting to install Nginx ..."
-sudo apt-get install -y nginx
+sudo apt-get install $aptget_arguments nginx
 sudo cp lib/support/nginx/gitlab /etc/nginx/sites-available/gitlab
 sudo ln -s /etc/nginx/sites-available/gitlab /etc/nginx/sites-enabled/gitlab
+
+# 5-3-stable and prior has YOUR_SERVER_IP in nginx conf, post 5-3-stable does not
+sudo sed -i 's/YOUR_SERVER_IP:80/*:80/g' /etc/nginx/sites-available/gitlab
+
 # Replace YOUR_SERVER_FQDN with domain
 sudo sed -i "s/YOUR_SERVER_FQDN/$domain_var/g" /etc/nginx/sites-available/gitlab
 
