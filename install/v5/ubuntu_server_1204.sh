@@ -24,7 +24,15 @@
 #  = Required Script Configuration Values =
 #  ========================================
 gitlab_release=5-3-stable
-aptget_arguments="-y -q"
+
+#  ==============================
+#  = Optional apt-get arguments =
+#  ==============================
+#  -s = simulate
+#  -y = yes (no prompt)
+#  -q = quiet
+#  -qq = even more quiet (also implies -y, do not use with -s)
+aptget_arguments="-qq"
 
 if [ "$1" = "-h" ] || [ "$1" = "--help" ] || [[ $1 == -* ]]; then
    echo "Usage: $0 domain.com" >&2
