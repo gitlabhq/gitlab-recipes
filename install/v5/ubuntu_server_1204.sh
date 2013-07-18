@@ -40,34 +40,28 @@ if [ "$1" = "-h" ] || [ "$1" = "--help" ] || [[ $1 == -* ]]; then
 fi
 
 clear
-echo "### Feeding the rabbit, here we go..."
+echo -e "\nFeeding the rabbit, here we go..."
 if [ "$#" -lt 1 ]; then
-  echo "=== Domain was not specified, using localhost as default"
+  echo -e "\n !! Domain was not specified, using localhost as default !!"
   domain_var=localhost
 fi
 
-echo "=== Installing GitLab v5 (Release: $gitlab_release) for $domain_var"
-
-echo "Host localhost
-   StrictHostKeyChecking no
-   UserKnownHostsFile=/dev/null" | sudo tee -a /etc/ssh/ssh_config
-
-echo "Host $domain_var
-   StrictHostKeyChecking no
-   UserKnownHostsFile=/dev/null" | sudo tee -a /etc/ssh/ssh_config
-
+echo -e "\nInstalling GitLab v5 (Release: $gitlab_release) for $domain_var"
 
 #  ====================
 #  = Install Packages =
 #  ====================
 #  
+echo -e "\nUpdating package information..."
 sudo apt-get update
+echo -e "\nInstalling required packages..."
 sudo apt-get install $aptget_arguments build-essential zlib1g-dev libyaml-dev libssl-dev libgdbm-dev libreadline-dev libncurses5-dev libffi-dev curl wget git-core openssh-server redis-server checkinstall libxml2-dev libxslt-dev libcurl4-openssl-dev libicu-dev
 
 #  =======================
 #  = Python Installation =
 #  =======================
-#  
+#
+echo -e "\n"
 sudo apt-get install $aptget_arguments python
 
 # Make sure that Python is 2.x (3.x is not supported at the moment)
@@ -248,16 +242,16 @@ sudo update-rc.d gitlab defaults 21
 #  ===================
 #  
 if [ -f /etc/init.d/apache2 ]; then
-  echo "=== Apache init found, attempting to stop"
+  echo -e "\n=== Apache init found, attempting to stop"
   sudo /etc/init.d/apache2 stop
-  echo "=== Disabling apache from starting at boot"
+  echo -e "\n=== Disabling apache from starting at boot"
   sudo update-rc.d apache2 remove
 fi
 
 #  =================
 #  = Install Nginx =
 #  =================
-echo "=== Attempting to install Nginx ..."
+echo -e "\n=== Attempting to install Nginx ..."
 sudo apt-get install $aptget_arguments nginx
 sudo cp lib/support/nginx/gitlab /etc/nginx/sites-available/gitlab
 sudo ln -s /etc/nginx/sites-available/gitlab /etc/nginx/sites-enabled/gitlab
