@@ -1,0 +1,40 @@
+# This site only works with mod_passenger 4.0x (use RVM or similar)
+#
+# In order for gitlab (5.2) to run with mod_passenger you only need to 
+# make sure that, sidekiq is running (see upstart script in init folder). 
+# mod_passenger will start gitlab more or less automatically. 
+#
+# Documentation of mod_passenger:
+# See: http://www.modrails.com/documentation/Users%20guide%20Apache.html
+
+# Remove if you don't want to use SSL
+<IfModule mod_ssl.c>
+
+    # Change to 80 if you want to access the site over HTTP
+    <VirtualHost *:443>
+        ServerAdmin root@localhost
+
+        ServerName git.example.com
+        # Mod_passenger needs to access the path 
+        DocumentRoot /home/git/gitlab/public
+        <Directory /home/git/gitlab/public >
+               Allow from all
+               Options -MultiViews
+        </Directory>
+        
+        # SSL, remove if you don't use SSL
+        SSLEngine on
+        SSLCertificateFile    /etc/ssl/private/private.pem
+        SSLCertificateKeyFile /etc/ssl/private/private.pem
+        SSLCertificateChainFile  /etc/ssl/private/private.pem
+
+        # Logging 
+        ErrorLog /var/log/apache2/git.example.com_error.log
+        LogLevel warn
+        CustomLog /var/log/apache2/git.example.com_access.log combined
+        
+        # Custom environment setup with RVM
+        SetEnv PATH /usr/local/rvm/gems/ruby-1.9.3-p429@gitlab/bin:/usr/local/rvm/gems/ruby-1.9.3-p429/bin:/usr/local/rvm/gems/ruby-1.9.3-p429@global/bin:/usr/local/rvm/rubies/ruby-1.9.3-p429/bin:/usr/local/rvm/bin:/usr/bin:/bin
+        SetEnv GEM_PATH /usr/local/rvm/gems/ruby-1.9.3-p429@gitlab:/usr/local/rvm/gems/ruby-1.9.3-p429@global
+    </VirtualHost>
+</IfModule>
