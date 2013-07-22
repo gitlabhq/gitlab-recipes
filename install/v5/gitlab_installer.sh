@@ -1,5 +1,9 @@
 #!/bin/bash -e
 
+# GITLAB
+# Maintainer: @mcpacosy
+# App Version: 5.4
+
 # GitLab 5-4-stable installation script
 
 # This script is based on: https://github.com/gitlabhq/gitlabhq/issues/3626
