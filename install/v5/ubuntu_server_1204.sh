@@ -1,12 +1,23 @@
-# @title GitLab v5 Ubuntu/Debian Installer
-# ------------------------------------------------------------------------------------------
+#!/bin/bash
+#
+#    88   ,ad8888ba,  88         88                     88
+#	 ""  d8"'    `"8b ""   ,d    88                     88
+#	    d8'                88    88                     88
+#	 88 88            88 MM88MMM 88          ,adPPYYba, 88,dPPYba,
+#	 88 88      88888 88   88    88          ""     `Y8 88P'    "8a
+#	 88 Y8,        88 88   88    88          ,adPPPPP88 88       d8
+#	 88  Y8a.    .a88 88   88,   88          88,    ,88 88b,   ,a8"
+#	 88   `"Y88888P"  88   "Y888 88888888888 `"8bbdP"Y8 8Y"Ybbd8"'
+#
+#                     Ubuntu/Debian Installer
+# ------------------------------------------------------------------------------
 # @author Myles McNamara
 # @date 7.17.2013
 # @version 1.0
-# @source https://github.com/tripflex/gitlab-recipes/
-# ------------------------------------------------------------------------------------------
-# @usage ./ubuntu_server_1204.sh domain.com
-# ------------------------------------------------------------------------------------------
+# @source https://github.com/tripflex/igitlab
+# ------------------------------------------------------------------------------
+# @usage ./igetlab domain.com
+# ------------------------------------------------------------------------------
 # @copyright Copyright (C) 2013 Myles McNamara
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,21 +29,61 @@
 # GNU General Public License for more details.
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
-# ------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
-#  ========================================
-#  = Required Script Configuration Values =
-#  ========================================
-gitlab_release=5-3-stable
-
-#  ==============================
-#  = Optional apt-get arguments =
-#  ==============================
+#  =============================================================================
+#  =                   Required Script Configuration Values                    =
+#  =============================================================================
+#  --------------------------------------------------------
+#  - GitHub branch to use.  Use master for latest release -
+#  --------------------------------------------------------
+#  For versions <=5.0 or >=6.0 the Unicorn Gem is used, 5.1-5.9 uses Puma, if you used master Unicorn is required.
+	gitlab_release=5-4-stable
+#  -------------------------------------------------------
+#  - Unicorn or Puma, Puma default, set to 1 for Unicorn -
+#  -------------------------------------------------------
+	useunicorn=0
+#  -------------------------------------
+#  - Download URL for Ruby tar.gz file -
+#  -------------------------------------
+#	rubydlurl="ftp://ftp.ruby-lang.org/pub/ruby/2.0/ruby-2.0.0-p247.tar.gz"
+	rubydlurl="http://ftp.ruby-lang.org/pub/ruby/1.9/ruby-1.9.3-p392.tar.gz"
+#  --------------------------------------------------
+#  - MySQL Root Password, will prompt if left blank -
+#  --------------------------------------------------
+	mysqlpasswd=""
+#  ------------------------------
+#  - Optional apt-get arguments -
+#  ------------------------------
 #  -s = simulate
 #  -y = yes (no prompt)
 #  -q = quiet
 #  -qq = even more quiet (also implies -y, do not use with -s)
-aptget_arguments="-qq"
+#  ------------------------------
+	aptget_arguments="-qq"
+	APTLOG=apt.log
+	APTERRLOG=apterror.log
+
+###########################
+# That's far enough buddy #
+###########################
+
+#  =============
+#  = Functions =
+#  =============
+
+function givemeayes {
+	echo -n "$1 "
+	read answer
+	    case "$answer" in
+	    Y|y|yes|YES|Yes) return 0 ;;
+	    *) echo -e "\nCaptain, we hit the eject button!\n"; exit ;;
+	    esac
+}
+
+#  ======================
+#  = General Start Code =
+#  ======================
 
 if [ "$1" = "-h" ] || [ "$1" = "--help" ] || [[ $1 == -* ]]; then
    echo "Usage: $0 domain.com" >&2
@@ -40,28 +91,79 @@ if [ "$1" = "-h" ] || [ "$1" = "--help" ] || [[ $1 == -* ]]; then
 fi
 
 clear
-echo -e "\nFeeding the rabbit, here we go..."
+
+# Check for domain
 if [ "$#" -lt 1 ]; then
-  echo -e "\n !! Domain was not specified, using localhost as default !!"
-  domain_var=localhost
+	echo -e "\n[iGitLab] Domain was not specified, using localhost as default!"
+	domain_var=localhost
+else
+	domain_var=$1
 fi
 
-echo -e "\nInstalling GitLab v5 (Release: $gitlab_release) for $domain_var"
+# Check for MySQL root password
+if [ -z "$mysqlpasswd" ]; then
+	echo -e "\n[iGitLab] MySQL root password not set in configuration, this will be required.  If MySQL is not installed you will be prompted to set a password after this script installs MySQL.  If MySQL is already installed you will need to set the root password and restart this script."
+fi
+
+echo -e "\n[iGitLab] Installing GitLab v5 (Release: $gitlab_release) for $domain_var"
+
+givemeayes "Would you like to continue with the install? (y/n)"
 
 #  ====================
 #  = Install Packages =
 #  ====================
 #  
-echo -e "\nUpdating package information..."
-sudo apt-get update
-echo -e "\nInstalling required packages..."
-sudo apt-get install $aptget_arguments build-essential zlib1g-dev libyaml-dev libssl-dev libgdbm-dev libreadline-dev libncurses5-dev libffi-dev curl wget git-core openssh-server redis-server checkinstall libxml2-dev libxslt-dev libcurl4-openssl-dev libicu-dev
+echo -e "\n[iGitLab] Updating package information..."
+sudo apt-get update $aptget_arguments
+echo -e "\n[iGitLab] Installing required packages, please wait this could take a minute..."
+sudo apt-get install $aptget_arguments build-essential zlib1g-dev libyaml-dev libssl-dev libgdbm-dev libreadline-dev libncurses5-dev libffi-dev curl wget git-core openssh-server redis-server checkinstall libxml2-dev libxslt-dev libcurl4-openssl-dev libicu-dev makepasswd 1>>$APTLOG 2>>$APTERRLOG || (echo "apt-get install failed, check APTLOG and APTERRLOG" ; exit)
+
+#  ======================
+#  = MySQL Installation =
+#  ======================
+#
+
+# Install the database packages
+sudo apt-get install $aptget_arguments mysql-server mysql-client libmysqlclient-dev
+
+# Check for MySQL root password
+if [ -z "$mysqlpasswd" ]; then
+	echo -e "\n[iGitLab] MySQL root password not provided, please enter the password you used now."
+	read mysqlpasswd
+	if [ -z "$mysqlpasswd" ]; then
+		echo -e "\n[iGitLab] MySQL root password not provided, exiting installer, please run again after you set the root password."
+		exit 0
+	fi
+fi
+
+# Generate a random gitlab MySQL password
+gitlabpass=$(makepasswd --char=14)
+
+if [ -z "$gitlabpass" ]; then
+	echo -e "\n[iGitLab] Random password generation failed, please enter a password to use for GitLab MySQL user:"
+	read gitlabpass
+fi
+
+# Create a user for GitLab.
+mysql -uroot -p$mysqlpasswd -e "CREATE USER 'gitlab'@'localhost' IDENTIFIED BY '$gitlabpass';"
+
+# Create the GitLab production database
+mysql -uroot -p$mysqlpasswd -e "CREATE DATABASE IF NOT EXISTS \`gitlabhq_production\` DEFAULT CHARACTER SET \`utf8\` COLLATE \`utf8_unicode_ci\`;"
+
+# Grant the GitLab user necessary permissons on the table.
+mysql -uroot -p$mysqlpasswd -e "GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER ON \`gitlabhq_production\`.* TO 'gitlab'@'localhost';"
+
+# Quit the database session
+mysql -uroot -p$mysqlpasswd -e "\\q;"
+
+# Try connecting to the new database with the new user
+# sudo -u git -H mysql -ugitlab -p$gitlabpass -D gitlabhq_production
 
 #  =======================
 #  = Python Installation =
 #  =======================
 #
-echo -e "\n"
+echo -e "\n[iGitLab] Installing Python..."
 sudo apt-get install $aptget_arguments python
 
 # Make sure that Python is 2.x (3.x is not supported at the moment)
@@ -82,25 +184,33 @@ sudo ln -s /usr/bin/python /usr/bin/python2
 #  
 sudo DEBIAN_FRONTEND='noninteractive' apt-get install $aptget_arguments postfix-policyd-spf-python postfix # Install postfix without prompting.
 
-
 #  =====================
 #  = Ruby Installation =
 #  =====================
-#  
-curl --progress ftp://ftp.ruby-lang.org/pub/ruby/2.0/ruby-2.0.0-p247.tar.gz | tar xz
-cd ruby-2.0.0-p247
-./configure
-make
-sudo make install
+#
+# Remove Ruby1.8 if installed
+echo -e "\n[iGitLab] Removing Ruby1.8 if installed..."
+sudo apt-get remove $aptget_arguments ruby1.8
+echo -e "\n[iGitLab] Downloading $rubydlurl..."
+curl --progress-bar $rubydlurl | tar xz
+cd ruby-*
+echo -e "\n[iGitLab] Configuring Ruby..."
+./configure --silent
+echo -e "\n[iGitLab] Making Ruby..."
+make --silent
+echo -e "\n[iGitLab] Installing Ruby..."
+sudo make install --silent
 
-# Bundler Gem
-sudo gem install bundler --no-ri --no-rdoc
+# Bundler Gem (-q for quiet)
+echo -e "\n[iGitLab] Installing Bundler Gem..."
+sudo gem install bundler --no-ri --no-rdoc -q
 
 #  ================
 #  = System Users =
 #  ================
 #  
 # Create system git user for GitLab
+echo -e "\n[iGitLab] Creating system git user for GitLab..."
 sudo adduser --disabled-login --gecos 'GitLab' git
 
 #  =============================
@@ -119,22 +229,10 @@ sudo -u git -H git checkout v1.4.0
 sudo -u git -H cp config.yml.example config.yml
 
 # Edit config and replace gitlab_url
-sudo -u git -H sed -i 's/localhost/$domain_var/g' config.yml
+sudo -u git -H sed -i "s/localhost/${domain_var}/g" config.yml
 
 # Do setup
 sudo -u git -H ./bin/install
-
-#  ======================
-#  = MySQL Installation =
-#  ======================
-#  
-sudo apt-get install $aptget_arguments makepasswd # Needed to create a unique password non-interactively.
-mysqlPassword=$(makepasswd --char=10) # Generate a random MySQL password
-# Note that the lines below creates a cleartext copy of the random password in /var/cache/debconf/passwords.dat
-# This file is normally only readable by root and the password will be deleted by the package management system after install.
-echo mysql-server mysql-server/root_password password $mysqlPassword | sudo debconf-set-selections
-echo mysql-server mysql-server/root_password_again password $mysqlPassword | sudo debconf-set-selections
-sudo apt-get install $aptget_arguments mysql-server mysql-client libmysqlclient-dev
 
 #  =======================
 #  = GitLab Installation =
@@ -160,7 +258,7 @@ cd /home/git/gitlab
 sudo -u git -H cp config/gitlab.yml.example config/gitlab.yml
 
 # Replace localhost with domain
-sudo -u git -H sed -i 's/localhost/$domain_var/g' config/gitlab.yml
+sudo -u git -H sed -i "s/localhost/${domain_var}/g" config/gitlab.yml
 
 # Make sure GitLab can write to the log/ and tmp/ directories
 sudo chown -R git log/
@@ -181,8 +279,18 @@ sudo chmod -R u+rwX  tmp/sockets/
 sudo -u git -H mkdir public/uploads
 sudo chmod -R u+rwX  public/uploads
 
-# Copy the example Puma config
-sudo -u git -H cp config/unicorn.rb.example config/unicorn.rb
+# Copy the example Unicorn config (Version < 5.1 use Unicorn, versions > 5.1 use Puma)
+# sudo -u git -H cp config/unicorn.rb.example config/unicorn.rb
+
+# Copy the example of Puma config
+
+if [ "$useunicorn" -eq 1 ]; then
+	sudo -u git -H cp config/unicorn.rb.example config/unicorn.rb
+	pumaorunicorn="puma"
+else
+	sudo -u git -H cp config/puma.rb.example config/puma.rb
+	pumaorunicorn="unicorn"
+fi
 
 # Configure Git global settings for git user
 sudo -u git -H git config --global user.name "GitLab"
@@ -196,16 +304,11 @@ sudo -u git -H git config --global user.email "gitlab@$domain_var"
 sudo -u git cp config/database.yml.mysql config/database.yml
 
 # Insert database password into config
-sed -i 's/"secure password"/$mysqlPassword/g' config/database.yml
+passwdph="secure password"
+sed -i "s/${passwdph}/${gitlabpass}/g" config/database.yml
 
 # Replace MySQL user root with gitlab
-# /**
- 
-#    TODO:
-#    - Setup MySQL DB with gitlab user instead of root
- 
-#  **/
-#sed -i 's/root/gitlab/g' config/database.yml
+sed -i 's/root/gitlab/g' config/database.yml
 
 # Make config/database.yml readable to git only
 sudo -u git -H chmod o-rwx config/database.yml
@@ -219,7 +322,7 @@ cd /home/git/gitlab
 sudo gem install charlock_holmes --version '0.6.9.4'
 
 # For MySQL (note, the option says "without ... postgres")
-sudo -u git -H bundle install --deployment --without development test postgres unicorn aws
+sudo -u git -H bundle install --deployment --without development test postgres aws $pumaorunicorn
 
 
 #  ================================================
@@ -242,16 +345,16 @@ sudo update-rc.d gitlab defaults 21
 #  ===================
 #  
 if [ -f /etc/init.d/apache2 ]; then
-  echo -e "\n=== Apache init found, attempting to stop"
+  echo -e "\n[iGitLab] Apache init found, attempting to stop"
   sudo /etc/init.d/apache2 stop
-  echo -e "\n=== Disabling apache from starting at boot"
+  echo -e "\n[iGitLab] Disabling apache from starting at boot"
   sudo update-rc.d apache2 remove
 fi
 
 #  =================
 #  = Install Nginx =
 #  =================
-echo -e "\n=== Attempting to install Nginx ..."
+echo -e "\n[iGitLab] Attempting to install Nginx ..."
 sudo apt-get install $aptget_arguments nginx
 sudo cp lib/support/nginx/gitlab /etc/nginx/sites-available/gitlab
 sudo ln -s /etc/nginx/sites-available/gitlab /etc/nginx/sites-enabled/gitlab
@@ -260,7 +363,7 @@ sudo ln -s /etc/nginx/sites-available/gitlab /etc/nginx/sites-enabled/gitlab
 sudo sed -i 's/YOUR_SERVER_IP:80/*:80/g' /etc/nginx/sites-available/gitlab
 
 # Replace YOUR_SERVER_FQDN with domain
-sudo sed -i "s/YOUR_SERVER_FQDN/$domain_var/g" /etc/nginx/sites-available/gitlab
+sudo sed -i "s/YOUR_SERVER_FQDN/${domain_var}/g" /etc/nginx/sites-available/gitlab
 
 #  ===========================
 #  = Where the magic happens =
@@ -268,3 +371,9 @@ sudo sed -i "s/YOUR_SERVER_FQDN/$domain_var/g" /etc/nginx/sites-available/gitlab
 sudo service gitlab start
 sudo service nginx start
 
+echo "Install Complete."
+echo -e "\n------------------------------------------------------------"
+echo -e "\n[iGitLab] You can login at $domain_var"
+echo -e "\n[iGitLab] Username: admin@local.host"
+echo -e "\n[iGitLab] Password: 5iveL!fe"
+echo -e "\n------------------------------------------------------------"
