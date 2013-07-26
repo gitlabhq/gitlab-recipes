@@ -11,8 +11,10 @@
 # followed by a sudo apt-get update && sudo apt-get -y upgrade && sudo reboot
 # Error messages and warnings can be found in gitlab_installer_errors.log.
 # The -e switch in the first line stops the script execution if something goes wrong.
-# The Apache configuration is based on:
+# The Apache configuration for the installation under / is based on:
 # http://shanetully.com/2012/08/running-gitlab-from-a-subdirectory-on-apache/
+# The Apache configuration for the installtion under /gitlab is based on:
+# https://gist.github.com/carlosjrcabello/5486422
 
 # TODO
 # - add nginx configuration
@@ -70,8 +72,8 @@ do
 done
 
 # set configuration values so that the installation can be performed non-interactively
-debconf-set-selections <<< "postfix postfix/mailname string $postfix_server_name"
-debconf-set-selections <<< "postfix postfix/main_mailer_type string 'Internet Site'"
+sudo debconf-set-selections <<< "postfix postfix/mailname string $postfix_server_name"
+sudo debconf-set-selections <<< "postfix postfix/main_mailer_type string 'Internet Site'"
 
 sudo apt-get install -y postfix
 
@@ -82,7 +84,7 @@ sudo apt-get install -y python python2.7 2>> $ERROR_LOG
 if [[ ! -h /usr/bin/python2 ]]; then sudo ln -s /usr/bin/python /usr/bin/python2 2>> $ERROR_LOG; fi
 
 # Install Ruby
-rm -rf /tmp/ruby 2>> $ERROR_LOG
+if [[ -d "/tmp/ruby" ]]; then rm -rf /tmp/ruby; fi 2>> $ERROR_LOG
 mkdir /tmp/ruby && cd /tmp/ruby 2>> $ERROR_LOG
 curl --progress http://ftp.ruby-lang.org/pub/ruby/1.9/ruby-1.9.3-p327.tar.gz | tar xz 2>> $ERROR_LOG
 cd ruby-1.9.3-p327 2>> $ERROR_LOG
@@ -119,8 +121,8 @@ sudo -u git -H ./bin/install 2>> $ERROR_LOG
 
 # NOTE: hard-coded version 5.5 for mysql-server
 # set configuration values so that the installation can be performed non-interactively
-debconf-set-selections <<< "mysql-server-5.5 mysql-server/root_password password $mysqlpass"
-debconf-set-selections <<< "mysql-server-5.5 mysql-server/root_password_again password $mysqlpass"
+sudo debconf-set-selections <<< "mysql-server-5.5 mysql-server/root_password password $mysqlpass"
+sudo debconf-set-selections <<< "mysql-server-5.5 mysql-server/root_password_again password $mysqlpass"
 
 # Install the database packages
 sudo apt-get install -y mysql-server mysql-client libmysqlclient-dev 2>> $ERROR_LOG
@@ -243,28 +245,47 @@ escape=$(echo -ne "\e")
 
 server_name=$(hostname)
 
+# after the installation test whether GitLab is running
+test_link=""
+
 case $apache_gitlab_root in
         "1") # install GitLab under /
         
         (echo "
 <VirtualHost *:80>
-      ServerName $server_name
-      DocumentRoot /home/git/gitlab/public
-      <Directory /home/git/gitlab/public>
-         Options -MultiViews
-      </Directory>
+    ServerName $server_name
+    DocumentRoot /home/git/gitlab/public
+    <Directory /home/git/gitlab/public>
+       Options -MultiViews
+    </Directory>
 </VirtualHost>" | sudo tee -a $VHOST_CONFIG_FILE) 2>> $ERROR_LOG
+
+        test_link="http://$server_name/"
+
         ;;
     
         "2") # install GitLab under /gitlab
 
-        # TODO add configuration routine
+        # enable the Apache proxy module
+        sudo a2enmod proxy
 
-        echo "Installing GitLab under /gitlab is not yet implemented. Please configure Apache manually!"
-
-        (echo -e "\n # TODO VirtualHost configuration" | sudo tee -a $VHOST_CONFIG_FILE) 2>> $ERROR_LOG
+        # write the configuration
+        (echo -e "
+<VirtualHost *:80>
+    ServerName $server_name
+    DocumentRoot /home/git/gitlab/public
+    ProxyPass /gitlab/ http://$server_name:3000/
+    ProxyPassReverse /gitlab/ http://$server_name:3000/
+    <Proxy *>
+        Order deny,allow
+        Allow from all
+    </Proxy>
+</VirtualHost>
+            " | sudo tee -a $VHOST_CONFIG_FILE) 2>> $ERROR_LOG
         
-        echo "GitLab won't be running!"
+        sudo /etc/init.d/apache2 restart
+
+        test_link="http://$server_name/gitlab/"
 
         ;;
 
@@ -282,10 +303,12 @@ sudo a2ensite gitlab 2>> $ERROR_LOG
 
 sudo /etc/init.d/apache2 restart 2>> $ERROR_LOG
 
-if [[ "$(wget -q -O- http://$server_name | grep -i -e gitlab -e 'users/sign_in')" != "" ]]; then
-    echo "GitLab installation completed."
-else
-    echo "GitLab is NOT running!"
+if [[ $apache_gitlab_root == "1" || $apache_gitlab_root == "2" ]]; then
+    if [[ "$(wget -q -O- $test_link | grep -i -e gitlab -e 'users/sign_in')" != "" ]]; then
+        echo "GitLab is running! Installtion complete."
+    else
+        echo "GitLab is NOT running! Please check gitlab_installer_errors.log."
+    fi
 fi
 
 echo "Further settings can be added to $VHOST_CONFIG_FILE."
