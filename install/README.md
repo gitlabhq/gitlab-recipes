@@ -7,7 +7,7 @@ archlinux-gitlab
 ## General information
 
 If you have an installation guide to provide, fill in the template and place it on top
-of the guide or include it in your installation script (commented), again on top.
+of your guide or include it in your installation script (commented), again on top.
 
 ### Template
 
