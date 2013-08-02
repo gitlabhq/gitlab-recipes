@@ -21,8 +21,3 @@ and easy to merge requests.
 Your Pull Request will be reviewed by one of our volunteers and you will be
 asked to reformat it if needed. We don't bite and we will try to be as flexible
 as possible, so don't get intimidated by the extent of the quidelines :)
-
-
-- big versions 
-- Naming guidelines and General inforamtion is provided.
-
