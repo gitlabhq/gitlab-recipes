@@ -24,6 +24,7 @@ Distribution      :
 GitLab version    : 
 Web Server        : 
 Init system       : 
+Database          : 
 Contributor       : 
 Additional Notes  : 
 ```
@@ -35,7 +36,8 @@ Additional Notes  :
 | Distribution     | The official name and version of the platform/distribution, case sensitive.  |
 | GitLab version   | GitLab version on which the guide/script was tested.    |
 | Web Server       | The web server used to serve GitLab. May be two-fold, eg. apache with mod_passenger.  |
-| Init system      | (Optional but recommended) The init system used by the platform if any. Examples: **sysvinit**, **systemd**, **upstart**, **openrc**, etc |
+| Init system      | (Optional but recommended) The init system used by the platform if any. Examples: `sysvinit`, `systemd`, `upstart`, `openrc`, etc |
+| Database         | The database used for installation. Examples: `mysql`, `postrgres`, `mariadb`.
 | Contributor      | Your github username (recommended in order to track you and give credits) or your real name or both. Example of the latter: **thedude (Jeffrey Lebowski)** |
 | Additional Notes | Anything else you want to add. Any deviations form the official guide can be reported here. Eg. using rvm for ruby install, storing in different locations, etc.|
 
@@ -47,8 +49,9 @@ Distribution      : Fedora 19
 GitLab version    : 5.4
 Web Server        : apache with mod_passenger 
 Init system       : systemd
+Database          : mariadb
 Contributor       : thedude
-Additional Notes  : the script installs `postgres` instead of `mysql` and uses rvm to install ruby
+Additional Notes  : the script uses rvm to install ruby
 ```
 
 ## Notes
