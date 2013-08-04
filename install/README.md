@@ -1,8 +1,16 @@
 ## Naming guidelines
 
-- consists? >= 2 files:
+For better maintainance and clarity, some naming guidelines should be followed.
 
-archlinux-gitlab
+* Guides should be provided in README files so that they render first when viewing the repository.
+* Installation scripts reside in a `scripts/` directory inside every platform folder.
+
+### Scripts
+
+TODO: How to name multiple scripts doing similar things?
+
+? Scripts should be named after the following scheme: platform-platform_version 
+Example: `ubuntu-server-12.04.sh`
 
 ## General information
 
@@ -29,7 +37,7 @@ Additional Notes  :
 | Web Server       | The web server used to serve GitLab. May be two-fold, eg. apache with mod_passenger.  |
 | Init system      | (Optional but recommended) The init system used by the platform if any. Examples: **sysvinit**, **systemd**, **upstart**, **openrc**, etc |
 | Contributor      | Your github username (recommended in order to track you and give credits) or your real name or both. Example of the latter: **thedude (Jeffrey Lebowski)** |
-| Additional Notes | Anything else you want to add. Any deviations form the official guide can be reported here. Eg. using different user than `git`, storing in different locations, etc.|
+| Additional Notes | Anything else you want to add. Any deviations form the official guide can be reported here. Eg. using rvm for ruby install, storing in different locations, etc.|
 
 
 ### Example
@@ -40,5 +48,11 @@ GitLab version    : 5.4
 Web Server        : apache with mod_passenger 
 Init system       : systemd
 Contributor       : thedude
-Additional Notes  : the script installs `postgres` instead of `mysql` and user is `gitlab` instead of `git`
+Additional Notes  : the script installs `postgres` instead of `mysql` and uses rvm to install ruby
 ```
+
+## Notes
+
+* We try to test everything before accepting PRs, in a clean, newly installed platform.
+* You should read the script and understand what it does prior to running it.
+* If something goes wrong during installation and you think the guide/script needs fixing, file a bug report or a Pull Request.
