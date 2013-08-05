@@ -1,8 +1,8 @@
 #!/bin/bash
 #
 # GitLab
-# Maintainer: @elvanja, @troyanov, @eiyaya, @foyo23, @nielsbasjes
-# App Version: 5.1.0
+# Contributors  : @elvanja, @troyanov, @eiyaya, @foyo23, @nielsbasjes, @relip, @JasonMing, @andronat
+# App Version   : 5.x
 
 # chkconfig: 2345 82 55
 # processname: puma
@@ -13,8 +13,16 @@
 # https://github.com/gitlabhq/gitlabhq/issues/1049#issuecomment-8386882
 # https://gist.github.com/3062860
 
+# Save original $PATH
+# /etc/rc.d/init.d/functions resets $PATH to default(/sbin:/usr/sbin:/bin:/usr/bin).
+# Consequently, rvm and compiled ruby with custom path (which isn't /usr/bin) cannot be executed.
+ORIGINAL_PATH=$PATH
+
 # Include RedHat function library
 . /etc/rc.d/init.d/functions
+
+# Restore original $PATH
+PATH=$ORIGINAL_PATH
 
 # The name of the service
 NAME=git
@@ -33,7 +41,8 @@ SLOCK=/var/lock/subsys/sidekiq
 OPTS="-C $APP_PATH/config/puma.rb -e production"
 
 # Ruby related path update
-RUBY_PATH_PATCH="PATH=$PATH:/usr/local/bin:/usr/local/lib:/home/git/bin && export PATH && "
+RVM_PATH="/usr/local/rvm/bin"
+RUBY_PATH_PATCH="PATH=/usr/local/bin:/usr/local/lib:/home/git/bin:$RVM_PATH:$PATH && export PATH && "
 
 start() {
   cd $APP_PATH
