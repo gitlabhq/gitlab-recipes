@@ -446,7 +446,7 @@ Download the init script (will be /etc/init.d/gitlab)
 
 **Double check the url for this next one!!**
 
-    curl https://raw.github.com/gitlabhq/gitlab-recipes/5-2-stable/init.d/gitlab-centos > /etc/init.d/gitlab
+    curl https://raw.github.com/gitlabhq/gitlab-recipes/master/init/sysvinit/centos/gitlab-centos > /etc/init.d/gitlab
     chmod +x /etc/init.d/gitlab
     chkconfig --add gitlab
 
