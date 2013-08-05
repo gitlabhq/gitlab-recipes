@@ -1,20 +1,36 @@
-# require apache module mod_proxy and mod_proxy_http
+# Requires apache modules: mod_proxy and mod_proxy_http
+# In Debian based distros enable with: sudo a2enmod mod_proxy mod_proxy_http
+# Change ServerName to your fqdn
+
 <VirtualHost *:80>
 	ServerName gitlab.example.com
 	#ServerAlias git.example.com
 
-	# Uncomment if you want redirect from HTTP to HTTPS
+	# Uncomment the following 3 lines if you want to redirect HTTP to HTTPS
+
 	#RewriteEngine   on
 	#RewriteCond     %{SERVER_PORT} ^80$
 	#RewriteRule     ^(.*)$ https://%{SERVER_NAME}$1 [L,R]
 	
+	ProxyPass /uploads !
+	ProxyPass /error !
 	ProxyPass / http://127.0.0.1:3000/
 	ProxyPassReverse / http://127.0.0.1:3000/
 	ProxyPreserveHost On
 
 	CustomLog /var/log/apache2/gitlab/access.log combined
 	ErrorLog  /var/log/apache2/gitlab/error.log
+
+	# Modify path to your needs (needed for downloading attachments)
+	DocumentRoot /home/git/gitlab/public
+
+	<Location />
+		Order allow,deny
+		Allow from all
+	</Location>
+
 </VirtualHost>
+
 <VirtualHost *:443>
 	ServerName gitlab.example.com
 	ServerAdmin gitlab@example.com
@@ -22,15 +38,22 @@
 	SSLEngine On
 	SSLCertificateFile /etc/apache2/ssl/server.crt
 	SSLCertificateKeyFile /etc/apache2/ssl/server.key
-	#SSLCertificateChainFile /etc/apache2/ssl/cacert.pem
 
-	# Uncomment the following line to prevent redirects to http on https only vhosts
-	#RequestHeader set X-Forwarded-Proto "https"
-
+	ProxyPass /uploads !
+	ProxyPass /error !
 	ProxyPass / http://127.0.0.1:3000/
 	ProxyPassReverse / http://127.0.0.1:3000/
 	ProxyPreserveHost On
 
 	CustomLog /var/log/apache2/gitlab/access.log combined
 	ErrorLog  /var/log/apache2/gitlab/error.log
+
+	# Modify path to your needs (needed for downloading attachments)
+	DocumentRoot /home/git/gitlab/public
+
+	<Location />
+		Order allow,deny
+		Allow from all
+	</Location>
+
 </VirtualHost>
