@@ -1,42 +1,42 @@
-# GITLAB
-# Maintainer: @nielsbasjes
-# App Version: 5.2
+```
+Distribution      : CentOS 6.4
+GitLab version    : 5.4
+Web Server        : Apache
+Init system       : sysvinit
+Database          : mysql
+Contributors      : @nielsbasjes, @axilleas
+Additional Notes  : Selinux is not disabled but properly configured.
+                    We have also tried this on RHEL 6.3 and found that there 
+                    are subtle differences which are documented in part.
+                    Look for the **RHEL Notes** note.
+```
 
-**This installation guide was created for CentOS 6.4 in combination with gitlab 5.2 and tested on it.**
-We also tried this on RHEL 6.3 and found that there are subtle differences that we so far have only documented in part.
+## Overview
 
 Please read `doc/install/requirements.md` for hardware and platform requirements.
 
-## Overview ##
-This guide installs gitlab on a bare system from scratch using MySQL as the database. All Postgress installation steps are absent as they have not been tested yet.
+This guide installs gitlab on a bare system from scratch using MySQL as the database.
+All Postgress installation steps are absent as they have not been tested yet.
 
-**Important Note:**
+### Important Notes
+
 The following steps have been known to work.
 If you deviate from this guide, do it with caution and make sure you don't
 violate any assumptions GitLab makes about its environment.
 
-**Important Note:**
+#### If you find a bug
+
 If you find a bug/error in this guide please submit an issue or pull request
 following the contribution guide (see `CONTRIBUTING.md`).
 
-**Note about accounts:**
-In most cases you are required to run commands as the 'root' user.
-When it is required you should be either the 'git' or 'root' user it will be indicated with a line like this
+#### Security
 
-*logged in as **git***
-
-The best way to become that user is by logging in as root and typing
-
-    su - git
-
-**Note about security:**
 Many setup guides of Linux software simply state: "disable selinux and firewall".
 The original gitlab installation for ubuntu disables StrictHostKeyChecking completely.
 This guide does not disable any of them, we simply configure them as they were intended.
 
 - - -
 
-# Overview
 
 The GitLab installation consists of setting up the following components:
 
@@ -469,8 +469,3 @@ The setup has created an admin account for you. You can use it to log in:
     admin@local.host
     5iveL!fe
 
-**Important Note:**
-Please go over to your profile page and immediately change the password, so
-nobody can access your GitLab by using this login information later on.
-
-**Enjoy!**
