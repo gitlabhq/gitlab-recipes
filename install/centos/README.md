@@ -4,11 +4,8 @@ GitLab version    : 5.4
 Web Server        : Apache
 Init system       : sysvinit
 Database          : mysql
-Contributors      : @nielsbasjes, @axilleas
-Additional Notes  : Selinux is not disabled but properly configured.
-                    We have also tried this on RHEL 6.3 and found that there 
-                    are subtle differences which are documented in part.
-                    Look for the **RHEL Notes** note.
+Contributors      : @nielsbasjes, @axilleas, @mairin
+Additional Notes  : In order to get the latest git version we build it from source
 ```
 
 ## Overview
@@ -17,26 +14,26 @@ Please read `doc/install/requirements.md` for hardware and platform requirements
 
 This guide installs GitLab on a bare system from scratch, using MySQL as the database.
 All Postgres installation steps are absent as they have not been tested yet.
+Pull requests with tested Postgres are welcome!
 
 ### Important Notes
 
-The following steps have been known to work.
-If you deviate from this guide, do it with caution and make sure you don't
-violate any assumptions GitLab makes about its environment.
+The following steps have been known to work. If you deviate from this guide, do
+it with caution and make sure you don't violate any assumptions GitLab makes about
+its environment. We have also tried this on RHEL 6.3 and found that there are subtle
+differences which are documented in part. Look for the **RHEL Notes** note.
 
 #### If you find a bug
 
 If you find a bug/error in this guide please submit an issue or pull request
-following the contribution guide (see `install/README.md`).
+following the contribution guide (see `../../contributing.md`).
 
 #### Security
 
 Many setup guides of Linux software simply state: "disable selinux and firewall".
-The original GitLab installation for Ubuntu disables StrictHostKeyChecking completely.
 This guide does not disable any of them, we simply configure them as they were intended.
 
 - - -
-
 
 The GitLab installation consists of setting up the following components:
 
@@ -44,12 +41,13 @@ The GitLab installation consists of setting up the following components:
 2. Ruby
 3. System Users
 4. GitLab shell
+5. Database
 5. GitLab
-
+6. Web server
 
 ----------
 
-# 1. Installing the operating system (CentOS 6.4 Minimal)
+## 1. Installing the operating system (CentOS 6.4 Minimal)
 
 We start with a completely clean CentOS 6.4 "minimal" installation which can be 
 accomplished by downloading the appropriate installation iso file. Just boot the
@@ -61,7 +59,8 @@ option for the network interface and hand (usually eth0).
 
 **If you forget this option the network will NOT start at boot.**
 
-The end result is a bare minimum CentOS installation that effectively only has network connectivity and (almost) no services at all.
+The end result is a bare minimum CentOS installation that effectively only has 
+network connectivity and (almost) no services at all.
 
 ## Updating and adding basic software and services
 
@@ -100,111 +99,66 @@ repository (apart from the standard base, updates and extras repositories):
     updates             CentOS-6 - Updates                                         814
     repolist: 13,507
 
-If you can't see it listed use the folowing command to enable it:
+If you can't see it listed, use the folowing command to enable it:
 
     sudo yum-config-manager --enable epel
 
 ### Install the required tools for GitLab
-
-    sudo yum -y groupinstall 'Development Tools'
+    
+    ::bash
+    su -
+    yum -y update
+    yum -y groupinstall 'Development Tools'
 
     ### 'Additional Development'
-    sudo yum -y install vim-enhanced httpd readline readline-devel ncurses-devel gdbm-devel glibc-devel \
-                   tcl-devel openssl-devel curl-devel expat-devel db4-devel byacc \
-                   sqlite-devel gcc-c++ libyaml libyaml-devel libffi libffi-devel \
-                   libxml2 libxml2-devel libxslt libxslt-devel libicu libicu-devel \
-                   system-config-firewall-tui python-devel redis sudo mysql-server wget \
-                   mysql-devel crontabs logwatch logrotate sendmail-cf qtwebkit qtwebkit-devel \
-                   perl-Time-HiRes
+    yum -y install vim-enhanced readline readline-devel ncurses-devel gdbm-devel glibc-devel tcl-devel openssl-devel curl-devel expat-devel db4-devel byacc sqlite-devel gcc-c++ libyaml libyaml-devel libffi libffi-devel libxml2 libxml2-devel libxslt libxslt-devel libicu libicu-devel system-config-firewall-tui python-devel redis sudo wget crontabs logwatch logrotate perl-Time-HiRes
 
-**IMPORTANT NOTE About Redhat EL 6** 
+**RHEL Notes**
 
-During an installation on an official RHEL 6.3 we found that some packages (in our case gdbm-devel, libffi-devel and libicu-devel) were NOT installed. You MUST make sure that all the packages are installed. Someone told me that you can get these "packages direct from RHEL by enabling the “RHEL Server Optional” Channel in RHN.". I haven't tried this yet.
+If some packages (eg. gdbm-devel, libffi-devel and libicu-devel) are NOT installed,
+add the rhel6 optional packages repo to your server to get those packages:
 
-### Update CentOS to the latest set of patches
+    yum-config-manager --enable rhel-6-server-optional-rpms
 
-*logged in as **root***
+Tip taken from [here](https://github.com/gitlabhq/gitlab-recipes/issues/62).
 
-    yum -y update
+### Git
 
-## Git
-For some reason gitlab has been written in such a way that it will only work correctly with git version 1.8.x or newer. At the time of writing [this commit](https://github.com/gitlabhq/gitlabhq/commit/b1a8fdd84d5a7cdbdb5ef3829b59a73db0f4d2dd) was the culprit that enforced this requirement.
-In case this has not been resolved when you read this you must either update your git to > 1.8.x or revert the above mentioned change manually.
+GitLab will only work correctly with git version 1.8.x or newer. The problem is 
+that the available rpms for CentOS stop at git 1.7.1 which is too old for GitLab.
+In order to update, you have to build git from source as it is not yet in any repository:
 
-Have a look at [this HowTo](http://www.pickysysadmin.ca/2013/05/21/commit-comments-not-appearing-in-gitlab-on-centos/) on one possible way of updating the git version.
+    ::bash
+    su -
+    cd /tmp
+    yum -y install git perl-ExtUtils-MakeMaker
+    git clone git://github.com/git/git.git
+    cd /tmp/git/
+    git checkout v1.8.3.4
+    autoconf
+    ./configure --prefix=/usr/local
+    make && make install
+    rm -rf /tmp/git/
+    yum erase git
 
-## Configure redis
-Just make sure it is started at the next reboot
+Logout and login again for the `$PATH` to take effect. Check that git is properly
+installed with:
 
-*logged in as **root***
+    which git
+    # /usr/local/bin/git
+    git --version
+    # git version 1.8.3.4
 
-    chkconfig redis on
+### Configure redis
+Make sure redis is started on boot:
 
-## Configure mysql
-Make sure it is started at the next reboot and start it immediately so we can configure it.
+    ::bash
+    sudo chkconfig redis on
 
-*logged in as **root***
+### Configure sendmail
 
-    chkconfig mysqld on
-    service mysqld start
-
-Secure MySQL by entering a root password and say "Yes" to all questions with the next command
-
-    /usr/bin/mysql_secure_installation
-
-## Configure httpd
-
-We use Apache HTTPD in front of gitlab
-Just make sure it is started at the next reboot
-
-    chkconfig httpd on
-
-We want to be able to reach gitlab using the normal http ports (i.e. not the :9292 thing)
-So we create a file called **/etc/httpd/conf.d/gitlab.conf** with this content (replace the git.example.org with your hostname!!). 
-
-    <VirtualHost *:80>
-      ServerName git.example.org
-      ProxyRequests Off
-        <Proxy *>
-           Order deny,allow
-           Allow from all
-        </Proxy>
-        ProxyPreserveHost On
-        ProxyPass / http://localhost:9292/
-        ProxyPassReverse / http://localhost:9292/
-    </VirtualHost>
-
-OPTIONAL: If you want to run other websites on the same system you'll need to enable in **/etc/httpd/conf/httpd.conf** the setting
-
-    NameVirtualHost *:80
-
-Poke a selinux hole for httpd so it can httpd can be in front of gitlab
-
-    setsebool -P httpd_can_network_connect on
-
-## Configure firewall
-
-Poke an iptables hole so uses can access the httpd (http and https ports) and ssh.
-The quick way is to put this in the file called **/etc/sysconfig/iptables**
-
-    # Firewall configuration written by system-config-firewall
-    # Manual customization of this file is not recommended.
-    *filter
-    :INPUT ACCEPT [0:0]
-    :FORWARD ACCEPT [0:0]
-    :OUTPUT ACCEPT [0:0]
-    -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
-    -A INPUT -p icmp -j ACCEPT
-    -A INPUT -i lo -j ACCEPT
-    -A INPUT -m state --state NEW -m tcp -p tcp --dport 22 -j ACCEPT
-    -A INPUT -m state --state NEW -m tcp -p tcp --dport 80 -j ACCEPT
-    -A INPUT -m state --state NEW -m tcp -p tcp --dport 443 -j ACCEPT
-    -A INPUT -j REJECT --reject-with icmp-host-prohibited
-    -A FORWARD -j REJECT --reject-with icmp-host-prohibited
-    COMMIT
-
-## Configure email
-
+    su -
+    yum -y install sendmail-cf
     cd /etc/mail
     vim /etc/mail/sendmail.mc
 
@@ -212,54 +166,44 @@ Add a line with the smtp gateway hostname
 
     define(`SMART_HOST', `smtp.example.com')dnl
 
-Then comment out this line 
+Then replace this line:
 
     EXPOSED_USER(`root')dnl
 
-by putting 'dnl ' in front of it like this
+with:
 
     dnl EXPOSED_USER(`root')dnl
  
-Now enable these settings
+Now enable these settings:
 
     make
     chkconfig sendmail on
 
-
-## Reboot
-Now that we have the basics right we reboot the system to load the new kernel and everything.
-After the reboot all of the so far installed services will startup automatically.
-
-    reboot
+Alternatively you can install `postfix`.
 
 ----------
 
 # 2. Ruby
 Download and compile it:
 
-*logged in as **root***
-
+    su -
     mkdir /tmp/ruby && cd /tmp/ruby
-    wget http://ftp.ruby-lang.org/pub/ruby/1.9/ruby-1.9.3-p392.tar.gz
-    tar xfvz ruby-1.9.3-p392.tar.gz
-    cd ruby-1.9.3-p392
-    ./configure
-    make
-    make install
+    curl --progress ftp://ftp.ruby-lang.org/pub/ruby/2.0/ruby-2.0.0-p247.tar.gz | tar xz
+    cd ruby-2.0.0-p247
+    ./configure --prefix=/usr/local/
+    make && make install
 
 Install the Bundler Gem:
 
-*logged in as **root***
-
-    gem install bundler
+     sudo gem install bundler
 
 ----------
 
 # 3. System Users
 
 ## Create user for Git
-*logged in as **root***
 
+    su -
     adduser \
       --system \
       --shell /bin/bash \
@@ -272,10 +216,9 @@ We do NOT set the password so this user cannot login.
 
 ## Forwarding all emails
 
-Now we want all logging of the system to be forwarded to a central email address
+Now we want all logging of the system to be forwarded to a central email address:
 
-*logged in as **root***
-
+    su -
     echo adminlogs@example.com > /root/.forward
     chown root /root/.forward
     chmod 600 /root/.forward
@@ -286,14 +229,21 @@ Now we want all logging of the system to be forwarded to a central email address
     chmod 600 /home/git/.forward
     restorecon /home/git/.forward
 
-## Database user
+### Configure mysql
 
+Install and enable the `mysqld` service to start on boot:
 
-*logged in as **root***
+    ::bash
+    su -
+    yum install -y mysql-server mysql-devel
+    chkconfig mysqld on
+    service mysqld start
 
-    su - git
+Secure MySQL by entering a root password and say "Yes" to all questions:
 
-*logged in as **git***
+    /usr/bin/mysql_secure_installation
+
+Create a new user and database for GitLab:
 
     # Login to MySQL
     mysql -u root -p
@@ -310,9 +260,11 @@ Now we want all logging of the system to be forwarded to a central email address
     # Quit the database session
     \q
 
-Try connecting to the new database with the new user
+Try connecting to the new database with the new user:
 
     mysql -u gitlab -p -D gitlabhq_production
+    # Quit the database session
+    \q
 
 ----------
 
@@ -497,14 +449,64 @@ Start your GitLab instance:
     # or
     /etc/init.d/gitlab start
 
+### Configure the web server
 
-# Done!
+For nginx:
+
+    sudo yum -y install nginx
+    
+
+For Apache:
+
+    sudo yum -y install httpd
+    sudo chkconfig httpd on
+    sudo wget -O /etc/httpd/conf.d/gitlab.conf https://raw.github.com/gitlabhq/gitlab-recipes/web-server/apache/gitlab
+
+Open `/etc/httpd/conf.d/gitlab.conf` with your editor and replace `git.example.org` with your FQDN.
+
+**OPTIONAL:** If you want to run other websites on the same system you'll need to 
+add in `/etc/httpd/conf/httpd.conf`:
+
+    NameVirtualHost *:80
+
+Poke a selinux hole for httpd so it can be in front of GitLab:
+
+    setsebool -P httpd_can_network_connect on
+
+### Configure firewall
+
+Poke an iptables hole so uses can access the httpd (http and https ports) and ssh.
+The quick way is to put this in the file called **/etc/sysconfig/iptables**
+
+    # Firewall configuration written by system-config-firewall
+    # Manual customization of this file is not recommended.
+    *filter
+    :INPUT ACCEPT [0:0]
+    :FORWARD ACCEPT [0:0]
+    :OUTPUT ACCEPT [0:0]
+    -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+    -A INPUT -p icmp -j ACCEPT
+    -A INPUT -i lo -j ACCEPT
+    -A INPUT -m state --state NEW -m tcp -p tcp --dport 22 -j ACCEPT
+    -A INPUT -m state --state NEW -m tcp -p tcp --dport 80 -j ACCEPT
+    -A INPUT -m state --state NEW -m tcp -p tcp --dport 443 -j ACCEPT
+    -A INPUT -j REJECT --reject-with icmp-host-prohibited
+    -A FORWARD -j REJECT --reject-with icmp-host-prohibited
+    COMMIT
+
+## Done!
 
 Visit YOUR_SERVER for your first GitLab login.
 The setup has created an admin account for you. You can use it to log in:
 
     admin@local.host
     5iveL!fe
+
+## Links used in this guide
+
+- [EPEL information](http://www.thegeekstuff.com/2012/06/enable-epel-repository/)
+- [git update to 1.8.x](http://www.pickysysadmin.ca/2013/05/21/commit-comments-not-appearing-in-gitlab-on-centos/)
+
 
 [EPEL]: https://fedoraproject.org/wiki/EPEL
 [keys]: https://fedoraproject.org/keys
