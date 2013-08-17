@@ -15,8 +15,8 @@ Additional Notes  : Selinux is not disabled but properly configured.
 
 Please read `doc/install/requirements.md` for hardware and platform requirements.
 
-This guide installs gitlab on a bare system from scratch using MySQL as the database.
-All Postgress installation steps are absent as they have not been tested yet.
+This guide installs GitLab on a bare system from scratch, using MySQL as the database.
+All Postgres installation steps are absent as they have not been tested yet.
 
 ### Important Notes
 
@@ -27,12 +27,12 @@ violate any assumptions GitLab makes about its environment.
 #### If you find a bug
 
 If you find a bug/error in this guide please submit an issue or pull request
-following the contribution guide (see `CONTRIBUTING.md`).
+following the contribution guide (see `install/README.md`).
 
 #### Security
 
 Many setup guides of Linux software simply state: "disable selinux and firewall".
-The original gitlab installation for ubuntu disables StrictHostKeyChecking completely.
+The original GitLab installation for Ubuntu disables StrictHostKeyChecking completely.
 This guide does not disable any of them, we simply configure them as they were intended.
 
 - - -
@@ -51,28 +51,65 @@ The GitLab installation consists of setting up the following components:
 
 # 1. Installing the operating system (CentOS 6.4 Minimal)
 
-We start with a completely clean CentOS 6.4 "minimal" installation which can be accomplished by downloading the appropriate installation iso file. Just boot the system of the iso file and install the system.
+We start with a completely clean CentOS 6.4 "minimal" installation which can be 
+accomplished by downloading the appropriate installation iso file. Just boot the
+system of the iso file and install the system.
 
-Note that during the installation you use the *"Configure Network"* option (it's a button in the same screen where you specify the hostname) to enable the *"Connect automatically"* option for the network interface and hand (usually eth0). 
+Note that during the installation you use the *"Configure Network"* option (it's a 
+button in the same screen where you specify the hostname) to enable the *"Connect automatically"* 
+option for the network interface and hand (usually eth0). 
+
 **If you forget this option the network will NOT start at boot.**
 
 The end result is a bare minimum CentOS installation that effectively only has network connectivity and (almost) no services at all.
 
 ## Updating and adding basic software and services
+
 ### Add EPEL repository
 
-*logged in as **root***
+[EPEL][] is a volunteer-based community effort from the Fedora project to create
+a repository of high-quality add-on packages that complement the Fedora-based 
+Red Hat Enterprise Linux (RHEL) and its compatible spinoffs, such as CentOS and Scientific Linux.
 
-    rpm -Uvh http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
+As part of the Fedora packaging community, EPEL packages are 100% free/libre open source software (FLOSS). 
 
-### Install the required tools for gitlab
+Download the GPG key for EPEL repository from [fedoraproject][keys] and install it on your system:
 
-*logged in as **root***
+    sudo wget -O /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-6 https://fedoraproject.org/static/0608B895.txt
+    sudo rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-6
 
-    yum -y groupinstall 'Development Tools'
+Verify that the key got installed successfully:
+
+    sudo rpm -qa gpg*
+    gpg-pubkey-0608b895-4bd22942
+
+Now install the `epel-release-6-8.noarch` package, which will enable EPEL repository on your system:
+
+    sudo rpm -Uvh http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
+
+**Note:** Don't mind the `x86_64`, if you install on a i686 system you can use the same commands.
+
+Verify that the EPEL repository is enabled as shown below. Now, you’ll see epel 
+repository (apart from the standard base, updates and extras repositories):
+
+    sudo yum repolist
+    repo id             repo name                                                status
+    base                CentOS-6 - Base                                          4,802
+    epel                Extra Packages for Enterprise Linux 6 - x86_64           7,879
+    extras              CentOS-6 - Extras                                           12
+    updates             CentOS-6 - Updates                                         814
+    repolist: 13,507
+
+If you can't see it listed use the folowing command to enable it:
+
+    sudo yum-config-manager --enable epel
+
+### Install the required tools for GitLab
+
+    sudo yum -y groupinstall 'Development Tools'
 
     ### 'Additional Development'
-    yum -y install vim-enhanced httpd readline readline-devel ncurses-devel gdbm-devel glibc-devel \
+    sudo yum -y install vim-enhanced httpd readline readline-devel ncurses-devel gdbm-devel glibc-devel \
                    tcl-devel openssl-devel curl-devel expat-devel db4-devel byacc \
                    sqlite-devel gcc-c++ libyaml libyaml-devel libffi libffi-devel \
                    libxml2 libxml2-devel libxslt libxslt-devel libicu libicu-devel \
@@ -469,3 +506,5 @@ The setup has created an admin account for you. You can use it to log in:
     admin@local.host
     5iveL!fe
 
+[EPEL]: https://fedoraproject.org/wiki/EPEL
+[keys]: https://fedoraproject.org/keys
