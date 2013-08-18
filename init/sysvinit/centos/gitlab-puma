@@ -2,7 +2,7 @@
 #
 # GitLab
 # Contributors  : @elvanja, @troyanov, @eiyaya, @foyo23, @nielsbasjes, @relip, @JasonMing, @andronat
-# App Version   : 5.x
+# App Version   : 6.x
 
 # chkconfig: 2345 82 55
 # processname: puma
