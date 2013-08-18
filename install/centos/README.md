@@ -1,7 +1,7 @@
 ```
 Distribution      : CentOS 6.4
-GitLab version    : 5.4
-Web Server        : Apache
+GitLab version    : 6.0
+Web Server        : Apache, Nginx
 Init system       : sysvinit
 Database          : mysql
 Contributors      : @nielsbasjes, @axilleas, @mairin
@@ -18,10 +18,11 @@ Pull requests with tested Postgres are welcome!
 
 ### Important Notes
 
-The following steps have been known to work. If you deviate from this guide, do
-it with caution and make sure you don't violate any assumptions GitLab makes about
-its environment. We have also tried this on RHEL 6.3 and found that there are subtle
-differences which are documented in part. Look for the **RHEL Notes** note.
+The following steps have been known to work and should be followed from up to bottom.
+If you deviate from this guide, do it with caution and make sure you don't violate
+any assumptions GitLab makes about its environment. We have also tried this on
+RHEL 6.3 and found that there are subtle differences which are documented in part.
+Look for the **RHEL Notes** note.
 
 #### If you find a bug
 
@@ -37,13 +38,14 @@ This guide does not disable any of them, we simply configure them as they were i
 
 The GitLab installation consists of setting up the following components:
 
-1. Installing the base operating system (CentOS 6.4 Minimal) and Packages / Dependencies
+1. Install the base operating system (CentOS 6.4 Minimal) and Packages / Dependencies
 2. Ruby
 3. System Users
 4. GitLab shell
 5. Database
-5. GitLab
-6. Web server
+6. GitLab
+7. Web server
+8. Firewall
 
 ----------
 
@@ -183,7 +185,7 @@ Alternatively you can install `postfix`.
 
 ----------
 
-# 2. Ruby
+## 2. Ruby
 Download and compile it:
 
     su -
@@ -193,28 +195,34 @@ Download and compile it:
     ./configure --prefix=/usr/local/
     make && make install
 
+Logout and login again for the `$PATH` to take effect. Check that ruby is properly
+installed with:
+
+    which ruby
+    # /usr/local/bin/ruby
+    ruby -v
+    # ruby 2.0.0p247 (2013-06-27 revision 41674) [x86_64-linux]
+
 Install the Bundler Gem:
 
-     sudo gem install bundler
+     sudo gem install bundler --no-ri --no-rdoc
+
+**NOTE:** If you get an error like `sudo: gem: command not found`, it is because
+CentOS has sudo built with the `--with-secure-path` flag. See this post on [stackoverflow][sudo]
+on how to deal with it. Alternatively, login as root and run the command.
 
 ----------
 
-# 3. System Users
+## 3. System Users
 
-## Create user for Git
+### Create user for Git
 
     su -
-    adduser \
-      --system \
-      --shell /bin/bash \
-      --comment 'Git Version Control' \
-      --create-home \
-      --home-dir /home/git \
-      git
+    adduser --system --shell /bin/bash --comment 'GitLab' --create-home --home-dir /home/git/ git
 
 We do NOT set the password so this user cannot login.
 
-## Forwarding all emails
+### Forwarding all emails
 
 Now we want all logging of the system to be forwarded to a central email address:
 
@@ -229,9 +237,37 @@ Now we want all logging of the system to be forwarded to a central email address
     chmod 600 /home/git/.forward
     restorecon /home/git/.forward
 
-### Configure mysql
+----------
 
-Install and enable the `mysqld` service to start on boot:
+# 4. GitLab shell
+
+GitLab Shell is a ssh access and repository management software developed specially for GitLab.
+
+```
+# First login as root
+su -
+
+# Login as git
+su - git
+
+# Clone gitlab shell
+git clone https://github.com/gitlabhq/gitlab-shell.git
+cd gitlab-shell
+
+# Switch to right version
+git checkout v1.7.0
+cp config.yml.example config.yml
+
+# Edit config and replace gitlab_url with something like 'http://domain.com/'
+
+# Do setup
+./bin/install
+```
+----------
+
+## 5. Database
+
+Install `mysql` and enable the `mysqld` service to start on boot:
 
     ::bash
     su -
@@ -247,7 +283,7 @@ Create a new user and database for GitLab:
 
     # Login to MySQL
     mysql -u root -p
-
+    # Type the database root password
     # Create a user for GitLab. (change supersecret to a real password)
     CREATE USER 'gitlab'@'localhost' IDENTIFIED BY 'supersecret';
 
@@ -263,179 +299,124 @@ Create a new user and database for GitLab:
 Try connecting to the new database with the new user:
 
     mysql -u gitlab -p -D gitlabhq_production
+    # Type the password you replaced supersecret with earlier
     # Quit the database session
     \q
 
 ----------
+## 6. GitLab
 
-# 4. GitLab shell
-
-GitLab Shell is a ssh access and repository management software developed specially for GitLab.
-
-    # Login as git
+We'll install GitLab into home directory of the user `git`:
+    su -
     su - git
 
-*logged in as **git***
-
-    # Go to home directory
-    cd /home/git
-
-    # Clone gitlab shell
-    git clone https://github.com/gitlabhq/gitlab-shell.git
-    cd gitlab-shell
-
-    # switch to right version
-    git checkout v1.4.0
-
-    cp config.yml.example config.yml
-
-    # Edit config and replace gitlab_url
-    # with something like 'http://domain.com/'
-    vim config.yml
-
-    # Do setup
-    ./bin/install
-
-
-----------
-# 5. GitLab
-
-*logged in as **git***
-
-    # We'll install GitLab into home directory of the user "git"
-    cd /home/git
-
-## Clone the Source
+### Clone the Source
 
     # Clone GitLab repository
     git clone https://github.com/gitlabhq/gitlabhq.git gitlab
 
-    # Go to gitlab dir 
+    # Go to gitlab directory 
     cd /home/git/gitlab
    
     # Checkout to stable release
-    git checkout 5-2-stable
+    git checkout 6-0-stable
 
 **Note:**
-You can change `5-2-stable` to `master` if you want the *bleeding edge* version, but
+You can change `6-0-stable` to `master` if you want the *bleeding edge* version, but
 do so with caution!
 
-## Configure it
+### Configure it
 
-Copy the example GitLab config
+```
+# Copy the example GitLab config
+cp config/gitlab.yml.example config/gitlab.yml
 
-    cp /home/git/gitlab/config/gitlab.yml{.example,}
+# Make sure to change "localhost" to the fully-qualified domain name of your
+# host serving GitLab where necessary
+sed -i 's|localhost|your_domain_name|g' config/gitlab.yml
 
-Edit the gitlab config to make sure to change "localhost" to the fully-qualified domain name of your host serving GitLab where necessary. Also review the other settings to match your setup.
+# Change git's path to point to /usr/local/bin/git
+sed -i 's|/usr/bin/git|/usr/local/bin/git|' config/gitlab.yml
 
-    vim /home/git/gitlab/config/gitlab.yml
+# Make sure GitLab can write to the log/ and tmp/ directories
+chown -R git log/
+chown -R git tmp/
+chmod -R u+rwX  log/
+chmod -R u+rwX  tmp/
 
-*logged in as **root***
+# Create directory for satellites
+mkdir /home/git/gitlab-satellites
 
-    # Make sure GitLab can write to the log/ and tmp/ directories
-    chown -R git    /home/git/gitlab/log/
-    chown -R git    /home/git/gitlab/tmp/
-    chmod -R u+rwX  /home/git/gitlab/log/
-    chmod -R u+rwX  /home/git/gitlab/tmp/
+# Create directories for sockets/pids and make sure GitLab can write to them
+mkdir tmp/pids/
+mkdir tmp/sockets/
+chmod -R u+rwX  tmp/pids/
+chmod -R u+rwX  tmp/sockets/
 
-*logged in as **git***
+# Create public/uploads directory otherwise backup will fail
+mkdir public/uploads
+chmod -R u+rwX  public/uploads
 
-    # Create directory for satellites
-    mkdir /home/git/gitlab-satellites
+# Copy the example Unicorn config
+cp config/unicorn.rb.example config/unicorn.rb
 
-    # Create directories for sockets/pids and make sure GitLab can write to them
-    mkdir /home/git/gitlab/tmp/pids/
-    mkdir /home/git/gitlab/tmp/sockets/
-    chmod -R u+rwX /home/git/gitlab/tmp/pids/
-    chmod -R u+rwX /home/git/gitlab/tmp/sockets/
+# Enable cluster mode if you expect to have a high load instance
+# E.g. change amount of workers to 3 for 2GB RAM server
+editor config/unicorn.rb
 
-    # Create public/uploads directory otherwise backup will fail
-    mkdir /home/git/gitlab/public/uploads
-    chmod -R u+rwX /home/git/gitlab/public/uploads
+# Configure Git global settings for git user, useful when editing via web
+# Edit user.email according to what is set in gitlab.yml
+git config --global user.name "GitLab"
+git config --global user.email "gitlab@your_domain_name"
+git config --global core.autocrlf input
+```
 
-    # Copy the example Puma config
-    cp /home/git/gitlab/config/puma.rb{.example,}
+**Important:** Make sure to edit both `gitlab.yml` and `unicorn.rb` to match your setup.
 
-    # Configure Git global settings for git user, useful when editing via web
-    # Edit user.email according to what is set in gitlab.yml
-    git config --global user.name "GitLab"
-    git config --global user.email "gitlab@localhost"
-
-
-**Important Note:**
-Make sure to edit both `gitlab.yml` and `puma.rb` to match your setup.
-
-Specifically for our setup behind Apache edit the puma config
-
-    vim /home/git/gitlab/config/puma.rb
-
-Change the bind parameter so that it reads:
-
-    bind 'tcp://127.0.0.1:9292'
-
-## Configure GitLab DB settings
+### Configure GitLab DB settings
 
     # MySQL
-    cp /home/git/gitlab/config/database.yml{.mysql,}
+    cp config/database.yml{.mysql,}
 
-Edit the database config and set the correct username/password
+Make sure to update username/password in `config/database.yml`.
+You only need to adapt the production settings (first part).
+If you followed the database guide then please do as follows:
+Change `root` to `gitlab`.
+Change `secure password` with the value you have given to supersecret.
+You can keep the double quotes around the password.
 
-    vim /home/git/gitlab/config/database.yml
+    editor config/database.yml
 
-The config should look something like this (where *supersecret* is replaced with your real password):
+Make config/database.yml readable to git only
 
-    production:
-      adapter: mysql2
-      encoding: utf8
-      reconnect: false
-      database: gitlabhq_production
-      pool: 5
-      username: gitlab
-      password: supersecret
-      # host: localhost
-      # socket: /tmp/mysql.sock
-    
-## Install Gems
-*logged in as **git***
+    chmod o-rwx config/database.yml
 
-    logout
+### Install Gems
 
-*logged in as **root***
-
-    cd /home/git/gitlab
-
+    su -
     gem install charlock_holmes --version '0.6.9.4'
+    exit
 
-    su - git
-
-*logged in as **git***
-
-    cd /home/git/gitlab
-
-    # For mysql db
-    bundle install --deployment --without development test postgres
+For MySQL (note, the option says "without ... postgres"):
+    
+    cd /home/git/gitlab/
+    bundle install --deployment --without development test postgres puma aws
 
 
-## Initialize Database and Activate Advanced Features
-
-*logged in as **git***
+### Initialize Database and Activate Advanced Features
 
     cd /home/git/gitlab
     bundle exec rake gitlab:setup RAILS_ENV=production
+    
+Type 'yes' to create the database.
+When done you see 'Administrator account created:'
 
-## Install Init Script
+### Install Init Script
 
-Download the init script (will be /etc/init.d/gitlab)
+Download the init script (will be /etc/init.d/gitlab):
 
-*logged in as **git***
-
-    logout
-
-*logged in as **root***
-
-**Double check the url for this next one!!**
-
-    curl https://raw.github.com/gitlabhq/gitlab-recipes/master/init/sysvinit/centos/gitlab-centos > /etc/init.d/gitlab
+    su -
+    wget -O /etc/init.d/gitlab https://raw.github.com/gitlabhq/gitlab-recipes/master/init/sysvinit/centos/gitlab-centos
     chmod +x /etc/init.d/gitlab
     chkconfig --add gitlab
 
@@ -443,56 +424,115 @@ Make GitLab start on boot:
 
     chkconfig gitlab on
 
-Start your GitLab instance:
+### Check Application Status
+
+Check if GitLab and its environment are configured correctly:
+
+    su - git
+    cd gitlab/
+    bundle exec rake gitlab:env:info RAILS_ENV=production
+    exit
+
+### Start your GitLab instance:
 
     service gitlab start
-    # or
-    /etc/init.d/gitlab start
 
-### Configure the web server
+### Double-check Application Status
 
-For nginx:
+To make sure you didn't miss anything run a more thorough check with:
 
-    sudo yum -y install nginx
+    su - git
+    cd gitlab/
+    bundle exec rake gitlab:check RAILS_ENV=production
+
+If all items are green, then congratulations on successfully installing GitLab!
+However there are still a few steps left.
+
+## 7. Configure the web server
+
+### Nginx
+
+```
+su -
+yum -y install nginx
+chkconfig nginx on
+mkdir /etc/nginx/sites-{available,enabled}
+wget -O /etc/nginx/sites-available/gitlab https://raw.github.com/gitlabhq/gitlab-recipes/master/web-server/nginx/gitlab-ssl
+ln -sf /etc/nginx/sites-available/gitlab /etc/nginx/sites-enabled/gitlab
+```
+
+Edit `/etc/nginx/nginx.conf` and replace `include /etc/nginx/conf.d/*.conf;`
+with `/etc/nginx/sites-enabled/*;`
+
+Add `nginx` user to `git` group.
+
+    usermod -a -G git nginx 
+    chmod g+rx /home/git/
+
+Finally start nginx with:
+
+    service nginx start
     
+### Apache
 
-For Apache:
-
-    sudo yum -y install httpd
-    sudo chkconfig httpd on
-    sudo wget -O /etc/httpd/conf.d/gitlab.conf https://raw.github.com/gitlabhq/gitlab-recipes/web-server/apache/gitlab
-
+We will configure apache with module `mod_proxy` which is loaded by default when
+installing apache:
+```
+su -
+yum -y install httpd mod_ssl
+chkconfig httpd on
+wget -O /etc/httpd/conf.d/gitlab.conf https://raw.github.com/gitlabhq/gitlab-recipes/master/web-server/apache/gitlab.conf
+```
 Open `/etc/httpd/conf.d/gitlab.conf` with your editor and replace `git.example.org` with your FQDN.
 
-**OPTIONAL:** If you want to run other websites on the same system you'll need to 
-add in `/etc/httpd/conf/httpd.conf`:
+Add `LoadModule ssl_module /etc/httpd/modules/mod_ssl.so` in `/etc/httpd/conf/httpd.conf`
 
-    NameVirtualHost *:80
+If you want to run other websites on the same system, you'll need to add in `/etc/httpd/conf/httpd.conf`:
+```
+NameVirtualHost *:80
+<IfModule mod_ssl.c>
+    # If you add NameVirtualHost *:443 here, you will also have to change
+    # the VirtualHost statement in /etc/httpd/conf.d/gitlab.conf
+    # to <VirtualHost *:443>
+    NameVirtualHost *:443
+    Listen 443
+</IfModule>
+```
 
 Poke a selinux hole for httpd so it can be in front of GitLab:
 
     setsebool -P httpd_can_network_connect on
+    
+Start apache:
+    
+    service httpd start
 
-### Configure firewall
+## 8. Configure the firewall
 
-Poke an iptables hole so uses can access the httpd (http and https ports) and ssh.
-The quick way is to put this in the file called **/etc/sysconfig/iptables**
+Poke an iptables hole so users can access the httpd (http and https ports) and ssh.
+The quick way is to put this in the file called `/etc/sysconfig/iptables`:
 
-    # Firewall configuration written by system-config-firewall
-    # Manual customization of this file is not recommended.
-    *filter
-    :INPUT ACCEPT [0:0]
-    :FORWARD ACCEPT [0:0]
-    :OUTPUT ACCEPT [0:0]
-    -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
-    -A INPUT -p icmp -j ACCEPT
-    -A INPUT -i lo -j ACCEPT
-    -A INPUT -m state --state NEW -m tcp -p tcp --dport 22 -j ACCEPT
-    -A INPUT -m state --state NEW -m tcp -p tcp --dport 80 -j ACCEPT
-    -A INPUT -m state --state NEW -m tcp -p tcp --dport 443 -j ACCEPT
-    -A INPUT -j REJECT --reject-with icmp-host-prohibited
-    -A FORWARD -j REJECT --reject-with icmp-host-prohibited
-    COMMIT
+```
+# Firewall configuration written by system-config-firewall
+# Manual customization of this file is not recommended.
+*filter
+:INPUT ACCEPT [0:0]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+-A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+-A INPUT -p icmp -j ACCEPT
+-A INPUT -i lo -j ACCEPT
+-A INPUT -m state --state NEW -m tcp -p tcp --dport 22 -j ACCEPT
+-A INPUT -m state --state NEW -m tcp -p tcp --dport 80 -j ACCEPT
+-A INPUT -m state --state NEW -m tcp -p tcp --dport 443 -j ACCEPT
+-A INPUT -j REJECT --reject-with icmp-host-prohibited
+-A FORWARD -j REJECT --reject-with icmp-host-prohibited
+COMMIT
+```
+
+Restart the service for the changes to take effect:
+
+    service iptables restart
 
 ## Done!
 
@@ -502,6 +542,8 @@ The setup has created an admin account for you. You can use it to log in:
     admin@local.host
     5iveL!fe
 
+You will then be redirected to change the default admin password.
+
 ## Links used in this guide
 
 - [EPEL information](http://www.thegeekstuff.com/2012/06/enable-epel-repository/)
@@ -510,3 +552,4 @@ The setup has created an admin account for you. You can use it to log in:
 
 [EPEL]: https://fedoraproject.org/wiki/EPEL
 [keys]: https://fedoraproject.org/keys
+[sudo]: http://stackoverflow.com/questions/257616/sudo-changes-path-why
