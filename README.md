@@ -1,10 +1,10 @@
 gitlab-recipes
 ==============
 
-Unofficial guides for using GitLab with different software (operating systems, webservers, etc.) than the official version.
+GitLab recipes for setup on different platforms, update etc...
 
-### Every file should have section with the maintainer name & GitLab version:
+### Every file should have section with maintainer name & gitlab version:
 
     # GITLAB
-    # Maintainer: Dmitriy Zaporozhets
+    # Maintainer: @randx
     # App Version: 5.0
