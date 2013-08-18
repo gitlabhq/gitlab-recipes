@@ -1,0 +1,16 @@
+[Unit]
+Description=GitLab Unicorn Server
+Requires=redis.service
+After=network.target mysqld.service redis.service
+
+[Service]
+User=git
+WorkingDirectory=/home/git/gitlab
+Environment=RAILS_ENV=production
+SyslogIdentifier=gitlab-unicorn
+PidFile=/home/git/gitlab/tmp/pids/unicorn.pid
+
+ExecStart=/usr/bin/bundle exec "unicorn_rails -c /home/git/gitlab/config/unicorn.rb -E production"
+
+[Install]
+WantedBy=gitlab.target

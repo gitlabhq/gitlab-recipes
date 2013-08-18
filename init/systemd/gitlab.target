@@ -1,0 +1,5 @@
+[Unit]
+Description=GitLab - Self Hosted Git Management
+
+[Install]
+WantedBy=multi-user.target
