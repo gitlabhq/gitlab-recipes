@@ -488,8 +488,8 @@ Open `/etc/httpd/conf.d/gitlab.conf` with your editor and replace `git.example.o
 Add `LoadModule ssl_module /etc/httpd/modules/mod_ssl.so` in `/etc/httpd/conf/httpd.conf`
 
 If you want to run other websites on the same system, you'll need to add in `/etc/httpd/conf/httpd.conf`:
-```
 
+```
 NameVirtualHost *:80
 <IfModule mod_ssl.c>
     # If you add NameVirtualHost *:443 here, you will also have to change
