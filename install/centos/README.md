@@ -107,7 +107,6 @@ If you can't see it listed, use the folowing command to enable it:
 
 ### Install the required tools for GitLab
     
-    ::bash
     su -
     yum -y update
     yum -y groupinstall 'Development Tools'
@@ -130,7 +129,6 @@ GitLab will only work correctly with git version 1.8.x or newer. The problem is
 that the available rpms for CentOS stop at git 1.7.1 which is too old for GitLab.
 In order to update, you have to build git from source as it is not yet in any repository:
 
-    ::bash
     su -
     cd /tmp
     yum -y install git perl-ExtUtils-MakeMaker
@@ -154,7 +152,7 @@ installed with:
 ### Configure redis
 Make sure redis is started on boot:
 
-    ::bash
+    
     sudo chkconfig redis on
 
 ### Configure sendmail
@@ -239,7 +237,7 @@ Now we want all logging of the system to be forwarded to a central email address
 
 ----------
 
-# 4. GitLab shell
+## 4. GitLab shell
 
 GitLab Shell is a ssh access and repository management software developed specially for GitLab.
 
@@ -269,7 +267,6 @@ cp config.yml.example config.yml
 
 Install `mysql` and enable the `mysqld` service to start on boot:
 
-    ::bash
     su -
     yum install -y mysql-server mysql-devel
     chkconfig mysqld on
@@ -307,6 +304,7 @@ Try connecting to the new database with the new user:
 ## 6. GitLab
 
 We'll install GitLab into home directory of the user `git`:
+
     su -
     su - git
 
@@ -331,8 +329,7 @@ do so with caution!
 # Copy the example GitLab config
 cp config/gitlab.yml.example config/gitlab.yml
 
-# Make sure to change "localhost" to the fully-qualified domain name of your
-# host serving GitLab where necessary
+# Replace your_domain_name with the fully-qualified domain name of your host serving GitLab
 sed -i 's|localhost|your_domain_name|g' config/gitlab.yml
 
 # Change git's path to point to /usr/local/bin/git
@@ -378,11 +375,12 @@ git config --global core.autocrlf input
     # MySQL
     cp config/database.yml{.mysql,}
 
-Make sure to update username/password in `config/database.yml`.
-You only need to adapt the production settings (first part).
+Make sure to update username/password in `config/database.yml`. You only need to adapt the production settings (first part).
+
 If you followed the database guide then please do as follows:
-Change `root` to `gitlab`.
-Change `secure password` with the value you have given to supersecret.
+* Change `root` to `gitlab`.
+* Change `secure password` with the value you have given to supersecret.
+
 You can keep the double quotes around the password.
 
     editor config/database.yml
@@ -416,7 +414,7 @@ When done you see 'Administrator account created:'
 Download the init script (will be /etc/init.d/gitlab):
 
     su -
-    wget -O /etc/init.d/gitlab https://raw.github.com/gitlabhq/gitlab-recipes/master/init/sysvinit/centos/gitlab-centos
+    wget -O /etc/init.d/gitlab https://raw.github.com/gitlabhq/gitlab-recipes/master/init/sysvinit/centos/gitlab-unicorn
     chmod +x /etc/init.d/gitlab
     chkconfig --add gitlab
 
@@ -472,23 +470,26 @@ Add `nginx` user to `git` group.
 Finally start nginx with:
 
     service nginx start
-    
+
 ### Apache
 
 We will configure apache with module `mod_proxy` which is loaded by default when
 installing apache:
+
 ```
 su -
 yum -y install httpd mod_ssl
 chkconfig httpd on
 wget -O /etc/httpd/conf.d/gitlab.conf https://raw.github.com/gitlabhq/gitlab-recipes/master/web-server/apache/gitlab.conf
 ```
+
 Open `/etc/httpd/conf.d/gitlab.conf` with your editor and replace `git.example.org` with your FQDN.
 
 Add `LoadModule ssl_module /etc/httpd/modules/mod_ssl.so` in `/etc/httpd/conf/httpd.conf`
 
 If you want to run other websites on the same system, you'll need to add in `/etc/httpd/conf/httpd.conf`:
 ```
+
 NameVirtualHost *:80
 <IfModule mod_ssl.c>
     # If you add NameVirtualHost *:443 here, you will also have to change
