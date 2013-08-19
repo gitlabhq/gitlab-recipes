@@ -549,6 +549,7 @@ You will then be redirected to change the default admin password.
 
 - [EPEL information](http://www.thegeekstuff.com/2012/06/enable-epel-repository/)
 - [git update to 1.8.x](http://www.pickysysadmin.ca/2013/05/21/commit-comments-not-appearing-in-gitlab-on-centos/)
+- [SELinux booleans](http://wiki.centos.org/TipsAndTricks/SelinuxBooleans)
 
 
 [EPEL]: https://fedoraproject.org/wiki/EPEL
