@@ -65,7 +65,7 @@ GitLab version    :
 Web Server        : 
 Init system       : 
 Database          : 
-Contributor       : 
+Contributors      : 
 Additional Notes  : 
 ```
 
