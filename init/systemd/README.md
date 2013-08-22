@@ -5,10 +5,10 @@ GitLab requires a couple of services:
 * Redis server
 * Mail server (postfix or other)
 * GitLab Sidekiq service (`gitlab-sidekiq.service`)
-* Unicorn (`gitlab-unicorn.service`)
+* Unicorn service (`gitlab-unicorn.service`)
 
 
-## Setup GitLab Sidekiq service
+## Setup GitLab services
 
 Copy files to `/etc/systemd/system/`:
 
@@ -20,24 +20,24 @@ wget -O gitlab-unicorn.service https://raw.github.com/gitlabhq/gitlab-recipes/ma
 wget -O gitlab.target https://raw.github.com/gitlabhq/gitlab-recipes/master/init/systemd/gitlab.target
 ```
 
-Reload systemd: 
+Reload systemd:
 
     sudo systemctl --system daemon-reload
-    
+
 Start the services:
 
     sudo systemctl start gitlab-sidekiq gitlab-unicorn
-    
+
 Enable them to start at boot:
 
     sudo systemctl enable gitlab-sidekiq gitlab-unicorn
 
 ## Notes
 
-If you installed GitLab in other path than `/home/git/gitlab` change the service files accordingly.
+* If you installed GitLab in other path than `/home/git/gitlab` change the service files accordingly.
 
-`/etc/systemd/system/` have a higher precedence over  `/lib/systemd/system`.
+* `/etc/systemd/system/` have a higher precedence over  `/lib/systemd/system`.
 
-For older systemd versions you need to append `service` after the service name. For example:
+* For older systemd versions you need to append `service` after the service name. For example:
 
     sudo systemctl start gitlab-sidekiq.service
