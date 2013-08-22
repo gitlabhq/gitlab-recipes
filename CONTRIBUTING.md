@@ -26,8 +26,8 @@ For example some good titles would be:
 
 ## Guides
 
-Each installation guide has its own namespace and it should be provided in a 
-`README` file so that it renders first when viewing the repository. Submit a new 
+Each installation guide has its own namespace and it should be provided in a
+`README` file so that it renders first when viewing the repository. Submit a new
 one in `install/platform/README.md` (it doesn't have to be strictly in markdown though).
 
 ## Scripts
@@ -42,6 +42,7 @@ how to use the script. You may have included all the needed info in the script
 itself (recommended), so you could simply write something between the lines:
 
   > This script installs GitLab 6.0 on Archlinux. Run it with `./archlinux.sh your_domain_name`
+  >
   > For more info and variables you can change, read the comments in the script.
 
 
@@ -87,7 +88,7 @@ Additional Notes  :
 ```
 Distribution      : Fedora 19
 GitLab version    : 5.4
-Web Server        : apache with mod_passenger 
+Web Server        : apache with mod_passenger
 Init system       : systemd
 Database          : mariadb
 Contributors      : thedude
