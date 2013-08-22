@@ -7,7 +7,7 @@ Bare in mind that this repository is co-maintained by volunteers/contributors li
 
 ## Contributing
 
-See [contributing.md](contributing.md) for contribution guidelines.
+See [contributing.md](CONTRIBUTING.md) for contribution guidelines.
 
 ## Notes on the reliability of guides/scripts
 
