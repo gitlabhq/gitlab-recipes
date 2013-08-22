@@ -1,0 +1,13 @@
+###########################################################################################
+#
+# GitLab version    : 5.x - 6.x
+# Contributors      : davispuh, mtorromeo, axilleas
+# Downloaded from   : https://github.com/gitlabhq/gitlab-recipes/tree/master/init/systemd 
+#
+###########################################################################################
+
+[Unit]
+Description=GitLab - Self Hosted Git Management
+
+[Install]
+WantedBy=multi-user.target
