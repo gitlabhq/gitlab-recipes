@@ -1,10 +1,16 @@
-gitlab-recipes
-==============
+## GitLab recipes: unofficial guides for using GitLab with different software
 
-GitLab recipes for setup on different platforms, update etc...
+Here you will find unofficial guides for using GitLab with different software (operating systems, web servers, etc.)
+provided by the community, for systems other than the officially supported (Debian/Ubuntu).
 
-### Every file should have section with maintainer name & gitlab version:
+Bare in mind that this repository is co-maintained by volunteers/contributors like you.
 
-    # GITLAB
-    # Maintainer: @randx
-    # App Version: 5.0
+## Contributing
+
+See [contributing.md](CONTRIBUTING.md) for contribution guidelines.
+
+## Notes on the reliability of guides/scripts
+
+* We will try to test everything before accepting PRs, in a clean, newly installed platform.
+* You should read a script and understand what it does prior to running it.
+* If something goes wrong during installation and you think the guide/script needs fixing, file a bug report or a submit a Pull Request.

@@ -1,0 +1,27 @@
+###########################################################################################
+#
+# GitLab version    : 5.x - 6.x
+# Contributors      : davispuh, mtorromeo, axilleas
+# Downloaded from   : https://github.com/gitlabhq/gitlab-recipes/tree/master/init/systemd 
+#
+###########################################################################################
+
+[Unit]
+Description=GitLab Sidekiq Worker
+Requires=redis.service
+After=syslog.target network.target redis.service
+Wants=mysqld.service
+
+[Service]
+Type=forking
+User=git
+WorkingDirectory=/home/git/gitlab
+Environment=RAILS_ENV=production
+SyslogIdentifier=gitlab-sidekiq
+PidFile=/home/git/gitlab/tmp/pids/sidekiq.pid
+
+ExecStart=/usr/bin/bundle exec rake sidekiq:start
+ExecStop=/usr/bin/bundle exec rake sidekiq:stop
+
+[Install]
+WantedBy=gitlab.target
