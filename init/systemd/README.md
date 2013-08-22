@@ -40,4 +40,4 @@ Enable them to start at boot:
 
 * For older systemd versions you need to append `service` after the service name. For example:
 
-    sudo systemctl start gitlab-sidekiq.service
+        sudo systemctl start gitlab-sidekiq.service
