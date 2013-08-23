@@ -51,17 +51,17 @@ The GitLab installation consists of setting up the following components:
 
 ## 1. Installing the operating system (CentOS 6.4 Minimal)
 
-We start with a completely clean CentOS 6.4 "minimal" installation which can be 
+We start with a completely clean CentOS 6.4 "minimal" installation which can be
 accomplished by downloading the appropriate installation iso file. Just boot the
 system of the iso file and install the system.
 
-Note that during the installation you use the *"Configure Network"* option (it's a 
-button in the same screen where you specify the hostname) to enable the *"Connect automatically"* 
-option for the network interface and hand (usually eth0). 
+Note that during the installation you use the *"Configure Network"* option (it's a
+button in the same screen where you specify the hostname) to enable the *"Connect automatically"*
+option for the network interface and hand (usually eth0).
 
 **If you forget this option the network will NOT start at boot.**
 
-The end result is a bare minimum CentOS installation that effectively only has 
+The end result is a bare minimum CentOS installation that effectively only has
 network connectivity and (almost) no services at all.
 
 ## Updating and adding basic software and services
@@ -69,10 +69,10 @@ network connectivity and (almost) no services at all.
 ### Add EPEL repository
 
 [EPEL][] is a volunteer-based community effort from the Fedora project to create
-a repository of high-quality add-on packages that complement the Fedora-based 
+a repository of high-quality add-on packages that complement the Fedora-based
 Red Hat Enterprise Linux (RHEL) and its compatible spinoffs, such as CentOS and Scientific Linux.
 
-As part of the Fedora packaging community, EPEL packages are 100% free/libre open source software (FLOSS). 
+As part of the Fedora packaging community, EPEL packages are 100% free/libre open source software (FLOSS).
 
 Download the GPG key for EPEL repository from [fedoraproject][keys] and install it on your system:
 
@@ -90,7 +90,7 @@ Now install the `epel-release-6-8.noarch` package, which will enable EPEL reposi
 
 **Note:** Don't mind the `x86_64`, if you install on a i686 system you can use the same commands.
 
-Verify that the EPEL repository is enabled as shown below. Now, you’ll see epel 
+Verify that the EPEL repository is enabled as shown below. Now, you’ll see epel
 repository (apart from the standard base, updates and extras repositories):
 
     sudo yum repolist
@@ -106,7 +106,7 @@ If you can't see it listed, use the folowing command to enable it:
     sudo yum-config-manager --enable epel
 
 ### Install the required tools for GitLab
-    
+
     su -
     yum -y update
     yum -y groupinstall 'Development Tools'
@@ -125,7 +125,7 @@ Tip taken from [here](https://github.com/gitlabhq/gitlab-recipes/issues/62).
 
 ### Git
 
-GitLab will only work correctly with git version 1.8.x or newer. The problem is 
+GitLab will only work correctly with git version 1.8.x or newer. The problem is
 that the available rpms for CentOS stop at git 1.7.1 which is too old for GitLab.
 In order to update, you have to build git from source as it is not yet in any repository:
 
@@ -152,7 +152,7 @@ installed with:
 ### Configure redis
 Make sure redis is started on boot:
 
-    
+
     sudo chkconfig redis on
 
 ### Configure sendmail
@@ -173,7 +173,7 @@ Then replace this line:
 with:
 
     dnl EXPOSED_USER(`root')dnl
- 
+
 Now enable these settings:
 
     make
@@ -313,9 +313,9 @@ We'll install GitLab into home directory of the user `git`:
     # Clone GitLab repository
     git clone https://github.com/gitlabhq/gitlabhq.git gitlab
 
-    # Go to gitlab directory 
+    # Go to gitlab directory
     cd /home/git/gitlab
-   
+
     # Checkout to stable release
     git checkout 6-0-stable
 
@@ -396,7 +396,7 @@ Make config/database.yml readable to git only
     exit
 
 For MySQL (note, the option says "without ... postgres"):
-    
+
     cd /home/git/gitlab/
     bundle install --deployment --without development test postgres puma aws
 
@@ -405,7 +405,7 @@ For MySQL (note, the option says "without ... postgres"):
 
     cd /home/git/gitlab
     bundle exec rake gitlab:setup RAILS_ENV=production
-    
+
 Type 'yes' to create the database.
 When done you see 'Administrator account created:'
 
@@ -448,6 +448,8 @@ However there are still a few steps left.
 
 ## 7. Configure the web server
 
+Use either Nginx or Apache, not both. Official installation guide recommends nginx.
+
 ### Nginx
 
 ```
@@ -464,7 +466,7 @@ with `/etc/nginx/sites-enabled/*;`
 
 Add `nginx` user to `git` group.
 
-    usermod -a -G git nginx 
+    usermod -a -G git nginx
     chmod g+rx /home/git/
 
 Finally start nginx with:
@@ -503,9 +505,9 @@ NameVirtualHost *:80
 Poke a selinux hole for httpd so it can be in front of GitLab:
 
     setsebool -P httpd_can_network_connect on
-    
+
 Start apache:
-    
+
     service httpd start
 
 ## 8. Configure the firewall
