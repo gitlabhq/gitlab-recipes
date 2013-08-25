@@ -11,10 +11,10 @@
 # sudo chmod o-r gitlab.key
 
 upstream gitlab {
-  
+
   ## Uncomment if you have set up puma/unicorn to listen on a unix socket (recommended).
   server unix:/home/git/gitlab/tmp/sockets/gitlab.socket;
-  
+
   ## Uncomment if puma/unicorn are configured to listen on a tcp port.
   ## Check the port number in /home/git/gitlab/config/{puma.rb/unicorn.rb}
   # server 127.0.0.1:9292;
@@ -30,7 +30,7 @@ server {
     rewrite ^ https://$server_name$request_uri permanent;
 }
 server {
-    listen 443;
+    listen 443 ssl;
     server_name git.example.com;
     server_tokens off;
     root /home/git/gitlab/public;
