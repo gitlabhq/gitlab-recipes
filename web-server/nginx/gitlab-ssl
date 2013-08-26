@@ -9,6 +9,8 @@
 # cd /etc/nginx/
 # sudo openssl req -new -x509 -nodes -days 3560 -out gitlab.crt -keyout gitlab.key
 # sudo chmod o-r gitlab.key
+# Also you need to edit gitlab-shell config.
+# Set "gitlab_url" param in gitlab-shell/config.yml to https://git.example.com 
 
 upstream gitlab {
 
