@@ -27,7 +27,7 @@ Look for the **RHEL Notes** note.
 #### If you find a bug
 
 If you find a bug/error in this guide please submit an issue or pull request
-following the contribution guide (see `../../contributing.md`).
+following the contribution guide (see [CONTRIBUTING.md](../../CONTRIBUTING.md)).
 
 #### Security
 
