@@ -154,6 +154,7 @@ Make sure redis is started on boot:
 
 
     sudo chkconfig redis on
+    service redis start
 
 ### Configure sendmail
 
