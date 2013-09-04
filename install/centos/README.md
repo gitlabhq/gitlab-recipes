@@ -206,7 +206,8 @@ Install the Bundler Gem:
 
      sudo gem install bundler --no-ri --no-rdoc
 
-**NOTE:** If you get an error like `sudo: gem: command not found`, it is because
+**NOTE:** 
+If you get an error like `sudo: gem: command not found`, it is because
 CentOS has sudo built with the `--with-secure-path` flag. See this post on [stackoverflow][sudo]
 on how to deal with it. Alternatively, login as root and run the command.
 
@@ -369,7 +370,8 @@ git config --global user.email "gitlab@your_domain_name"
 git config --global core.autocrlf input
 ```
 
-**Important:** Make sure to edit both `gitlab.yml` and `unicorn.rb` to match your setup.
+**Important:** 
+Make sure to edit both `gitlab.yml` and `unicorn.rb` to match your setup.
 
 ### Configure GitLab DB settings
 
@@ -477,10 +479,8 @@ Finally start nginx with:
 **Note:**
 Don't forget to add a SSL certificate or generate a Self Signed Certificate
 
-```
-cd /etc/nginx
-sudo openssl req -new -x509 -nodes -days 3560 -out gitlab.crt -keyout gitlab.key
-
+    cd /etc/nginx
+    sudo openssl req -new -x509 -nodes -days 3560 -out gitlab.crt -keyout gitlab.key
 
 ### Apache
 
