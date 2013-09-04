@@ -474,6 +474,14 @@ Finally start nginx with:
 
     service nginx start
 
+**Note:**
+Don't forget to add a SSL certificate or generate a Self Signed Certificate
+
+```
+cd /etc/nginx
+sudo openssl req -new -x509 -nodes -days 3560 -out gitlab.crt -keyout gitlab.key
+
+
 ### Apache
 
 We will configure apache with module `mod_proxy` which is loaded by default when
