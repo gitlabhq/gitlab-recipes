@@ -480,7 +480,7 @@ Finally start nginx with:
 Don't forget to add a SSL certificate or generate a Self Signed Certificate
 
     cd /etc/nginx
-    sudo openssl req -new -x509 -nodes -days 3560 -out gitlab.crt -keyout gitlab.key
+    openssl req -new -x509 -nodes -days 3560 -out gitlab.crt -keyout gitlab.key
 
 ### Apache
 
