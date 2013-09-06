@@ -206,8 +206,7 @@ Install the Bundler Gem:
 
      sudo gem install bundler --no-ri --no-rdoc
 
-**NOTE:** 
-If you get an error like `sudo: gem: command not found`, it is because
+**NOTE:** If you get an error like `sudo: gem: command not found`, it is because
 CentOS has sudo built with the `--with-secure-path` flag. See this post on [stackoverflow][sudo]
 on how to deal with it. Alternatively, login as root and run the command.
 
