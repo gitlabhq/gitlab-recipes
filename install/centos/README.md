@@ -4,7 +4,7 @@ GitLab version    : 6.0
 Web Server        : Apache, Nginx
 Init system       : sysvinit
 Database          : mysql
-Contributors      : @nielsbasjes, @axilleas, @mairin
+Contributors      : @nielsbasjes, @axilleas, @mairin, @ponsjuh
 Additional Notes  : In order to get the latest git version we build it from source
 ```
 
@@ -320,8 +320,7 @@ We'll install GitLab into home directory of the user `git`:
     # Checkout to stable release
     git checkout 6-0-stable
 
-**Note:**
-You can change `6-0-stable` to `master` if you want the *bleeding edge* version, but
+**Note:** You can change `6-0-stable` to `master` if you want the *bleeding edge* version, but
 do so with caution!
 
 ### Configure it
@@ -369,8 +368,7 @@ git config --global user.email "gitlab@your_domain_name"
 git config --global core.autocrlf input
 ```
 
-**Important:** 
-Make sure to edit both `gitlab.yml` and `unicorn.rb` to match your setup.
+**Important:** Make sure to edit both `gitlab.yml` and `unicorn.rb` to match your setup.
 
 ### Configure GitLab DB settings
 
@@ -475,8 +473,7 @@ Finally start nginx with:
 
     service nginx start
 
-**Note:**
-Don't forget to add a SSL certificate or generate a Self Signed Certificate
+**Note:** Don't forget to add a SSL certificate or generate a Self Signed Certificate
 
     cd /etc/nginx
     openssl req -new -x509 -nodes -days 3560 -out gitlab.crt -keyout gitlab.key
