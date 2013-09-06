@@ -4,7 +4,7 @@ GitLab version    : 6.0
 Web Server        : Apache, Nginx
 Init system       : sysvinit
 Database          : mysql
-Contributors      : @nielsbasjes, @axilleas, @mairin
+Contributors      : @nielsbasjes, @axilleas, @mairin, @ponsjuh
 Additional Notes  : In order to get the latest git version we build it from source
 ```
 
@@ -154,6 +154,7 @@ Make sure redis is started on boot:
 
 
     sudo chkconfig redis on
+    sudo service redis start
 
 ### Configure sendmail
 
@@ -319,8 +320,7 @@ We'll install GitLab into home directory of the user `git`:
     # Checkout to stable release
     git checkout 6-0-stable
 
-**Note:**
-You can change `6-0-stable` to `master` if you want the *bleeding edge* version, but
+**Note:** You can change `6-0-stable` to `master` if you want the *bleeding edge* version, but
 do so with caution!
 
 ### Configure it
@@ -472,6 +472,11 @@ Add `nginx` user to `git` group.
 Finally start nginx with:
 
     service nginx start
+
+**Note:** Don't forget to add a SSL certificate or generate a Self Signed Certificate
+
+    cd /etc/nginx
+    openssl req -new -x509 -nodes -days 3560 -out gitlab.crt -keyout gitlab.key
 
 ### Apache
 
