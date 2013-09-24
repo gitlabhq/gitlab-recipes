@@ -98,7 +98,7 @@ You should comment out the following modules from your `httpd.conf`.
     #LoadModule deflate_module modules/mod_deflate.so
     #LoadModule suexec_module modules/mod_suexec.so
 
-`mod_deflate` is potentially used by HTTP.  If you set up HTTP to use it then you'll still be vulnerable to the [CRIME][crimepatch] exploit.  `mod_suexec` is dangerous if apache directories' permissions are improperly configured.  `mod_suexec` can be exploited to write to the document root which gives a remote attacker the ability to possibly execute a local exploit to escalate privileges.  There's not reason to `mod_suexec` enabled for GitLab.
+`mod_deflate` is potentially used by HTTP.  If you set up HTTP to use it then you'll still be vulnerable to the [CRIME][crimepatch] exploit.  `mod_suexec` is dangerous if apache directories' permissions are improperly configured.  `mod_suexec` can be exploited to write to the document root which gives a remote attacker the ability to possibly execute a local exploit to escalate privileges.  There's not reason to enable `mod_suexec` for GitLab.
 
 ## Manage your own SSL Certificates
 
