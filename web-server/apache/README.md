@@ -93,6 +93,13 @@ For Apache httpd 2.2.24 and greater there has been a fix implemented in `mod_ssl
 
     SSLCompression Off
 
+You should comment out the following modules from your `httpd.conf`.
+
+    #LoadModule deflate_module modules/mod_deflate.so
+    #LoadModule suexec_module modules/mod_suexec.so
+
+`mod_deflate` is potentially used by HTTP.  If you set up HTTP to use it then you'll still be vulnerable to the [CRIME][crimepatch] exploit.  `mod_suexec` is dangerous if apache directories' permissions are improperly configured.  `mod_suexec` can be exploited to write to the document root which gives a remote attacker the ability to possible execute a local exploit to escalate privileges.  There's not reason to `mod_suexec` enabled for GitLab.
+
 ## Manage your own SSL Certificates
 
 Using self signed certificates is always a bad idea.  It's far more secure to run and manage your own certificate authority than it is to use self signed certificates.   Running your own certificate authority is easy.  There are 3 ways you can manage your own certificate authority for signing certificates.
