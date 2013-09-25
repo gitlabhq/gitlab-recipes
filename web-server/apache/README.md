@@ -19,7 +19,7 @@ As apache's mod_proxy [doesn't support][sock] sockets, the proxy URL must be con
 
 ## Assumptions
 
-It is assumed GitLab will be running in a secure production system.  This Apache `httpd` configuration is hardened for that purpose.  By default this configuration only allows strong SSL and HTTP is redirected to HTTPS.  If self signed certificates are preferred then see below in this document on managing SSL certificates.  Also see additional security recommendations located at the bottom of this document for `httpd`.  Managing GitLab with plain text HTTP only is not recommended however [gitlab.conf](gitlab.conf) has been provided for that purpose.
+It is assumed GitLab will be running in a secure production environment.  This Apache `httpd` configuration is hardened for that purpose.  By default this configuration only allows strong SSL and HTTP is redirected to HTTPS.  If self signed certificates are preferred then see below in this document on managing SSL certificates.  Also see additional security recommendations located at the bottom of this document for `httpd`.  Managing GitLab with plain text HTTP only is not recommended however [gitlab.conf](gitlab.conf) has been provided for that purpose.
 
 ### Encryption assumptions
 
