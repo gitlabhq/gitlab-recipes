@@ -12,20 +12,18 @@ By default, Unicorn (i.e. `unicorn.rb`) is configured to listen on port `8080` i
 
 Info taken from [PR #87](https://github.com/gitlabhq/gitlab-recipes/pull/87).
 
-As apache's mod_proxy [doesn't support][sock] sockets, we have to configure the 
-proxy URL to use tcp instead of unix sockets. First make sure that `/home/git/gitlab/config/puma.rb` exists.
-Then you have to make 2 changes:
+As apache's mod_proxy [doesn't support][sock] sockets, the proxy URL must be configured to use tcp instead of unix sockets. `/home/git/gitlab/config/puma.rb` should exist and be configured.  Two changes must then be made:
 
 1. In `gitlab.conf` replace `http://127.0.0.1:8080/ ` with `http://0.0.0.0:9292/`
 2. Edit `puma.rb`: comment out `bind 'tcp://0.0.0.0:9292'` and comment `bind "unix://#{application_path}/tmp/sockets/gitlab.socket"`
 
 ## Assumptions
 
-Since it is assumed your GitLab will be running in a secure production system, this Apache `httpd` configuration is hardened for that purpose.  By default this configuration only allows strong SSL and HTTP is redirected to HTTPS.  If you wish to manage your own self signed certificates then see below on managing your own SSL certificates.  Also see additional security recommendations located at the bottom of this document for `httpd`.  If you wish to run with plain text HTTP only (not recommended) then the [gitlab.conf](gitlab.conf) can be easily modified.
+It is assumed GitLab will be running in a secure production system.  This Apache `httpd` configuration is hardened for that purpose.  By default this configuration only allows strong SSL and HTTP is redirected to HTTPS.  I self signed certificates are preferred then see below in this document on managing SSL certificates.  Also see additional security recommendations located at the bottom of this document for `httpd`.  Managing GitLab with plain text HTTP only is not recommended however [gitlab.conf](gitlab.conf) has been provided for that purpose.
 
 ### Encryption assumptions
 
-For the hardened security ciphers I decided to go with TLSv1.0+ and SSLv3+.  Only strong ciphers 128-bit or higher.  Ciphers with known weaknesses (i.e. MD5 hashed and RC4 based ciphers) have been purposefully excluded.
+Only security ciphers TLSv1.0+ and SSLv3+ are used in [gitlab-ssl.conf](gitlab-ssl.conf).  Only strong ciphers 128-bit or higher.  Ciphers with known weaknesses (i.e. MD5 hashed and RC4 based ciphers) have been purposefully excluded.
 
 ### Run GitLab insecure with HTTP only
 
@@ -54,16 +52,16 @@ And change `<VirtualHost *:443>` to `<VirtualHost *:80>`.
 
 ## Customize gitlab.conf
 
-There are a few places in [gitlab.conf](gitlab.conf) where you'll need to modify for your own configuration.
+There are a few places in [gitlab.conf](gitlab.conf) which need to be customized for the GitLab installation.
 
-1. `ServerName` is defined in two VirtualHosts.  You'll need to set `ServerName` to your own host value.
-2. `SSLCertificateFile`, `SSLCertificateKeyFile`, and `SSLCACertificateFile` should be customized for your setup using your own signed certificates.
-3. `ProxyPassReverse http://gitlab.example.com:8080` should be customized for your public host name of GitLab.
-4. At the bottom of `gitlab.conf` I have the log file names defined with `gitlab.example.com`.  You should change that so it includes your hostname instead.
+1. `ServerName` is defined in two VirtualHosts.  `ServerName` should be set to host name of the GitLab installation.
+2. `SSLCertificateFile`, `SSLCertificateKeyFile`, and `SSLCACertificateFile` should be customized for signed certificates.
+3. `ProxyPassReverse http://gitlab.example.com:8080` should be customized for public host name of the GitLab installtion.
+4. At the bottom of `gitlab.conf` log file names defined with `gitlab.example.com`.  The log file names should reflect the GitLab installation host name.
 
 ## SELinux modifications
 
-In your production environment it is assumed you'll be running SELinux enabled.  Therefore you should make the following SELinux changes.
+In a RHEL6 production production environment it is assumed SELinux is enabled.  SELinux must be configured with the following:
 
     setsebool -P httpd_can_network_connect on
     setsebool -P httpd_can_network_relay on
@@ -77,43 +75,43 @@ In your production environment it is assumed you'll be running SELinux enabled. 
 
 ## Other httpd security considerations
 
-In `/etc/httpd/conf/httpd.conf` it is recommended you add/modify the following values.  For more information see [ServerTokens][servertokens], [ServerSignature][serversignature], and [TraceEnable][traceenable].
+In `/etc/httpd/conf/httpd.conf` it is recommended to add/modify the following values.  For more information see [ServerTokens][servertokens], [ServerSignature][serversignature], and [TraceEnable][traceenable].
 
     ServerTokens Prod
     ServerSignature Off
     TraceEnable Off
 
-`ServerTokens` and `ServerSignature` prevent your Apache httpd version being broadcast in HTTP RESPONSE headers.  `TraceEnable` disables HTTP tracing which is a HTTP debugging feature and is commonly used in cross-site scripting (XSS) attacks.
+`ServerTokens` and `ServerSignature` prevent the Apache httpd version being broadcast in HTTP RESPONSE headers.  `TraceEnable` disables HTTP tracing which is a HTTP debugging feature and is commonly used in cross-site scripting (XSS) attacks.
 
 There is a vulnerability in compression over SSL and the exploit is called [CRIME][crimepatch].  To mitigate this vulnerability it is recommended to disable compression in `httpd`.  In RHEL Apache httpd 2.2.15 (official release) `mod_ssl` enables compression over SSL by default.  The only way to mitigate that is by implementing an [RHN solution][rhnfix].  Basically add the following line to `/etc/sysconfig/httpd`.
 
     export OPENSSL_NO_DEFAULT_ZLIB=1
 
-For Apache httpd 2.2.24 and greater there has been a fix implemented in `mod_ssl`.  Now there's a [SSLCompression][sslcompression] option available to disable compression in SSL.  Add the following line to your `httpd.conf`.
+For Apache httpd 2.2.24 and greater there has been a fix implemented in `mod_ssl`.  Now there's a [SSLCompression][sslcompression] option available to disable compression over SSL.  Add the following line to `httpd.conf`.
 
     SSLCompression Off
 
-You should comment out the following modules from your `httpd.conf`.
+Certain modules should be disabled.  Comment out the following modules from `httpd.conf`.
 
     #LoadModule deflate_module modules/mod_deflate.so
     #LoadModule suexec_module modules/mod_suexec.so
 
-`mod_deflate` is potentially used by HTTP.  If you set up HTTP to use it then you'll still be vulnerable to the [CRIME][crimepatch] exploit.  `mod_suexec` is dangerous if apache directories' permissions are improperly configured.  `mod_suexec` can be exploited to write to the document root which gives a remote attacker the ability to possibly execute a local exploit to escalate privileges.  There's not reason to enable `mod_suexec` for GitLab.
+`mod_deflate` is potentially used by HTTP.  If VirtualHosts are configured to use `mod_deflate` then the [CRIME][crimepatch] exploit vulnerability will be a concern.  `mod_suexec` is dangerous if apache directories' permissions are improperly configured.  `mod_suexec` can be exploited to write to the document root which gives a remote attacker the ability to possibly execute a local exploit to escalate privileges.  GitLab does not require `mod_suexec` so it is better to remain disabled.
 
-## Manage your own SSL Certificates
+## How to self manage a Certificate Authority to sign SSL certificates
 
-Using self signed certificates is always a bad idea.  It's far more secure to run and manage your own certificate authority than it is to use self signed certificates.   Running your own certificate authority is easy.  There are 3 ways you can manage your own certificate authority for signing certificates.
+Using self signed certificates is always a bad idea.  It's far more secure to self manage a certificate authority than it is to use self signed certificates.   Running a certificate authority is easy.  There are three recommended options for managing a certificate authority for signing certificates.
 
 1. The [xca project][xca] provides a graphical front end to certificate authority management in openssl.  It is available for Windows, Linux, and Mac OS.
-2. The OpenVPN project provides a nice [set of scripts][ovpn_scripts] for managing a certificate authority as well.  I'd like the GitLab project to include these scripts for their own purpose but for now SSL certificate management is outside of their scope.
-3. [Be your own CA][yourca_tut] tutorial which is a personal favorite and much lighter weight than the previous two options.
+2. The OpenVPN project provides a nice [set of scripts][ovpn_scripts] for managing a certificate authority as well.  Eventually the GitLab project may include these scripts for their own purpose but for now SSL certificate management is outside of their scope.
+3. [Be your own CA][yourca_tut] tutorial provides a more manual method of certificate authority management outside of scripts or UI.  It provides openssl commands for certificate authority management.
 
-For your own certificate authority you just add your CA certificate to all of your browsers and mobile devices. Then you have secure and validated certificates everywhere.  If you would like your server to be more public and open you should still use SSL to secure your service because of password authentication.  You may utilize the free [StartCom SSL Certificate Authority][startcom_ssl] to sign your public certificates for free.
+Once a certificate authority is self managed simply add the CA certificate to all browsers and mobile devices. Enjoy secure and validated certificates everywhere.  If a GitLab service is designated for public access then self managing a certificate authority may not be the best option.  Signed certificates should still be the preferred method  to secure GitLab.  The [StartCom SSL Certificate Authority][startcom_ssl] provides a free service to sign Class 1 SSL certificates.
 
 ---
 # Ubuntu 12.04 notes
 
-In Ubuntu httpd is called Apache2 and apache logs are located under `/var/log/apache2`.  You may wish to change this in the [gitlab.conf](gitlab.conf) configuration.  Ubuntu runs [AppArmor][apparmor] instead of SELinux and by default doesn't affect GitLab operation.
+In Ubuntu httpd is called Apache2 and apache logs are located under `/var/log/apache2`.  Log path names in the [gitlab.conf](gitlab.conf) configuration should reflect this.  Ubuntu runs [AppArmor][apparmor] instead of SELinux and by default doesn't affect GitLab operation.
 
 [startcom_ssl]: http://cert.startcom.org/
 [xca]: http://sourceforge.net/projects/xca/
