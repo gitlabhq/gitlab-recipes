@@ -1,6 +1,6 @@
 # RHEL6/CentOS6 recommendations
 
-The up-to-date recommended `gitlab.conf` was configured on RHEL 6.4.
+The up-to-date recommended [gitlab-ssl.conf](gitlab-ssl.conf) was configured on RHEL 6.4.
 
 ## Puma or unicorn?
 
@@ -19,7 +19,7 @@ As apache's mod_proxy [doesn't support][sock] sockets, the proxy URL must be con
 
 ## Assumptions
 
-It is assumed GitLab will be running in a secure production system.  This Apache `httpd` configuration is hardened for that purpose.  By default this configuration only allows strong SSL and HTTP is redirected to HTTPS.  I self signed certificates are preferred then see below in this document on managing SSL certificates.  Also see additional security recommendations located at the bottom of this document for `httpd`.  Managing GitLab with plain text HTTP only is not recommended however [gitlab.conf](gitlab.conf) has been provided for that purpose.
+It is assumed GitLab will be running in a secure production system.  This Apache `httpd` configuration is hardened for that purpose.  By default this configuration only allows strong SSL and HTTP is redirected to HTTPS.  If self signed certificates are preferred then see below in this document on managing SSL certificates.  Also see additional security recommendations located at the bottom of this document for `httpd`.  Managing GitLab with plain text HTTP only is not recommended however [gitlab.conf](gitlab.conf) has been provided for that purpose.
 
 ### Encryption assumptions
 
@@ -35,8 +35,8 @@ There are a few places in [gitlab-ssl.conf](gitlab-ssl.conf) which need to be cu
 
 1. `ServerName` is defined in two VirtualHosts.  `ServerName` should be set to host name of the GitLab installation.
 2. `SSLCertificateFile`, `SSLCertificateKeyFile`, and `SSLCACertificateFile` should be customized for signed certificates.
-3. `ProxyPassReverse http://gitlab.example.com:8080` should be customized for public host name of the GitLab installtion.
-4. At the bottom of `gitlab-ssl.conf` log file names defined with `gitlab.example.com`.  The log file names should reflect the GitLab installation host name.
+3. `ProxyPassReverse http://gitlab.example.com:8080` should be customized for public host name of the GitLab installation.
+4. At the bottom of `gitlab-ssl.conf` log file names contain `gitlab.example.com`.  The log file names should reflect the GitLab installation host name.
 
 A quicker method is to use `sed` to modify the file.
 
