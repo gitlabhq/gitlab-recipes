@@ -27,37 +27,22 @@ Only security ciphers TLSv1.0+ and SSLv3+ are used in [gitlab-ssl.conf](gitlab-s
 
 ### Run GitLab insecure with HTTP only
 
-Simply remove the following lines:
+Utilize [gitlab.conf](gitlab.conf) rather than [gitlab-ssl.conf](gitlab-ssl.conf).  Running a production GitLab instance over plain text HTTP is not recommended.
 
-      SSLEngine on
-      #strong encryption ciphers only
-      #see ciphers(1) http://www.openssl.org/docs/apps/ciphers.html
-      SSLCipherSuite SSLv3:TLSv1:+HIGH:!SSLv2:!MD5:!MEDIUM:!LOW:!EXP:!ADH:!eNULL:!aNULL
-      SSLCertificateFile /etc/httpd/ssl.crt/gitlab.example.com.crt
-      SSLCertificateKeyFile /etc/httpd/ssl.key/gitlab.example.com.key
-      SSLCACertificateFile /etc/httpd/ssl.crt/your-ca.crt
+## Customize gitlab-ssl.conf
 
-Remove this entire block.
-
-    <VirtualHost *:80>
-      ServerName gitlab.example.com
-      ServerSignature Off 
-    
-      RewriteEngine on
-      RewriteCond %{HTTPS} !=on
-      RewriteRule ^(.*) https://%{SERVER_NAME}$1 [R,L]
-    </VirtualHost>
-
-And change `<VirtualHost *:443>` to `<VirtualHost *:80>`.
-
-## Customize gitlab.conf
-
-There are a few places in [gitlab.conf](gitlab.conf) which need to be customized for the GitLab installation.
+There are a few places in [gitlab-ssl.conf](gitlab-ssl.conf) which need to be customized for the GitLab installation.
 
 1. `ServerName` is defined in two VirtualHosts.  `ServerName` should be set to host name of the GitLab installation.
 2. `SSLCertificateFile`, `SSLCertificateKeyFile`, and `SSLCACertificateFile` should be customized for signed certificates.
 3. `ProxyPassReverse http://gitlab.example.com:8080` should be customized for public host name of the GitLab installtion.
-4. At the bottom of `gitlab.conf` log file names defined with `gitlab.example.com`.  The log file names should reflect the GitLab installation host name.
+4. At the bottom of `gitlab-ssl.conf` log file names defined with `gitlab.example.com`.  The log file names should reflect the GitLab installation host name.
+
+A quicker method is to use `sed` to modify the file.
+
+    sed -i 's/gitlab.example.com/yourhost.com/g' gitlab-ssl.conf
+
+Even with the quicker method `SSLCertificateFile`, `SSLCertificateKeyFile`, and `SSLCACertificateFile` should still be modified.
 
 ## SELinux modifications
 
@@ -111,7 +96,7 @@ Once a certificate authority is self managed simply add the CA certificate to al
 ---
 # Ubuntu 12.04 notes
 
-In Ubuntu httpd is called Apache2 and apache logs are located under `/var/log/apache2`.  Log path names in the [gitlab.conf](gitlab.conf) configuration should reflect this.  Ubuntu runs [AppArmor][apparmor] instead of SELinux and by default doesn't affect GitLab operation.
+In Ubuntu httpd is called Apache2 and apache logs are located under `/var/log/apache2`.  Log path names in the [gitlab-ssl.conf](gitlab-ssl.conf) configuration should reflect this.  Ubuntu runs [AppArmor][apparmor] instead of SELinux and by default doesn't affect GitLab operation.
 
 [startcom_ssl]: http://cert.startcom.org/
 [xca]: http://sourceforge.net/projects/xca/
