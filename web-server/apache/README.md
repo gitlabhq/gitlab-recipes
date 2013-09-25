@@ -46,7 +46,7 @@ Even with the quicker method `SSLCertificateFile`, `SSLCertificateKeyFile`, and 
 
 ## SELinux modifications
 
-In a RHEL6 production production environment it is assumed SELinux is enabled.  SELinux must be configured with the following:
+In a RHEL6 production environment it is assumed [SELinux is enabled](http://stopdisablingselinux.com/).  SELinux must be configured with the following:
 
     setsebool -P httpd_can_network_connect on
     setsebool -P httpd_can_network_relay on
