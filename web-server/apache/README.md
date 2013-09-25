@@ -6,7 +6,7 @@ The up-to-date recommended [gitlab-ssl.conf](gitlab-ssl.conf) was configured on 
 
 ### unicorn
 
-By default, Unicorn (i.e. `unicorn.rb`) is configured to listen on port `8080` in the gitlabhq documentation.  Therefore, [gitlab.conf](gitlab.conf) does that by default.
+By default, Unicorn (i.e. `unicorn.rb`) is configured to listen on port `8080` in the gitlabhq documentation.  Therefore, [gitlab-ssl.conf](gitlab-ssl.conf) does that by default.
 
 ### puma
 
@@ -14,7 +14,7 @@ Info taken from [PR #87](https://github.com/gitlabhq/gitlab-recipes/pull/87).
 
 As apache's mod_proxy [doesn't support][sock] sockets, the proxy URL must be configured to use tcp instead of unix sockets. `/home/git/gitlab/config/puma.rb` should exist and be configured.  Two changes must then be made:
 
-1. In `gitlab.conf` replace `http://127.0.0.1:8080/ ` with `http://0.0.0.0:9292/`
+1. In `gitlab-ssl.conf` replace `http://127.0.0.1:8080 ` with `http://0.0.0.0:9292`.  Also replace `ProxyPassreverse http://gitlab.example.com:9292`
 2. Edit `puma.rb`: comment out `bind 'tcp://0.0.0.0:9292'` and comment `bind "unix://#{application_path}/tmp/sockets/gitlab.socket"`
 
 ## Assumptions
