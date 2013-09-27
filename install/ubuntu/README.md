@@ -1,27 +1,31 @@
-One script installer for clean ubuntu 12.04 x64
-==============
+# Interactive Install Script for GitLab 6.1 on Ubuntu 12.04/12.10
 
-Made for GitLab v4.0
+#### by doublerebel
 
-### ABOUT
+https://github.com/doublerebel/gitlab-recipes/blob/master/install/ubuntu/ubuntu_server_1204.sh
 
-This script performs a complete installation of Gitlab for ubuntu server 12.04.1 x64:
-* packages update
-* redis, git, postfix etc
-* ruby setup
-* git, gitlab users
-* gitolite fork
+### Usage (run as root):
 
+    # ./ubuntu_server_1204.sh [--url <yourgitlabdomain.com>] [--db <mysql|postgres>] [--gitlab <version>] [--shell <version>]
 
-### Notes
+Requires `--url` parameter.  Default database is `mysql`.
 
-__!IMPORTANT run as root or sudo without prompting password cause script ignore any input.__
+Script provides information about current progress.  If installation fails, script can be re-run safely.
 
+#### Example
 
-### USAGE
+    $ git clone https://github.com/doublerebel/gitlab-recipes.git
+    $ cd gitlab-recipes/install/ubuntu
+    $ sudo ./ubuntu_server_1204.sh --url your.gitlabdomain.com
 
-#### 1. Run script (replace gitlab.example.com with your domain or ip address)
+### More info
 
-    curl https://raw.github.com/gitlabhq/gitlab-recipes/master/install/ubuntu/ubuntu_server_1204.sh | sudo domain_var=gitlab.example.com sh
+  * Prompts to install Python 2 if not found.
 
-#### 2. Reboot machine
+  * Prompts to install Ruby 2.0 from [Brightbox PPA](https://launchpad.net/~brightbox/+archive/ruby-ng-experimental) if not found.
+
+  * Prompts for MySQL root password if MySQL is already installed.
+
+  * Prompts to install Nginx and site config.
+
+  * GitLab and dependency versions are factored out for easy update upon release of new versions.
