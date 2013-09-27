@@ -4,7 +4,7 @@ GitLab version    : 6.0
 Web Server        : Apache, Nginx
 Init system       : sysvinit
 Database          : mysql
-Contributors      : @nielsbasjes, @axilleas, @mairin, @ponsjuh
+Contributors      : @nielsbasjes, @axilleas, @mairin, @ponsjuh, @yorn
 Additional Notes  : In order to get the latest git version we build it from source
 ```
 
