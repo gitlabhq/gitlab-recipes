@@ -25,7 +25,8 @@ ORIGINAL_PATH=$PATH
 PATH=$ORIGINAL_PATH
 
 # The name of the service
-NAME=git
+NAME=${0##*/}
+
 
 # The username and path to the gitlab source
 USER=git
@@ -93,11 +94,18 @@ restart() {
 
 get_status() {
   status -p $UPID unicorn
+  unicorn=$?
+
   status -p $SPID sidekiq
+  sidekiq=$?
+
+  retval=$unicorn || $sidekiq
+  return $retval
 }
 
 query_status() {
   get_status >/dev/null 2>&1
+  return $?
 }
 
 case "$1" in
@@ -114,6 +122,7 @@ case "$1" in
     ;;
   status)
     get_status
+    exit $?
     ;;
   *)
     N=/etc/init.d/$NAME
