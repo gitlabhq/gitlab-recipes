@@ -3,7 +3,7 @@ Distribution      : CentOS 6.4
 GitLab version    : 6.0
 Web Server        : Apache, Nginx
 Init system       : sysvinit
-Database          : mysql
+Database          : MySQL, PostgreSQL
 Contributors      : @nielsbasjes, @axilleas, @mairin, @ponsjuh, @yorn
 Additional Notes  : In order to get the latest git version we build it from source
 ```
@@ -11,10 +11,6 @@ Additional Notes  : In order to get the latest git version we build it from sour
 ## Overview
 
 Please read `doc/install/requirements.md` for hardware and platform requirements.
-
-This guide installs GitLab on a bare system from scratch, using MySQL as the database.
-All Postgres installation steps are absent as they have not been tested yet.
-Pull requests with tested Postgres are welcome!
 
 ### Important Notes
 
@@ -266,6 +262,8 @@ cp config.yml.example config.yml
 
 ## 5. Database
 
+### 5.1 MySQL
+
 Install `mysql` and enable the `mysqld` service to start on boot:
 
     su -
@@ -300,6 +298,41 @@ Try connecting to the new database with the new user:
     # Type the password you replaced supersecret with earlier
     # Quit the database session
     \q
+
+### 5.2 PostgreSQL
+
+Install `postgresql-server` and the `postgreqsql-devel` libraries.
+
+    su -
+    yum install postgresql-server postgresql-devel
+
+Initialize the database.
+
+    service postgresql initdb
+
+Start the service and configure service to start on boot
+
+    service postgresql start
+    chkconfig postgresql on
+
+Configure the database user and password.
+
+    su - postgres
+    psql -d template1
+    psql (8.4.13)
+
+    template1=# CREATE USER git WITH PASSWORD 'your-password-here';
+    CREATE ROLE
+    template1=# CREATE DATABASE gitlabhq_production OWNER git;
+    CREATE DATABASE
+    template1=# \q
+    exit # exit uid=postgres, return to root
+
+Test the connection as the gitlab (uid=git) user.
+
+    su - git
+    psql -d gitlabhq_production -W # prompts for your password.
+
 
 ----------
 ## 6. GitLab
@@ -375,7 +408,24 @@ git config --global core.autocrlf input
     # MySQL
     cp config/database.yml{.mysql,}
 
+    # PostgreSQL 
+    cp config/database.yml{.postgresql,}
+
 Make sure to update username/password in `config/database.yml`. You only need to adapt the production settings (first part).
+
+    # PostgreSQL example config/database.yml
+    # disable host/port in order to support the default postgresql ident auth
+    # PRODUCTION
+    production:
+      adapter: postgresql
+      encoding: unicode
+      database: gitlabhq_production
+      pool: 5
+      username: git
+      password: your-password-here
+      #host: localhost
+      #port: 5432 
+      # socket: /tmp/postgresql.sock 
 
 If you followed the database guide then please do as follows:
 * Change `root` to `gitlab`.
