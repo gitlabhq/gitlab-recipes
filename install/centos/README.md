@@ -72,7 +72,7 @@ As part of the Fedora packaging community, EPEL packages are 100% free/libre ope
 
 Download the GPG key for EPEL repository from [fedoraproject][keys] and install it on your system:
 
-    sudo wget -O /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-6 https://fedoraproject.org/static/0608B895.txt
+    sudo wget -O /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-6 https://www.fedoraproject.org/static/0608B895.txt
     sudo rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-6
 
 Verify that the key got installed successfully:
