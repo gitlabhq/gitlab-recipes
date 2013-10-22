@@ -49,14 +49,14 @@ start() {
 
   # Start unicorn
   echo -n $"Starting unicorn: "
-  daemon --pidfile=$UPID --user=$USER "$RUBY_PATH_PATCH RAILS_ENV=production bundle exec unicorn_rails $OPTS"
+  daemon --pidfile=$UPID --user=$USER "$RUBY_PATH_PATCH RAILS_ENV=production script/web start"
   unicorn=$?
   [ $unicorn -eq 0 ] && touch $ULOCK
   echo
 
   # Start sidekiq
   echo -n $"Starting sidekiq: "
-  daemon --pidfile=$SPID --user=$USER "$RUBY_PATH_PATCH RAILS_ENV=production bundle exec rake sidekiq:start"
+  daemon --pidfile=$SPID --user=$USER "$RUBY_PATH_PATCH RAILS_ENV=production script/background_jobs start"
   sidekiq=$?
   [ $sidekiq -eq 0 ] && touch $SLOCK
   echo
