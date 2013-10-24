@@ -13,19 +13,14 @@
 # https://github.com/gitlabhq/gitlabhq/issues/1049#issuecomment-8386882
 # https://gist.github.com/3062860
 
-# Save original $PATH
-# /etc/rc.d/init.d/functions resets $PATH to default(/sbin:/usr/sbin:/bin:/usr/bin).
-# Consequently, rvm and compiled ruby with custom path (which isn't /usr/bin) cannot be executed.
-ORIGINAL_PATH=$PATH
-
 # Include RedHat function library
 . /etc/rc.d/init.d/functions
 
-# Restore original $PATH
-PATH=$ORIGINAL_PATH
-
 # The name of the service
-NAME=git
+NAME=${0##*/}
+
+### Environment variables
+RAILS_ENV="production"
 
 # The username and path to the gitlab source
 USER=git
@@ -37,26 +32,22 @@ ULOCK=/var/lock/subsys/unicorn
 SPID=$APP_PATH/tmp/pids/sidekiq.pid
 SLOCK=/var/lock/subsys/sidekiq
 
-# The options to use when running unicorn
-OPTS="-c $APP_PATH/config/unicorn.rb -D -E production"
-
-# Ruby related path update
-RVM_PATH="/usr/local/rvm/bin"
-RUBY_PATH_PATCH="PATH=/usr/local/bin:/usr/local/lib:/home/git/bin:$RVM_PATH:$PATH && export PATH && "
+# Evaluate the real path for the user (should already have RVM)
+PATH_PATCH="PATH=$(su $USER -l -c "echo \"\$PATH\"") && export PATH && "
 
 start() {
   cd $APP_PATH
 
   # Start unicorn
   echo -n $"Starting unicorn: "
-  daemon --pidfile=$UPID --user=$USER "$RUBY_PATH_PATCH RAILS_ENV=production bundle exec unicorn_rails $OPTS"
+  daemon --pidfile=$UPID --user=$USER "$PATH_PATCH RAILS_ENV=$RAILS_ENV script/web start"
   unicorn=$?
   [ $unicorn -eq 0 ] && touch $ULOCK
   echo
 
   # Start sidekiq
   echo -n $"Starting sidekiq: "
-  daemon --pidfile=$SPID --user=$USER "$RUBY_PATH_PATCH RAILS_ENV=production bundle exec rake sidekiq:start"
+  daemon --pidfile=$SPID --user=$USER "$PATH_PATCH RAILS_ENV=$RAILS_ENV script/background_jobs start"
   sidekiq=$?
   [ $sidekiq -eq 0 ] && touch $SLOCK
   echo
@@ -93,11 +84,18 @@ restart() {
 
 get_status() {
   status -p $UPID unicorn
+  unicorn=$?
+
   status -p $SPID sidekiq
+  sidekiq=$?
+
+  retval=$unicorn || $sidekiq
+  return $retval
 }
 
 query_status() {
   get_status >/dev/null 2>&1
+  return $?
 }
 
 case "$1" in
@@ -114,6 +112,7 @@ case "$1" in
     ;;
   status)
     get_status
+	exit $?
     ;;
   *)
     N=/etc/init.d/$NAME
