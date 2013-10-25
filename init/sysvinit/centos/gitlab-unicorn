@@ -49,7 +49,7 @@ start() {
 
   # Start unicorn
   echo -n $"Starting unicorn: "
-  daemon --pidfile=$UPID --user=$USER "$RUBY_PATH_PATCH RAILS_ENV=production bundle exec unicorn_rails $OPTS"
+  daemon --pidfile=$UPID --user=$USER "$RUBY_PATH_PATCH RAILS_ENV=production script/background_jobs start"
   unicorn=$?
   [ $unicorn -eq 0 ] && touch $ULOCK
   echo

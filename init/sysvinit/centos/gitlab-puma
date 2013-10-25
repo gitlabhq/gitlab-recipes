@@ -56,7 +56,7 @@ start() {
 
   # Start sidekiq
   echo -n $"Starting sidekiq: "
-  daemon --pidfile=$SPID --user=$USER "$RUBY_PATH_PATCH RAILS_ENV=production bundle exec rake sidekiq:start"
+  daemon --pidfile=$SPID --user=$USER "$RUBY_PATH_PATCH RAILS_ENV=production script/background_jobs start"
   sidekiq=$?
   [ $sidekiq -eq 0 ] && touch $SLOCK
   echo
