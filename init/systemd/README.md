@@ -30,7 +30,7 @@ Start the services:
 
 Enable them to start at boot:
 
-    sudo systemctl enable gitlab-sidekiq gitlab-unicorn
+    sudo systemctl enable gitlab.target gitlab-sidekiq gitlab-unicorn
 
 ## Notes
 
