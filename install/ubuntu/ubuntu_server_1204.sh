@@ -70,7 +70,7 @@ sudo DEBIAN_FRONTEND='noninteractive' apt-get install -y postfix-policyd-spf-pyt
 #==
 #== 2. RUBY
 #==
-curl -L https://get.rvm.io | bash -s stable --ruby
+curl -L https://get.rvm.io | bash -s stable --ruby --auto-dotfiles
 source ~/.rvm/scripts/rvm
 bundle install
 
@@ -143,6 +143,7 @@ sudo -u gitlab -H git clone https://github.com/gitlabhq/gitlabhq.git gitlab
 cd /home/gitlab/gitlab
 # Checkout v4
 sudo -u gitlab -H git checkout 4-0-stable
+bundle install
 
 # Copy the example GitLab config
 sudo -u gitlab -H cp config/gitlab.yml.example config/gitlab.yml
@@ -157,8 +158,8 @@ sudo -u gitlab -H cp config/unicorn.rb.example config/unicorn.rb
 
 cd /home/gitlab/gitlab
 
-sudo gem install charlock_holmes --version '0.6.9'
-sudo -u gitlab -H bundle install --deployment --without development postgres test 
+gem install charlock_holmes --version '0.6.9'
+bundle install --deployment --without development postgres test 
 
 sudo -u gitlab -H git config --global user.name "GitLab"
 sudo -u gitlab -H git config --global user.email "gitlab@localhost"
@@ -189,4 +190,3 @@ sudo sed -i "s/YOUR_SERVER_FQDN/$domain_var/" /etc/nginx/sites-available/gitlab
 
 sudo service gitlab start
 sudo service nginx start
-
