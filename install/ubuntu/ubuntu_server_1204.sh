@@ -72,7 +72,6 @@ sudo DEBIAN_FRONTEND='noninteractive' apt-get install -y postfix-policyd-spf-pyt
 #==
 curl -L https://get.rvm.io | bash -s stable --ruby --auto-dotfiles
 source ~/.rvm/scripts/rvm
-bundle install
 
 #==
 #== 3. Users
@@ -143,7 +142,6 @@ sudo -u gitlab -H git clone https://github.com/gitlabhq/gitlabhq.git gitlab
 cd /home/gitlab/gitlab
 # Checkout v4
 sudo -u gitlab -H git checkout 4-0-stable
-bundle install
 
 # Copy the example GitLab config
 sudo -u gitlab -H cp config/gitlab.yml.example config/gitlab.yml
