@@ -71,6 +71,7 @@ sudo DEBIAN_FRONTEND='noninteractive' apt-get install -y postfix-policyd-spf-pyt
 #== 2. RUBY
 #==
 curl -L https://get.rvm.io | bash -s stable --ruby
+bundle install
 
 #==
 #== 3. Users
