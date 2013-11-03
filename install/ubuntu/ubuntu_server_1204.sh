@@ -11,7 +11,7 @@
 # * ruby setup
 # * git, gitlab users
 # * gitolite fork
-# Is should be run as root or sudo user w/o password. 
+# Is should be run as root or sudo user w/o password.
 #
 # USAGE
 # !IMPORTANT run as root or sudo without prompting password cause script ignore any input.
@@ -19,12 +19,12 @@
 #
 
 #==
-#== 0. FQDN 
+#== 0. FQDN
 #==
 
 if [ $domain_var ] ; then
   echo "Installing GitLab for domain: $domain_var"
-else 
+else
   echo "Please pass domain_var"
   exit
 fi
@@ -43,7 +43,7 @@ echo "Host $domain_var
 sudo apt-get update
 sudo apt-get install -y wget curl build-essential checkinstall libxml2-dev libxslt-dev libcurl4-openssl-dev libreadline6-dev libc6-dev libssl-dev zlib1g-dev libicu-dev redis-server openssh-server git-core libyaml-dev
 
-# Python 
+# Python
 
 # Install Python
 sudo apt-get install -y python
@@ -80,7 +80,7 @@ sudo adduser \
   --disabled-password \
   --home /home/git \
   git
-  
+
 sudo adduser --disabled-login --gecos 'GitLab' gitlab
 
 # Add it to the git group
@@ -147,7 +147,7 @@ sudo -u gitlab -H cp config/unicorn.rb.example config/unicorn.rb
 cd /home/gitlab/gitlab
 
 gem install charlock_holmes --version '0.6.9'
-bundle install --deployment --without development postgres test 
+bundle install --deployment --without development postgres
 sudo -u gitlab -H git config --global user.name "GitLab"
 sudo -u gitlab -H git config --global user.email "gitlab@localhost"
 sudo cp ./lib/hooks/post-receive /home/git/.gitolite/hooks/common/post-receive
@@ -167,6 +167,5 @@ sudo sed -i 's/YOUR_SERVER_IP:80/80/' /etc/nginx/sites-available/gitlab # Set Do
 sudo sed -i "s/YOUR_SERVER_FQDN/$domain_var/" /etc/nginx/sites-available/gitlab
 
 # Start all
-
 sudo service gitlab start
 sudo service nginx start
