@@ -1,4 +1,4 @@
-#!/bin/sh
+﻿#!/bin/sh
 
 # GITLAB
 # Maintainer: @randx
@@ -17,7 +17,6 @@
 # !IMPORTANT run as root or sudo without prompting password cause script ignore any input.
 # curl https://raw.github.com/gitlabhq/gitlab-recipes/master/install/v4/ubuntu_server_1204.sh | sudo domain_var=gitlab.example.com sh
 #
-
 
 #==
 #== 0. FQDN 
@@ -38,13 +37,11 @@ echo "Host $domain_var
    StrictHostKeyChecking no
    UserKnownHostsFile=/dev/null" | sudo tee -a /etc/ssh/ssh_config
 
-
 #==
 #== 1. Packages
 #==
 sudo apt-get update
 sudo apt-get install -y wget curl build-essential checkinstall libxml2-dev libxslt-dev libcurl4-openssl-dev libreadline6-dev libc6-dev libssl-dev zlib1g-dev libicu-dev redis-server openssh-server git-core libyaml-dev
-
 
 # Python 
 
@@ -66,7 +63,6 @@ sudo ln -s /usr/bin/python /usr/bin/python2
 # POSTFIX
 sudo DEBIAN_FRONTEND='noninteractive' apt-get install -y postfix-policyd-spf-python postfix # Install postfix without prompting.
 
-
 #==
 #== 2. RUBY
 #==
@@ -84,7 +80,6 @@ sudo adduser \
   --disabled-password \
   --home /home/git \
   git
-  
   
 sudo adduser --disabled-login --gecos 'GitLab' gitlab
 
@@ -111,17 +106,12 @@ sudo chmod 0444 /home/git/gitlab.pub
 
 # ... and use it as the admin key for the Gitolite setup
 sudo -u git -H sh -c "PATH=/home/git/bin:$PATH; gitolite setup -pk /home/git/gitlab.pub"
-
 sudo chmod -R ug+rwXs /home/git/repositories/
 sudo chown -R git:git /home/git/repositories/
-
 sudo chmod 750 /home/git/.gitolite/
 sudo chown -R git:git /home/git/.gitolite/
-
-
 sudo -u gitlab -H git clone git@localhost:gitolite-admin.git /tmp/gitolite-admin
 sudo rm -rf /tmp/gitolite-admin
-
 
 #==
 #== 5. MySQL
@@ -158,20 +148,14 @@ cd /home/gitlab/gitlab
 
 gem install charlock_holmes --version '0.6.9'
 bundle install --deployment --without development postgres test 
-
 sudo -u gitlab -H git config --global user.name "GitLab"
 sudo -u gitlab -H git config --global user.email "gitlab@localhost"
-
 sudo cp ./lib/hooks/post-receive /home/git/.gitolite/hooks/common/post-receive
 sudo chown git:git /home/git/.gitolite/hooks/common/post-receive
-
 sudo -u gitlab -H bundle exec rake gitlab:app:setup RAILS_ENV=production
-
 sudo wget https://raw.github.com/gitlabhq/gitlab-recipes/4-0-stable/init.d/gitlab -P /etc/init.d/
 sudo chmod +x /etc/init.d/gitlab
-
 sudo update-rc.d gitlab defaults 21
-
 
 #==
 #== 7. Nginx
@@ -179,8 +163,6 @@ sudo update-rc.d gitlab defaults 21
 sudo apt-get install -y nginx
 sudo wget https://raw.github.com/gitlabhq/gitlab-recipes/4-0-stable/nginx/gitlab -P /etc/nginx/sites-available/
 sudo ln -s /etc/nginx/sites-available/gitlab /etc/nginx/sites-enabled/gitlab
-
-
 sudo sed -i 's/YOUR_SERVER_IP:80/80/' /etc/nginx/sites-available/gitlab # Set Domain
 sudo sed -i "s/YOUR_SERVER_FQDN/$domain_var/" /etc/nginx/sites-available/gitlab
 
