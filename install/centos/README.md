@@ -351,9 +351,9 @@ We'll install GitLab into home directory of the user `git`:
     cd /home/git/gitlab
 
     # Checkout to stable release
-    git checkout 6-0-stable
+    git checkout 6-2-stable
 
-**Note:** You can change `6-0-stable` to `master` if you want the *bleeding edge* version, but
+**Note:** You can change `6-2-stable` to `master` if you want the *bleeding edge* version, but
 do so with caution!
 
 ### Configure it
