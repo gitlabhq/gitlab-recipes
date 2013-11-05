@@ -8,7 +8,7 @@ Made for GitLab v4.0
 This script performs a complete installation of Gitlab for ubuntu server 12.04.1 x64:
 * packages update
 * redis, git, postfix etc
-* ruby setup
+* rvm ruby setup
 * git, gitlab users
 * gitolite fork
 
