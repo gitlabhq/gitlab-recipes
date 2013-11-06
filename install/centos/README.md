@@ -250,7 +250,7 @@ git clone https://github.com/gitlabhq/gitlab-shell.git
 cd gitlab-shell
 
 # Switch to right version
-git checkout v1.7.0
+git checkout v1.7.4
 cp config.yml.example config.yml
 
 # Edit config and replace gitlab_url with something like 'http://domain.com/'
