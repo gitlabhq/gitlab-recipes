@@ -254,6 +254,11 @@ git checkout v1.7.4
 cp config.yml.example config.yml
 
 # Edit config and replace gitlab_url with something like 'http://domain.com/'
+#
+# Note, 'gitlab_url' is used by gitlab-shell to access GitLab API. Since 
+#     1. the whole communication is locally
+#     2. next steps will explain how to expose GitLab over HTTPS with custom cert
+# it's a good solution is to set gitlab_url as "http://localhost:8080/"
 
 # Do setup
 ./bin/install
