@@ -498,7 +498,17 @@ To make sure you didn't miss anything run a more thorough check with:
     cd gitlab/
     bundle exec rake gitlab:check RAILS_ENV=production
 
-If all items are green, then congratulations on successfully installing GitLab!
+Now, the output will complain that your init script is not up-to-date as follows:
+
+Init script up-to-date? ... no  
+  Try fixing it:  
+  Redownload the init script  
+  For more information see:  
+  doc/install/installation.md in section "Install Init Script"  
+  Please fix the error above and rerun the checks.  
+
+Do not care about it  if you are sure that you have downloaded the up-to-date file from https://raw.github.com/gitlabhq/gitlab-recipes/master/init/sysvinit/centos/gitlab-unicorn and saved it to /etc/init.d/gitlab.  
+If all other items are green, then congratulations on successfully installing GitLab!
 However there are still a few steps left.
 
 ## 7. Configure the web server
