@@ -1,11 +1,11 @@
 ```
 Distribution      : CentOS 6.4
-GitLab version    : 6.0
+GitLab version    : 6.0 - 6.2
 Web Server        : Apache, Nginx
 Init system       : sysvinit
 Database          : MySQL, PostgreSQL
-Contributors      : @nielsbasjes, @axilleas, @mairin, @ponsjuh, @yorn
-Additional Notes  : In order to get the latest git version we build it from source
+Contributors      : @nielsbasjes, @axilleas, @mairin, @ponsjuh, @yorn, @psftw
+Additional Notes  : In order to get a proper Ruby setup we build it from source
 ```
 
 ## Overview
@@ -86,29 +86,39 @@ Now install the `epel-release-6-8.noarch` package, which will enable EPEL reposi
 
 **Note:** Don't mind the `x86_64`, if you install on a i686 system you can use the same commands.
 
-Verify that the EPEL repository is enabled as shown below. Now, you’ll see epel
-repository (apart from the standard base, updates and extras repositories):
+### Add PUIAS Computational repository
+
+The [PUIAS Computational][PUIAS] repository is a part of [PUIAS/Springdale Linux][SDL],
+a custom Red Hat&reg; distribution maintained by [Princeton University][PU] and the
+[Institute for Advanced Study][IAS].  We take advantage of the PUIAS
+Computational repository to obtain a git v1.8.x package since the base CentOS
+repositories only provide v1.7.1 which is not compatible with GitLab.
+
+Install the PUIAS Computational repository rpm
+
+    sudo rpm -Uvh http://puias.math.ias.edu/data/puias/6/x86_64/os/Packages/springdale-computational-6-2.sdl6.10.noarch.rpmo
+
+Verify that the EPEL and PUIAS Computational repositories are enabled as shown below:
 
     sudo yum repolist
-    repo id             repo name                                                status
-    base                CentOS-6 - Base                                          4,802
-    epel                Extra Packages for Enterprise Linux 6 - x86_64           7,879
-    extras              CentOS-6 - Extras                                           12
-    updates             CentOS-6 - Updates                                         814
-    repolist: 13,507
+    repo id                 repo name                                                status
+    PUIAS_6_computational   PUIAS computational Base 6 - x86_64                      2,018
+    base                    CentOS-6 - Base                                          4,802
+    epel                    Extra Packages for Enterprise Linux 6 - x86_64           7,879
+    extras                  CentOS-6 - Extras                                           12
+    updates                 CentOS-6 - Updates                                         814
+    repolist: 15,525
 
-If you can't see it listed, use the folowing command to enable it:
+If you can't see them listed, use the folowing command (from yum-utils package) to enable them:
 
-    sudo yum-config-manager --enable epel
+    sudo yum-config-manager --enable epel --enable PUIAS_6_computational
 
 ### Install the required tools for GitLab
 
     su -
     yum -y update
     yum -y groupinstall 'Development Tools'
-
-    ### 'Additional Development'
-    yum -y install vim-enhanced readline readline-devel ncurses-devel gdbm-devel glibc-devel tcl-devel openssl-devel curl-devel expat-devel db4-devel byacc sqlite-devel gcc-c++ libyaml libyaml-devel libffi libffi-devel libxml2 libxml2-devel libxslt libxslt-devel libicu libicu-devel system-config-firewall-tui python-devel redis sudo wget crontabs logwatch logrotate perl-Time-HiRes
+    yum -y install vim-enhanced readline readline-devel ncurses-devel gdbm-devel glibc-devel tcl-devel openssl-devel curl-devel expat-devel db4-devel byacc sqlite-devel gcc-c++ libyaml libyaml-devel libffi libffi-devel libxml2 libxml2-devel libxslt libxslt-devel libicu libicu-devel system-config-firewall-tui python-devel redis sudo wget crontabs logwatch logrotate perl-Time-HiRes git
 
 **RHEL Notes**
 
@@ -118,32 +128,6 @@ add the rhel6 optional packages repo to your server to get those packages:
     yum-config-manager --enable rhel-6-server-optional-rpms
 
 Tip taken from [here](https://github.com/gitlabhq/gitlab-recipes/issues/62).
-
-### Git
-
-GitLab will only work correctly with git version 1.8.x or newer. The problem is
-that the available rpms for CentOS stop at git 1.7.1 which is too old for GitLab.
-In order to update, you have to build git from source as it is not yet in any repository:
-
-    su -
-    cd /tmp
-    yum -y install git perl-ExtUtils-MakeMaker
-    git clone git://github.com/git/git.git
-    cd /tmp/git/
-    git checkout v1.8.3.4
-    autoconf
-    ./configure --prefix=/usr/local
-    make && make install
-    rm -rf /tmp/git/
-    yum erase git
-
-Logout and login again for the `$PATH` to take effect. Check that git is properly
-installed with:
-
-    which git
-    # /usr/local/bin/git
-    git --version
-    # git version 1.8.3.4
 
 ### Configure redis
 Make sure redis is started on boot:
@@ -369,9 +353,6 @@ cp config/gitlab.yml.example config/gitlab.yml
 
 # Replace your_domain_name with the fully-qualified domain name of your host serving GitLab
 sed -i 's|localhost|your_domain_name|g' config/gitlab.yml
-
-# Change git's path to point to /usr/local/bin/git
-sed -i 's|/usr/bin/git|/usr/local/bin/git|' config/gitlab.yml
 
 # Make sure GitLab can write to the log/ and tmp/ directories
 chown -R git log/
@@ -603,10 +584,13 @@ You will then be redirected to change the default admin password.
 ## Links used in this guide
 
 - [EPEL information](http://www.thegeekstuff.com/2012/06/enable-epel-repository/)
-- [git update to 1.8.x](http://www.pickysysadmin.ca/2013/05/21/commit-comments-not-appearing-in-gitlab-on-centos/)
 - [SELinux booleans](http://wiki.centos.org/TipsAndTricks/SelinuxBooleans)
 
 
 [EPEL]: https://fedoraproject.org/wiki/EPEL
+[PUIAS]: https://puias.math.ias.edu/wiki/YumRepositories6#Computational
+[SDL]: https://puias.math.ias.edu
+[PU]: http://www.princeton.edu/
+[IAS]: http://www.ias.edu/
 [keys]: https://fedoraproject.org/keys
 [sudo]: http://stackoverflow.com/questions/257616/sudo-changes-path-why
