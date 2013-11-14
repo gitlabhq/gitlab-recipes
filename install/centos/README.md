@@ -354,9 +354,6 @@ cp config/gitlab.yml.example config/gitlab.yml
 # Replace your_domain_name with the fully-qualified domain name of your host serving GitLab
 sed -i 's|localhost|your_domain_name|g' config/gitlab.yml
 
-# Change git's path to point to /usr/local/bin/git
-sed -i 's|/usr/bin/git|/usr/local/bin/git|' config/gitlab.yml
-
 # Make sure GitLab can write to the log/ and tmp/ directories
 chown -R git log/
 chown -R git tmp/
