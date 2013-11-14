@@ -7,7 +7,7 @@ and easy to merge requests.
 
 Your Pull Request will be reviewed by one of our devs/volunteers and you will be
 asked to reformat it if needed. We don't bite and we will try to be as flexible
-as possible, so don't get intimidated by the extent of the quidelines :)
+as possible, so don't get intimidated by the extent of the guidelines :)
 
 For better maintainance and clarity, some naming guidelines should be followed.
 See details in each section below.
