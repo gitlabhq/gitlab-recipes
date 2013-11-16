@@ -92,7 +92,9 @@ The [PUIAS Computational][PUIAS] repository is a part of [PUIAS/Springdale Linux
 a custom Red Hat&reg; distribution maintained by [Princeton University][PU] and the
 [Institute for Advanced Study][IAS].  We take advantage of the PUIAS
 Computational repository to obtain a git v1.8.x package since the base CentOS
-repositories only provide v1.7.1 which is not compatible with GitLab. Although the PUIAS Computational repo offers an RPM, it requires the other PUIAS repos as a dependency, so you'll have to add it manually.
+repositories only provide v1.7.1 which is not compatible with GitLab.
+Although the PUIAS offers an RPM to install the repo, it requires the
+other PUIAS repos as a dependency, so you'll have to add it manually.
 
 Create /etc/yum.repos.d/PUIAS_6_computational.repo and add the following lines:
 
