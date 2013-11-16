@@ -92,11 +92,26 @@ The [PUIAS Computational][PUIAS] repository is a part of [PUIAS/Springdale Linux
 a custom Red Hat&reg; distribution maintained by [Princeton University][PU] and the
 [Institute for Advanced Study][IAS].  We take advantage of the PUIAS
 Computational repository to obtain a git v1.8.x package since the base CentOS
-repositories only provide v1.7.1 which is not compatible with GitLab.
+repositories only provide v1.7.1 which is not compatible with GitLab. Although the PUIAS Computational repo offers an RPM, it requires the other PUIAS repos as a dependency, so you'll have to add it manually.
 
-Install the PUIAS Computational repository rpm
+Create /etc/yum.repos.d/PUIAS_6_computational.repo and add the following lines:
 
-    sudo rpm -Uvh http://puias.math.ias.edu/data/puias/6/x86_64/os/Packages/springdale-computational-6-2.sdl6.10.noarch.rpmo
+    [PUIAS_6_computational]
+    name=PUIAS computational Base $releasever - $basearch
+    mirrorlist=http://puias.math.ias.edu/data/puias/computational/$releasever/$basearch/mirrorlist
+    #baseurl=http://puias.math.ias.edu/data/puias/computational/$releasever/$basearch
+    gpgcheck=1
+    gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-puias
+
+Next download and install the gpg key.
+
+    sudo wget -O /etc/pki/rpm-gpg/RPM-GPG-KEY-puias http://springdale.math.ias.edu/data/puias/6/x86_64/os/RPM-GPG-KEY-puias
+    sudo rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-puias
+
+Verify that the key got installed successfully:
+
+    sudo rpm -qa gpg*
+    gpg-pubkey-41a40948-4ce19266
 
 Verify that the EPEL and PUIAS Computational repositories are enabled as shown below:
 
