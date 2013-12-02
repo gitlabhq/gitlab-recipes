@@ -6,7 +6,7 @@
 
 # chkconfig: 2345 82 55
 # processname: sidekiq
-# description: Runs unicorn and sidekiq for nginx integration.
+# description: Runs sidekiq for nginx integration.
 
 # Related (kudos @4sak3n0ne):
 # https://github.com/gitlabhq/gitlabhq/issues/1049#issuecomment-8386882
