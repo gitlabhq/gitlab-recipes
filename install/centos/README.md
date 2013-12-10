@@ -525,21 +525,24 @@ ln -sf /etc/nginx/sites-available/gitlab /etc/nginx/sites-enabled/gitlab
 ```
 
 Edit `/etc/nginx/nginx.conf` and replace `include /etc/nginx/conf.d/*.conf;`
-with `/etc/nginx/sites-enabled/*;`
+with `include /etc/nginx/sites-enabled/*;`
+
+Edit `/etc/nginx/sites-available/gitlab` and replace `git.example.com` with your FQDN.
 
 Add `nginx` user to `git` group.
 
     usermod -a -G git nginx
     chmod g+rx /home/git/
 
-Finally start nginx with:
-
-    service nginx start
 
 **Note:** Don't forget to add a SSL certificate or generate a Self Signed Certificate
 
     cd /etc/nginx
     openssl req -new -x509 -nodes -days 3560 -out gitlab.crt -keyout gitlab.key
+
+Finally start nginx with:
+
+    service nginx start
 
 ### Apache
 
