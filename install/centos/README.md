@@ -185,7 +185,9 @@ Alternatively you can install `postfix`.
 
 ### 2.1 Download and install
 
-#### 2.a Download and compile it:
+Choose one of the following methods to install ruby
+
+#### 2.1.a Download and compile it:
 
     su -
     mkdir /tmp/ruby && cd /tmp/ruby
@@ -194,7 +196,7 @@ Alternatively you can install `postfix`.
     ./configure --prefix=/usr/local/
     make && make install
 
-#### 2.b Download and install using RVM
+#### 2.1.b Download and install using RVM
 
     su -
     \curl -sSL https://get.rvm.io | bash -s stable --ruby
