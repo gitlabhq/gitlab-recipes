@@ -194,7 +194,7 @@ Alternatively you can install `postfix`.
     ./configure --prefix=/usr/local/
     make && make install
 
-#### 2.b Download and install with RVM
+#### 2.b Download and install using RVM
 
     su -
     \curl -sSL https://get.rvm.io | bash -s stable --ruby
@@ -257,7 +257,7 @@ GitLab Shell is a ssh access and repository management software developed specia
 # First login as root
 su -
 
-# Login as gitch
+# Login as git
 su - git
 
 # Clone gitlab shell
