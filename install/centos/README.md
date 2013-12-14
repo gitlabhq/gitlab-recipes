@@ -373,7 +373,7 @@ We'll install GitLab into home directory of the user `git`:
     # Checkout to stable release
     git checkout 6-3-stable
 
-**Note:** You can change `6-2-stable` to `master` if you want the *bleeding edge* version, but
+**Note:** You can change `6-3-stable` to `master` if you want the *bleeding edge* version, but
 do so with caution!
 
 ### Configure it
