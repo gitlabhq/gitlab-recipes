@@ -182,7 +182,10 @@ Alternatively you can install `postfix`.
 ----------
 
 ## 2. Ruby
-Download and compile it:
+
+### 2.1 Download and install
+
+#### 2.a Download and compile it:
 
     su -
     mkdir /tmp/ruby && cd /tmp/ruby
@@ -191,6 +194,15 @@ Download and compile it:
     ./configure --prefix=/usr/local/
     make && make install
 
+#### 2.b Download and install with RVM
+
+    su -
+    \curl -sSL https://get.rvm.io | bash -s stable --ruby
+    source /usr/local/rvm/scripts/rvm
+
+
+### 2.2 Check
+
 Logout and login again for the `$PATH` to take effect. Check that ruby is properly
 installed with:
 
@@ -198,6 +210,8 @@ installed with:
     # /usr/local/bin/ruby
     ruby -v
     # ruby 2.0.0p247 (2013-06-27 revision 41674) [x86_64-linux]
+
+### 2.3 Bundler Gem
 
 Install the Bundler Gem:
 
@@ -243,7 +257,7 @@ GitLab Shell is a ssh access and repository management software developed specia
 # First login as root
 su -
 
-# Login as git
+# Login as gitch
 su - git
 
 # Clone gitlab shell
@@ -251,7 +265,7 @@ git clone https://github.com/gitlabhq/gitlab-shell.git
 cd gitlab-shell
 
 # Switch to right version
-git checkout v1.7.4
+git checkout v1.7.9
 cp config.yml.example config.yml
 
 # Edit config and replace gitlab_url with something like 'http://domain.com/'
@@ -357,7 +371,7 @@ We'll install GitLab into home directory of the user `git`:
     cd /home/git/gitlab
 
     # Checkout to stable release
-    git checkout 6-2-stable
+    git checkout 6-3-stable
 
 **Note:** You can change `6-2-stable` to `master` if you want the *bleeding edge* version, but
 do so with caution!
