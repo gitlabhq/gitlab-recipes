@@ -56,7 +56,7 @@ server {
 server {
 	listen *:80 default;
 	location / {
-		rewrite ^ https://gitlab.ut.mephi.ru$request_uri? permanent;
+		rewrite ^ https://git.example.com$request_uri? permanent;
 	}
 }
 
