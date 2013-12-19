@@ -1,6 +1,6 @@
 ```
 Distribution      : CentOS 6.5
-GitLab version    : 6.0 - 6.2
+GitLab version    : 6.0 - 6.3
 Web Server        : Apache, Nginx
 Init system       : sysvinit
 Database          : MySQL, PostgreSQL
