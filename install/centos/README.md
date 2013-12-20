@@ -1,10 +1,10 @@
 ```
-Distribution      : CentOS 6.4
-GitLab version    : 6.0 - 6.2
+Distribution      : CentOS 6.5
+GitLab version    : 6.0 - 6.3
 Web Server        : Apache, Nginx
 Init system       : sysvinit
 Database          : MySQL, PostgreSQL
-Contributors      : @nielsbasjes, @axilleas, @mairin, @ponsjuh, @yorn, @psftw
+Contributors      : @nielsbasjes, @axilleas, @mairin, @ponsjuh, @yorn, @psftw, @etcet
 Additional Notes  : In order to get a proper Ruby setup we build it from source
 ```
 
@@ -186,8 +186,8 @@ Download and compile it:
 
     su -
     mkdir /tmp/ruby && cd /tmp/ruby
-    curl --progress ftp://ftp.ruby-lang.org/pub/ruby/2.0/ruby-2.0.0-p247.tar.gz | tar xz
-    cd ruby-2.0.0-p247
+    curl --progress ftp://ftp.ruby-lang.org/pub/ruby/2.0/ruby-2.0.0-p353.tar.gz | tar xz
+    cd ruby-2.0.0-p353
     ./configure --prefix=/usr/local/
     make && make install
 
@@ -197,7 +197,7 @@ installed with:
     which ruby
     # /usr/local/bin/ruby
     ruby -v
-    # ruby 2.0.0p247 (2013-06-27 revision 41674) [x86_64-linux]
+    # ruby 2.0.0p353 (2013-11-22 revision 43784) [x86_64-linux]
 
 Install the Bundler Gem:
 
@@ -251,7 +251,7 @@ git clone https://github.com/gitlabhq/gitlab-shell.git
 cd gitlab-shell
 
 # Switch to right version
-git checkout v1.7.4
+git checkout v1.8.0
 cp config.yml.example config.yml
 
 # Edit config and replace gitlab_url with something like 'http://domain.com/'
@@ -357,9 +357,9 @@ We'll install GitLab into home directory of the user `git`:
     cd /home/git/gitlab
 
     # Checkout to stable release
-    git checkout 6-2-stable
+    git checkout 6-3-stable
 
-**Note:** You can change `6-2-stable` to `master` if you want the *bleeding edge* version, but
+**Note:** You can change `6-3-stable` to `master` if you want the *bleeding edge* version, but
 do so with caution!
 
 ### Configure it
