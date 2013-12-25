@@ -1,6 +1,6 @@
 ```
 Distribution      : CentOS 6.5
-GitLab version    : 6.0 - 6.3
+GitLab version    : 6.0 - 6.4
 Web Server        : Apache, Nginx
 Init system       : sysvinit
 Database          : MySQL, PostgreSQL
@@ -357,9 +357,9 @@ We'll install GitLab into home directory of the user `git`:
     cd /home/git/gitlab
 
     # Checkout to stable release
-    git checkout 6-3-stable
+    git checkout 6-4-stable
 
-**Note:** You can change `6-3-stable` to `master` if you want the *bleeding edge* version, but
+**Note:** You can change `6-4-stable` to `master` if you want the *bleeding edge* version, but
 do so with caution!
 
 ### Configure it
