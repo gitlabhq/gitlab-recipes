@@ -14,7 +14,7 @@
 # You also need to edit gitlab/config/gitlab.yml
 #  1) Define port for http: line 19  -- port: 443
 #  2) Enable https:         line 20  -- https: true
-#  3) Disable gravater:     line 110 -- enabled: false
+#  3) Disable gravatar:     line 110 -- enabled: false
 
 upstream gitlab {
 
