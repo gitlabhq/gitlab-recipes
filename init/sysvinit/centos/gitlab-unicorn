@@ -33,7 +33,7 @@ SPID=$APP_PATH/tmp/pids/sidekiq.pid
 SLOCK=/var/lock/subsys/sidekiq
 
 # Evaluate the real path for the user (should already have RVM)
-PATH_PATCH="PATH=$(su $USER -l -c "echo \"\$PATH\"") && export PATH && "
+PATH_PATCH="PATH=$(su $USER -s /bin/bash -l -c "echo \"\$PATH\"") && export PATH && "
 
 start() {
   cd $APP_PATH
