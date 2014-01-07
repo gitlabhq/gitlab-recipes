@@ -24,6 +24,7 @@ Update the /etc/group file, and change the gid of the group
 ```bash
 git:x:500:
 ```
+or you can run the following command
 
 ```bash
 groupmod -g 500 git
@@ -41,7 +42,7 @@ mv /home/git /var/lib/git
 chown -R git:git /var/lib/git
 ```
 
-### 3. Update Gitlab config files
+### 4. Update Gitlab config files
 update ~git/gitlab/config/gitlab.yml, using the following command
 
 ```bash
@@ -51,29 +52,28 @@ sed -i -e 's/\/home/\/var\/lib/g' ~git/gitlab/config/gitlab.yml
 You should see the following difference after running the command
 
 ```diff
---- gitlab.yml  2014-01-05 15:11:17.706013229 -0500
-+++ gitlab.yml.example  2013-12-20 16:27:14.784403409 -0500
-@@ -166,7 +165,7 @@
+--- gitlab.yml.example  2013-12-20 16:27:14.784403409 -0500
++++ gitlab.yml  2014-01-05 15:11:17.706013229 -0500
+@@ -165,7 +166,7 @@
    # GitLab Satellites
    satellites:
      # Relative paths are relative to Rails.root (default: tmp/repo_satellites/)
--    path: /var/lib/git/gitlab-satellites/
-+    path: /home/git/gitlab-satellites/
+-    path: /home/git/gitlab-satellites/
++    path: /var/lib/git/gitlab-satellites/
  
-   ## Backup settings
-   backup:
-@@ -175,11 +174,11 @@
+   ## Backup
+@@ -174,11 +175,11 @@
  
    ## GitLab Shell settings
    gitlab_shell:
--    path: /var/lib/git/gitlab-shell/
-+    path: /home/git/gitlab-shell/
+-    path: /home/git/gitlab-shell/
++    path: /var/lib/git/gitlab-shell/
  
      # REPOS_PATH MUST NOT BE A SYMLINK!!!
--    repos_path: /var/lib/git/repositories/
--    hooks_path: /var/lib/git/gitlab-shell/hooks/
-+    repos_path: /home/git/repositories/
-+    hooks_path: /home/git/gitlab-shell/hooks/
+-    repos_path: /home/git/repositories/
+-    hooks_path: /home/git/gitlab-shell/hooks/
++    repos_path: /var/lib/git/repositories/
++    hooks_path: /var/lib/git/gitlab-shell/hooks/
  
      # Git over HTTP
      upload_pack: true
@@ -87,41 +87,41 @@ sed -i -e 's/\/home/\/var\/lib/g' ~git/gitlab/config/unicorn.rb
 You should see the following difference after running the command
 
 ```diff
---- unicorn.rb  2014-01-07 07:47:33.786389865 -0500
-+++ unicorn.rb.example  2013-12-20 16:27:14.795402739 -0500
+--- unicorn.rb.example  2013-12-20 16:27:14.795402739 -0500
++++ unicorn.rb  2014-01-07 07:47:33.786389865 -0500
 @@ -32,24 +32,24 @@
  
  # Help ensure your application will always spawn in the symlinked
  # "current" directory that Capistrano sets up.
--working_directory "/var/lib/git/gitlab" # available in 0.94.0+
-+working_directory "/home/git/gitlab" # available in 0.94.0+
+-working_directory "/home/git/gitlab" # available in 0.94.0+
++working_directory "/var/lib/git/gitlab" # available in 0.94.0+
  
  # listen on both a Unix domain socket and a TCP port,
  # we use a shorter backlog for quicker failover when busy
--listen "/var/lib/git/gitlab/tmp/sockets/gitlab.socket", :backlog => 64
-+listen "/home/git/gitlab/tmp/sockets/gitlab.socket", :backlog => 64
+-listen "/home/git/gitlab/tmp/sockets/gitlab.socket", :backlog => 64
++listen "/var/lib/git/gitlab/tmp/sockets/gitlab.socket", :backlog => 64
  listen "127.0.0.1:8080", :tcp_nopush => true
  
  # nuke workers after 30 seconds instead of 60 seconds (the default)
  timeout 30
  
  # feel free to point this anywhere accessible on the filesystem
--pid "/var/lib/git/gitlab/tmp/pids/unicorn.pid"
-+pid "/home/git/gitlab/tmp/pids/unicorn.pid"
+-pid "/home/git/gitlab/tmp/pids/unicorn.pid"
++pid "/var/lib/git/gitlab/tmp/pids/unicorn.pid"
  
  # By default, the Unicorn logger will write to stderr.
  # Additionally, some applications/frameworks log to stderr or stdout,
  # so prevent them from going to /dev/null when daemonized here:
--stderr_path "/var/lib/git/gitlab/log/unicorn.stderr.log"
--stdout_path "/var/lib/git/gitlab/log/unicorn.stdout.log"
-+stderr_path "/home/git/gitlab/log/unicorn.stderr.log"
-+stdout_path "/home/git/gitlab/log/unicorn.stdout.log"
+-stderr_path "/home/git/gitlab/log/unicorn.stderr.log"
+-stdout_path "/home/git/gitlab/log/unicorn.stdout.log"
++stderr_path "/var/lib/git/gitlab/log/unicorn.stderr.log"
++stdout_path "/var/lib/git/gitlab/log/unicorn.stdout.log"
  
  # combine Ruby 2.0.0dev or REE with "preload_app true" for memory savings
  # http://rubyenterpriseedition.com/faq.html#adapt_apps_for_cow
 ```
 
-### 4. Update Gitlab shell config file
+### 5. Update Gitlab shell config file
 update ~git/gitlab-shell/config.yml, using the following patch
 
 ```bash
@@ -146,7 +146,7 @@ sed -i -e 's/\/home/\/var\/lib/g' ~git/gitlab-shell/config.yml
  redis:
 ```
 
-### 5. Update authorized_keys
+### 6. Update authorized_keys
 
 Replace all /home to /var/lib using the following command
 
@@ -154,13 +154,13 @@ Replace all /home to /var/lib using the following command
 sed -i -e 's/\/home/\/var\/lib/g' /var/lib/git/.ssh/authorized_keys
 ```
 
-### 6. Update nginx config file
+### 7. Update nginx config file
 
 ```bash
 sed -i -e 's/\/home/\/var\/lib/g' /etc/nginx/sites-enabled/gitlab
 ```
 
-### 7. Add/Update gitlab service and default files
+### 8. Add/Update gitlab service and default files
 
 We need to apply the following patch to /etc/init.d/gitlab, This has been submitted as a PR already to gitlabhq
 
@@ -195,7 +195,7 @@ cp /var/lib/git/gitlab/lib/support/init.d/gitlab.default.example /etc/default/gi
 sed -i -e 's/\/home/\/var\/lib/g' /etc/default/gitlab
 ```
 
-### 8. Update gitlab-shell hooks
+### 9. Update gitlab-shell hooks
 
 The file /var/lib/git/gitlab-shell/support/rewrite-hooks.sh, has the home directory hardcoded, so we need to update this file as well
 
@@ -209,13 +209,13 @@ Now we update all the hooks
 /var/lib/git/gitlab-shell/support/rewrite-hooks.sh
 ```
 
-### 9. Restart application
+### 10. Restart application
 ```bash
 sudo service gitlab restart
 sudo service nginx restart
 ```
 
-### 10. Check application status
+### 11. Check application status
 
 Check if GitLab and its environment are configured correctly:
 
