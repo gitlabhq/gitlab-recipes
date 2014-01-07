@@ -8,7 +8,7 @@ service nginx stop
 ```
 
 ### 1. Update passwd/group file
-Amended the /etc/passwd file to change the uid, gid and the home directory for git
+Amended the `/etc/passwd` file to change the uid, gid and the home directory for git
 
 ```bash
 git:x:500:500:GitLab,,,:/var/lib/git:/bin/bash
@@ -19,7 +19,7 @@ or you can run the following command
 usermod -d /var/lib/git -g 500 -u 500 git
 ```
 
-Update the /etc/group file, and change the gid of the group
+Update the `/etc/group` file, and change the gid of the group
 
 ```bash
 git:x:500:
@@ -43,7 +43,7 @@ chown -R git:git /var/lib/git
 ```
 
 ### 4. Update Gitlab config files
-update ~git/gitlab/config/gitlab.yml, using the following command
+update `~git/gitlab/config/gitlab.yml`, using the following command
 
 ```bash
 sed -i -e 's/\/home/\/var\/lib/g' ~git/gitlab/config/gitlab.yml
@@ -78,7 +78,7 @@ You should see the following difference after running the command
      # Git over HTTP
      upload_pack: true
 ```
-Update ~git/gitlab/config/unicorb.rb, using the following command
+Update `~git/gitlab/config/unicorb.rb`, using the following command
 
 ```bash
 sed -i -e 's/\/home/\/var\/lib/g' ~git/gitlab/config/unicorn.rb
@@ -122,11 +122,13 @@ You should see the following difference after running the command
 ```
 
 ### 5. Update Gitlab shell config file
-update ~git/gitlab-shell/config.yml, using the following patch
+update `~git/gitlab-shell/config.yml`, using the following command
 
 ```bash
 sed -i -e 's/\/home/\/var\/lib/g' ~git/gitlab-shell/config.yml
 ```
+
+You should see the following difference after running the command
 
 ```diff
 --- config.yml.old      2014-01-07 09:00:41.522352570 -0500
@@ -148,13 +150,15 @@ sed -i -e 's/\/home/\/var\/lib/g' ~git/gitlab-shell/config.yml
 
 ### 6. Update authorized_keys
 
-Replace all /home to /var/lib using the following command
+Update the `/var/lib/git/.ssh/authorized_keys`, using the following command
 
 ```bash
-sed -i -e 's/\/home/\/var\/lib/g' /var/lib/git/.ssh/authorized_keys
+sed -i -e 's/\/home/\/var\/lib/g' ~git/.ssh/authorized_keys
 ```
 
 ### 7. Update nginx config file
+
+update `/etc/nginx/sites-enabled/gitlab`, using the following command
 
 ```bash
 sed -i -e 's/\/home/\/var\/lib/g' /etc/nginx/sites-enabled/gitlab
@@ -162,7 +166,9 @@ sed -i -e 's/\/home/\/var\/lib/g' /etc/nginx/sites-enabled/gitlab
 
 ### 8. Add/Update gitlab service and default files
 
-We need to apply the following patch to /etc/init.d/gitlab, This has been submitted as a PR already to gitlabhq
+We need to apply the following patch to `/etc/init.d/gitlab`, This has been submitted as a 
+PR already to gitlabhq. This enables to read the default file, and initialises other variables.
+Without this diff, other variables then also need to be defined in `/etc/default/gitlab`
 
 ```diff
 --- gitlab      2013-12-20 16:27:14.919395198 -0500
@@ -191,16 +197,16 @@ We need to apply the following patch to /etc/init.d/gitlab, This has been submit
 If you haven't already, copy the service default file, then do so, and then update the file to point to the new home directory
 
 ```bash
-cp /var/lib/git/gitlab/lib/support/init.d/gitlab.default.example /etc/default/gitlab
+cp ~git/gitlab/lib/support/init.d/gitlab.default.example /etc/default/gitlab
 sed -i -e 's/\/home/\/var\/lib/g' /etc/default/gitlab
 ```
 
 ### 9. Update gitlab-shell hooks
 
-The file /var/lib/git/gitlab-shell/support/rewrite-hooks.sh, has the home directory hardcoded, so we need to update this file as well
+The file `~git/gitlab-shell/support/rewrite-hooks.sh`, has the home directory hardcoded, so we need to update this file as well
 
 ```bash
-sed -i -e 's/\/home/\/var\/lib/g /var/lib/git/gitlab-shell/support/rewrite-hooks.sh
+sed -i -e 's/\/home/\/var\/lib/g' ~git/gitlab-shell/support/rewrite-hooks.sh
 ```
 
 Now we update all the hooks
@@ -211,6 +217,7 @@ sudo -u git -H gitlab-shell/support/rewrite-hooks.sh
 ```
 
 ### 10. Restart application
+
 ```bash
 sudo service gitlab restart
 sudo service nginx restart
