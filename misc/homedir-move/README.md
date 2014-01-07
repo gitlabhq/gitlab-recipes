@@ -50,7 +50,7 @@ sed -i -e 's/\/home/\/var\/lib/g' ~git/gitlab/config/gitlab.yml
 
 You should see the following difference after running the command
 
-```bash
+```diff
 --- gitlab.yml  2014-01-05 15:11:17.706013229 -0500
 +++ gitlab.yml.example  2013-12-20 16:27:14.784403409 -0500
 @@ -166,7 +165,7 @@
@@ -86,7 +86,7 @@ sed -i -e 's/\/home/\/var\/lib/g' ~git/gitlab/config/unicorn.rb
 
 You should see the following difference after running the command
 
-```bash
+```diff
 --- unicorn.rb  2014-01-07 07:47:33.786389865 -0500
 +++ unicorn.rb.example  2013-12-20 16:27:14.795402739 -0500
 @@ -32,24 +32,24 @@
@@ -128,7 +128,7 @@ update ~git/gitlab-shell/config.yml, using the following patch
 sed -i -e 's/\/home/\/var\/lib/g' ~git/gitlab-shell/config.yml
 ```
 
-```bash
+```diff
 --- config.yml.old      2014-01-07 09:00:41.522352570 -0500
 +++ config.yml  2014-01-05 15:12:59.695840545 -0500
 @@ -15,10 +15,10 @@
@@ -164,7 +164,7 @@ sed -i -e 's/\/home/\/var\/lib/g' /etc/nginx/sites-enabled/gitlab
 
 We need to apply the following patch to /etc/init.d/gitlab, This has been submitted as a PR already to gitlabhq
 
-```bash
+```diff
 --- gitlab      2013-12-20 16:27:14.919395198 -0500
 +++ /etc/init.d/gitlab  2014-01-06 08:51:18.253120785 -0500
 @@ -31,14 +31,15 @@
