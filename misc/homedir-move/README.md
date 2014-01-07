@@ -206,7 +206,8 @@ sed -i -e 's/\/home/\/var\/lib/g /var/lib/git/gitlab-shell/support/rewrite-hooks
 Now we update all the hooks
 
 ```bash
-/var/lib/git/gitlab-shell/support/rewrite-hooks.sh
+cd ~git
+sudo -u git -H gitlab-shell/support/rewrite-hooks.sh
 ```
 
 ### 10. Restart application
