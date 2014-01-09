@@ -8,16 +8,6 @@ service nginx stop
 ```
 
 ### 1. Update passwd/group file
-Amended the `/etc/passwd` file to change the uid, gid and the home directory for git
-
-```bash
-git:x:500:500:GitLab,,,:/var/lib/git:/bin/bash
-```
-or you can run the following command
-
-```bash
-usermod -d /var/lib/git -g 500 -u 500 git
-```
 
 Update the `/etc/group` file, and change the gid of the group
 
@@ -30,10 +20,21 @@ or you can run the following command
 groupmod -g 500 git
 ```
 
+Amended the `/etc/passwd` file to change the uid, gid and the home directory for git
+
+```bash
+git:x:500:500:GitLab,,,:/var/lib/git:/bin/bash
+```
+or you can run the following command
+
+```bash
+usermod -d /var/lib/git -g 500 -u 500 git
+```
+
 ### 2. Move the git folder
 
 ```bash
-mv /home/git /var/lib/git
+mv /home/git /var/lib/
 ```
 
 ### 3. Change permissions to use the new uid/gid
@@ -227,8 +228,10 @@ sudo service nginx restart
 
 Check if GitLab and its environment are configured correctly:
 
+    cd ~git/gitlab
     sudo -u git -H bundle exec rake gitlab:env:info RAILS_ENV=production
 
 To make sure you didn't miss anything run a more thorough check with:
 
+    cd ~git/gitlab
     sudo -u git -H bundle exec rake gitlab:check RAILS_ENV=production
