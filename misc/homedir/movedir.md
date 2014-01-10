@@ -34,7 +34,7 @@ usermod -d /var/lib/git -g 500 -u 500 git
 ### 2. Move the git folder
 
 ```bash
-mv /home/git /var/lib/
+cp -r /home/git /var/lib/
 ```
 
 ### 3. Change permissions to use the new uid/gid
@@ -235,3 +235,9 @@ To make sure you didn't miss anything run a more thorough check with:
 
     cd ~git/gitlab
     sudo -u git -H bundle exec rake gitlab:check RAILS_ENV=production
+
+### 12. Remove old home
+
+Once you are happy that everything is now working in the new directory, you can remove the old `/home/git`
+
+    rm -rf /home/git
