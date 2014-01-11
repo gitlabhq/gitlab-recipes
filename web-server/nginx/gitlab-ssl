@@ -10,7 +10,9 @@
 # sudo openssl req -new -x509 -nodes -days 3560 -out gitlab.crt -keyout gitlab.key
 # sudo chmod o-r gitlab.key
 # Also you need to edit gitlab-shell config.
-# Set "gitlab_url" param in gitlab-shell/config.yml to https://git.example.com 
+#  1) Set "gitlab_url" param in gitlab-shell/config.yml to https://git.example.com
+#  2) Set "ca_file" to /etc/nginx/gitlab.crt
+#  3) Set "self_signed_cert" to true
 # You also need to edit gitlab/config/gitlab.yml
 #  1) Define port for http "port: 443"
 #  2) Enable https "https: true"
