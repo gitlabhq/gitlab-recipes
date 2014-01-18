@@ -214,9 +214,9 @@ on how to deal with it. Alternatively, login as root and run the command.
 ### Create user for Git
 
     su -
-    adduser --system --shell /bin/bash --comment 'GitLab' --create-home --home-dir /home/git/ git
+    adduser --system --shell /sbin/nologin --comment 'GitLab' --create-home --home-dir /home/git/ git
 
-We do NOT set the password so this user cannot login.
+The shell we use for this user does not allow logins via a terminal.
 
 ### Forwarding all emails
 
@@ -237,22 +237,16 @@ Now we want all logging of the system to be forwarded to a central email address
 
 ## 4. GitLab shell
 
-GitLab Shell is a ssh access and repository management software developed specially for GitLab.
+GitLab Shell is a ssh access and repository management application developed specifically for GitLab.
 
 ```
-# First login as root
-su -
-
-# Login as git
-su - git
-
-# Clone gitlab shell
-git clone https://github.com/gitlabhq/gitlab-shell.git
+# Clone the gitlab shell from github
+sudo -u git -H git clone https://github.com/gitlabhq/gitlab-shell.git
 cd gitlab-shell
 
 # Switch to right version
-git checkout v1.8.0
-cp config.yml.example config.yml
+sudo -u git -H git checkout v1.8.0
+sudo -u git -H cp config.yml.example config.yml
 
 # Edit config and replace gitlab_url with something like 'http://domain.com/'
 #
@@ -262,7 +256,7 @@ cp config.yml.example config.yml
 # it's a good solution is to set gitlab_url as "http://localhost:8080/"
 
 # Do setup
-./bin/install
+sudo -u git -H ./bin/install
 ```
 ----------
 
@@ -343,21 +337,18 @@ Test the connection as the gitlab (uid=git) user.
 ----------
 ## 6. GitLab
 
-We'll install GitLab into home directory of the user `git`:
-
-    su -
-    su - git
+We'll install GitLab into home directory of the user `git`.
 
 ### Clone the Source
 
     # Clone GitLab repository
-    git clone https://github.com/gitlabhq/gitlabhq.git gitlab
+    sudo -u git -H git clone https://github.com/gitlabhq/gitlabhq.git gitlab
 
     # Go to gitlab directory
     cd /home/git/gitlab
 
     # Checkout to stable release
-    git checkout 6-4-stable
+    sudo -u git -H git checkout 6-4-stable
 
 **Note:** You can change `6-4-stable` to `master` if you want the *bleeding edge* version, but
 do so with caution!
@@ -366,32 +357,23 @@ do so with caution!
 
 ```
 # Copy the example GitLab config
-cp config/gitlab.yml.example config/gitlab.yml
+sudo -u git -H cp config/gitlab.yml.example config/gitlab.yml
 
 # Replace your_domain_name with the fully-qualified domain name of your host serving GitLab
 sed -i 's|localhost|your_domain_name|g' config/gitlab.yml
 
-# Make sure GitLab can write to the log/ and tmp/ directories
-chown -R git log/
-chown -R git tmp/
-chmod -R u+rwX  log/
-chmod -R u+rwX  tmp/
-
 # Create directory for satellites
-mkdir /home/git/gitlab-satellites
+sudo -u git -H mkdir /home/git/gitlab-satellites
 
 # Create directories for sockets/pids and make sure GitLab can write to them
-mkdir tmp/pids/
-mkdir tmp/sockets/
-chmod -R u+rwX  tmp/pids/
-chmod -R u+rwX  tmp/sockets/
+sudo -u git -H mkdir tmp/pids/
+sudo -u git -H mkdir tmp/sockets/
 
 # Create public/uploads directory otherwise backup will fail
-mkdir public/uploads
-chmod -R u+rwX  public/uploads
+sudo -u git -H mkdir public/uploads
 
 # Copy the example Unicorn config
-cp config/unicorn.rb.example config/unicorn.rb
+sudo -u git -H cp config/unicorn.rb.example config/unicorn.rb
 
 # Enable cluster mode if you expect to have a high load instance
 # E.g. change amount of workers to 3 for 2GB RAM server
@@ -399,9 +381,9 @@ editor config/unicorn.rb
 
 # Configure Git global settings for git user, useful when editing via web
 # Edit user.email according to what is set in gitlab.yml
-git config --global user.name "GitLab"
-git config --global user.email "gitlab@your_domain_name"
-git config --global core.autocrlf input
+sudo -u git -H git config --global user.name "GitLab"
+sudo -u git -H git config --global user.email "gitlab@your_domain_name"
+sudo -u git -H git config --global core.autocrlf input
 ```
 
 **Important:** Make sure to edit both `gitlab.yml` and `unicorn.rb` to match your setup.
@@ -409,10 +391,10 @@ git config --global core.autocrlf input
 ### Configure GitLab DB settings
 
     # MySQL
-    cp config/database.yml{.mysql,}
+    sudo -u git -H cp config/database.yml{.mysql,}
 
     # PostgreSQL 
-    cp config/database.yml{.postgresql,}
+    sudo -u git -H cp config/database.yml{.postgresql,}
 
 Make sure to update username/password in `config/database.yml`. You only need to adapt the production settings (first part).
 
@@ -444,9 +426,7 @@ Make config/database.yml readable to git only
 
 ### Install Gems
 
-    su -
     gem install charlock_holmes --version '0.6.9.4'
-    exit
 
 For MySQL (note, the option says "without ... postgres"):
 
@@ -457,7 +437,7 @@ For MySQL (note, the option says "without ... postgres"):
 ### Initialize Database and Activate Advanced Features
 
     cd /home/git/gitlab
-    bundle exec rake gitlab:setup RAILS_ENV=production
+    sudo -u git -H bundle exec rake gitlab:setup RAILS_ENV=production
 
 Type 'yes' to create the database.
 When done you see 'Administrator account created:'
