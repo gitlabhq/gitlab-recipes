@@ -462,6 +462,13 @@ For MySQL (note, the option says "without ... postgres"):
 Type 'yes' to create the database.
 When done you see 'Administrator account created:'
 
+### Generate assets
+
+Static contents such as Javascripts and CSS images have to be compiled. If you dont do it know, it will be done the first time you access you new Gitlab instance. Depending on your processing power this could lead you to an execution timeout
+
+    cd /home/git/gitlab
+    bundle exec rake assets:precompile RAILS_ENV=production
+
 ### Install Init Script
 
 Download the init script (will be /etc/init.d/gitlab):
