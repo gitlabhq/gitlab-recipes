@@ -482,6 +482,10 @@ Check if GitLab and its environment are configured correctly:
     su - git
     cd gitlab/
     bundle exec rake gitlab:env:info RAILS_ENV=production
+    
+Precompile to speed up access and avoid timeouts:
+
+    bundle exec rake assets:precompile RAILS_ENV=production
     exit
 
 ### Start your GitLab instance:
