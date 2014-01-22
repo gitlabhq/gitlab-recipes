@@ -167,34 +167,6 @@ sed -i -e 's/\/home/\/var\/lib/g' /etc/nginx/sites-enabled/gitlab
 
 ### 8. Add/Update gitlab service and default files
 
-We need to apply the following patch to `/etc/init.d/gitlab`, This has been submitted as a 
-PR already to gitlabhq. This enables to read the default file, and initialises other variables.
-Without this diff, other variables then also need to be defined in `/etc/default/gitlab`
-
-```diff
---- gitlab      2013-12-20 16:27:14.919395198 -0500
-+++ /etc/init.d/gitlab  2014-01-06 08:51:18.253120785 -0500
-@@ -31,14 +31,15 @@
- # internal /bin/sh variables such as PATH, EDITOR or SHELL.
- app_user="git"
- app_root="/home/$app_user/gitlab"
-+
-+# Read configuration variable file if it is present
-+test -f /etc/default/gitlab && . /etc/default/gitlab
-+
- pid_path="$app_root/tmp/pids"
- socket_path="$app_root/tmp/sockets"
- web_server_pid_path="$pid_path/unicorn.pid"
- sidekiq_pid_path="$pid_path/sidekiq.pid"
- 
--# Read configuration variable file if it is present
--test -f /etc/default/gitlab && . /etc/default/gitlab
--
- # Switch to the app_user if it is not he/she who is running the script.
- if [ "$USER" != "$app_user" ]; then
-   sudo -u "$app_user" -H -i $0 "$@"; exit;
-```
-
 If you haven't already, copy the service default file, then do so, and then update the file to point to the new home directory
 
 ```bash
@@ -217,14 +189,20 @@ cd ~git
 sudo -u git -H gitlab-shell/support/rewrite-hooks.sh
 ```
 
-### 10. Restart application
+### 11. Update logrotate files
+
+```
+sed -i -e 's/\/home/\/var\/lib/g' /etc/logrotate.d/gitlab
+```
+
+### 12. Restart application
 
 ```bash
 sudo service gitlab restart
 sudo service nginx restart
 ```
 
-### 11. Check application status
+### 13. Check application status
 
 Check if GitLab and its environment are configured correctly:
 
@@ -236,7 +214,7 @@ To make sure you didn't miss anything run a more thorough check with:
     cd ~git/gitlab
     sudo -u git -H bundle exec rake gitlab:check RAILS_ENV=production
 
-### 12. Remove old home
+### 14. Remove old home
 
 Once you are happy that everything is now working in the new directory, you can remove the old `/home/git`
 
