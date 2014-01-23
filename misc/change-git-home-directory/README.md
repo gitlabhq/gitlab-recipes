@@ -20,7 +20,7 @@ or you can run the following command
 groupmod -g 500 git
 ```
 
-Amended the `/etc/passwd` file to change the uid, gid and the home directory for git
+Amend the `/etc/passwd` file to change the uid, gid and the home directory for git
 
 ```bash
 git:x:500:500:GitLab,,,:/var/lib/git:/bin/bash
@@ -31,7 +31,7 @@ or you can run the following command
 usermod -d /var/lib/git -g 500 -u 500 git
 ```
 
-### 2. Move the git folder
+### 2. Copy the git folder
 
 ```bash
 cp -r /home/git /var/lib/
@@ -44,7 +44,8 @@ chown -R git:git /var/lib/git
 ```
 
 ### 4. Update Gitlab config files
-update `~git/gitlab/config/gitlab.yml`, using the following command
+
+Update `~git/gitlab/config/gitlab.yml`, using the following command
 
 ```bash
 sed -i -e 's/\/home/\/var\/lib/g' ~git/gitlab/config/gitlab.yml
@@ -123,7 +124,8 @@ You should see the following difference after running the command
 ```
 
 ### 5. Update Gitlab shell config file
-update `~git/gitlab-shell/config.yml`, using the following command
+
+Update `~git/gitlab-shell/config.yml`, using the following command
 
 ```bash
 sed -i -e 's/\/home/\/var\/lib/g' ~git/gitlab-shell/config.yml
@@ -159,7 +161,7 @@ sed -i -e 's/\/home/\/var\/lib/g' ~git/.ssh/authorized_keys
 
 ### 7. Update nginx config file
 
-update `/etc/nginx/sites-enabled/gitlab`, using the following command
+Update `/etc/nginx/sites-enabled/gitlab`, using the following command
 
 ```bash
 sed -i -e 's/\/home/\/var\/lib/g' /etc/nginx/sites-enabled/gitlab
@@ -206,16 +208,22 @@ sudo service nginx restart
 
 Check if GitLab and its environment are configured correctly:
 
-    cd ~git/gitlab
-    sudo -u git -H bundle exec rake gitlab:env:info RAILS_ENV=production
+```bash
+cd ~git/gitlab
+sudo -u git -H bundle exec rake gitlab:env:info RAILS_ENV=production
+```
 
 To make sure you didn't miss anything run a more thorough check with:
 
-    cd ~git/gitlab
-    sudo -u git -H bundle exec rake gitlab:check RAILS_ENV=production
+```bash
+cd ~git/gitlab
+sudo -u git -H bundle exec rake gitlab:check RAILS_ENV=production
+```
 
 ### 14. Remove old home
 
 Once you are happy that everything is now working in the new directory, you can remove the old `/home/git`
 
-    rm -rf /home/git
+```bash
+rm -rf /home/git
+```
