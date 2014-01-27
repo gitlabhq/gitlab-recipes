@@ -58,6 +58,8 @@ In a RHEL6 production environment it is assumed [SELinux is enabled](http://stop
     semanage fcontext -a -t httpd_sys_content_t '/home/git/repositories(/.*)?'
     restorecon -R /home/git
 
+**Note:** `semanage` is part of the `policycoreutils-python` package.
+
 ## Other httpd security considerations
 
 In `/etc/httpd/conf/httpd.conf` it is recommended to add/modify the following values.  For more information see [ServerTokens][servertokens], [ServerSignature][serversignature], and [TraceEnable][traceenable].
