@@ -559,12 +559,12 @@ To make sure you didn't miss anything run a more thorough check with:
 
 Now, the output will complain that your init script is not up-to-date as follows:
 
-Init script up-to-date? ... no
-  Try fixing it:
-  Redownload the init script
-  For more information see:
-  doc/install/installation.md in section "Install Init Script"
-  Please fix the error above and rerun the checks.
+    Init script up-to-date? ... no
+      Try fixing it:
+      Redownload the init script
+      For more information see:
+      doc/install/installation.md in section "Install Init Script"
+      Please fix the error above and rerun the checks.
 
 Do not mind about that error if you are sure that you have downloaded the up-to-date file from https://gitlab.com/gitlab-org/gitlab-recipes/raw/master/init/sysvinit/centos/gitlab-unicorn and saved it to `/etc/init.d/gitlab`.
 
