@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # GitLab
-# Contributors  : @elvanja, @troyanov, @eiyaya, @foyo23, @nielsbasjes, @relip, @JasonMing, @andronat, @axilleas
+# Contributors  : @elvanja, @troyanov, @eiyaya, @foyo23, @nielsbasjes, @relip, @JasonMing, @andronat, @axilleas, @mdirkse
 # App Version   : 6.x
 
 # chkconfig: 2345 82 55
@@ -33,7 +33,7 @@ SPID=$APP_PATH/tmp/pids/sidekiq.pid
 SLOCK=/var/lock/subsys/sidekiq
 
 # Evaluate the real path for the user (should already have RVM)
-PATH_PATCH="PATH=$(su $USER -l -c "echo \"\$PATH\"") && export PATH && "
+PATH_PATCH="PATH=$(su $USER -s /bin/bash -l -c "echo \"\$PATH\"") && export PATH && "
 
 start() {
   cd $APP_PATH
