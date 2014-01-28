@@ -37,7 +37,7 @@ This guide does not disable any of them, we simply configure them as they were i
 
 The GitLab installation consists of setting up the following components:
 
-1. Install the base operating system (CentOS 6.4 Minimal) and Packages / Dependencies
+1. Install the base operating system (CentOS 6.5 Minimal) and Packages / Dependencies
 2. Ruby
 3. System Users
 4. GitLab shell
@@ -48,9 +48,9 @@ The GitLab installation consists of setting up the following components:
 
 ----------
 
-## 1. Installing the operating system (CentOS 6.4 Minimal)
+## 1. Installing the operating system (CentOS 6.5 Minimal)
 
-We start with a completely clean CentOS 6.4 "minimal" installation which can be
+We start with a completely clean CentOS 6.5 "minimal" installation which can be
 accomplished by downloading the appropriate installation iso file. Just boot the
 system of the iso file and install the system.
 
