@@ -308,7 +308,7 @@ Create a new user and database for GitLab:
 
 Try connecting to the new database with the new user:
 
-    mysql -u gitlab -p -D gitlabhq_production
+    mysql -u git -p -D gitlabhq_production
     # Type the password you replaced supersecret with earlier
     # Quit the database session
     \q
