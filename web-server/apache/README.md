@@ -1,3 +1,6 @@
+# Apache 2 version
+If you are using Apache version 2.4 or above, please use files [gitlab-apache2.4.conf](gitlab-apache2.4.conf) or [gitlab-ssl-apache2.4.conf](gitlab-ssl-apache2.4.conf) for the HTTP and HTTPS versions of the vhost repectively.
+
 # RHEL6/CentOS6 recommendations
 
 The up-to-date recommended [gitlab-ssl.conf](gitlab-ssl.conf) was configured on RHEL 6.4.
