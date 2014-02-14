@@ -101,14 +101,14 @@ query_status() {
 case "$1" in
   start)
     query_status && exit 0
-    start
+    start || exit 1
     ;;
   stop)
     query_status || exit 0
-    stop
+    stop || exit 1
     ;;
   restart)
-    restart
+    restart || exit 1
     ;;
   status)
     get_status
@@ -122,4 +122,3 @@ case "$1" in
 esac
 
 exit 0
-
