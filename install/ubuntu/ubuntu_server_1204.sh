@@ -70,9 +70,9 @@ sudo DEBIAN_FRONTEND='noninteractive' apt-get install -y postfix-policyd-spf-pyt
 #==
 #== 2. RUBY
 #==
-wget http://ftp.ruby-lang.org/pub/ruby/1.9/ruby-1.9.3-p327.tar.gz
-tar xfvz ruby-1.9.3-p327.tar.gz
-cd ruby-1.9.3-p327
+wget http://ftp.ruby-lang.org/pub/ruby/1.9/ruby-1.9.3-p484.tar.gz
+tar xfvz ruby-1.9.3-p484.tar.gz
+cd ruby-1.9.3-p484
 ./configure
 make
 sudo make install
