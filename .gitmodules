@@ -1,0 +1,3 @@
+[submodule "database/migrate-mysql-to-postgres/mysql-postgresql-converter"]
+	path = database/migrate-mysql-to-postgres/mysql-postgresql-converter
+	url = https://github.com/lanyrd/mysql-postgresql-converter.git
