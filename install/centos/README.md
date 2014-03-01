@@ -1,6 +1,6 @@
 ```
 Distribution      : CentOS 6.5
-GitLab version    : 6.0 - 6.5
+GitLab version    : 6.0 - 6.6
 Web Server        : Apache, Nginx
 Init system       : sysvinit
 Database          : MySQL, PostgreSQL
@@ -159,24 +159,7 @@ If you are not familiar with vim please skip this and keep using the default edi
     yum -y install vim-enhanced
     update-alternatives --set editor /usr/bin/vim.basic
 
-Make sure you have the right version of Python installed.
-
-    # Install Python
-    yum -y install python
-
-    # Make sure that Python is 2.5+ (3.x is not supported at the moment)
-    python --version
-
-    # If it's Python 3 you might need to install Python 2 separately
-    yum -y install python2.7
-
-    # Make sure you can access Python via python2
-    python2 --version
-
-    # If you get a "command not found" error create a link to the python binary
-    ln -s /usr/bin/python /usr/bin/python2
-
-    # For reStructuredText markup language support install required package:
+    # For reStructuredText markup language support, install required package:
     yum -y install python-docutils
 
 ### Configure redis
@@ -355,9 +338,9 @@ Test the connection as the gitlab (uid=git) user.
 ### Clone the Source
 
     # Clone GitLab repository
-    sudo -u git -H git clone https://gitlab.com/gitlab-org/gitlab-ce.git -b 6-5-stable gitlab
+    sudo -u git -H git clone https://gitlab.com/gitlab-org/gitlab-ce.git -b 6-6-stable gitlab
 
-**Note:** You can change `6-5-stable` to `master` if you want the *bleeding edge* version, but do so with caution!
+**Note:** You can change `6-6-stable` to `master` if you want the *bleeding edge* version, but do so with caution!
 
 ### Configure it
 
