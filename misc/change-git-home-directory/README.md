@@ -191,6 +191,14 @@ cd ~git
 sudo -u git -H gitlab-shell/support/rewrite-hooks.sh
 ```
 
+### 10. Update deploy.sh
+
+The file `~git/gitlab/lib/support/deploy/deploy.sh`, also has the home directory hardcoded, again update the file
+
+```bash
+sed -i -e 's/\/home/\/var\/lib/g' ~git/gitlab/lib/support/deploy/deploy.sh
+```
+
 ### 11. Update logrotate files
 
 ```
