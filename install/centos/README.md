@@ -470,6 +470,10 @@ Use either Nginx or Apache, not both. Official installation guide recommends ngi
 
 ### Nginx
 
+You will need a new version of nginx otherwise you might encounter an issue like [this][issue-nginx].
+To do so, follow the instructions provided by the [nginx wiki][nginx-centos] and then install nginx with:
+
+    yum update
     yum -y install nginx
     chkconfig nginx on
     wget -O /etc/nginx/conf.d/gitlab.conf https://gitlab.com/gitlab-org/gitlab-recipes/raw/master/web-server/nginx/gitlab-ssl
@@ -580,3 +584,5 @@ nobody can access your GitLab by using this login information later on.
 [PU]: http://www.princeton.edu/
 [IAS]: http://www.ias.edu/
 [keys]: https://fedoraproject.org/keys
+[issue-nginx]: https://github.com/gitlabhq/gitlabhq/issues/5774
+[nginx-centos]: http://wiki.nginx.org/Install#Official_Red_Hat.2FCentOS_packages
