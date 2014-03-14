@@ -1,8 +1,10 @@
 ### 1. Update Nginx  config
 Added the SSL section and a rewrite of port 80 to 443 in the Nginx configuration
+
 ```bash
 nano /etc/nginx/sites-enabled/gitlab
 ```
+
 ```bash
 server {
   listen 80;
