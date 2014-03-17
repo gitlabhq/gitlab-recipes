@@ -190,8 +190,8 @@ Remove the old Ruby 1.8 if present:
 Download Ruby and compile it:
 
     mkdir /tmp/ruby && cd /tmp/ruby
-    curl --progress ftp://ftp.ruby-lang.org/pub/ruby/2.1/ruby-2.1.0.tar.gz | tar xz
-    cd ruby-2.1.0
+    curl --progress ftp://ftp.ruby-lang.org/pub/ruby/2.1/ruby-2.1.1.tar.gz | tar xz
+    cd ruby-2.1.1
     ./configure --disable-install-rdoc
     make
     make prefix=/usr/local install
@@ -206,7 +206,7 @@ installed with:
     which ruby
     # /usr/local/bin/ruby
     ruby -v
-    # ruby 2.1.0p0 (2013-12-25 revision 44422) [x86_64-linux]
+    # ruby 2.1.1p76 (2014-02-24 revision 45161) [x86_64-linux]
 
 ----------
 
@@ -243,7 +243,7 @@ GitLab Shell is a ssh access and repository management application developed spe
     cd /home/git
 
     # Clone gitlab shell
-    sudo -u git -H git clone https://gitlab.com/gitlab-org/gitlab-shell.git -b v1.8.0
+    sudo -u git -H git clone https://gitlab.com/gitlab-org/gitlab-shell.git -b v1.8.5
 
     cd gitlab-shell
 
