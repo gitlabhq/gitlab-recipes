@@ -326,7 +326,15 @@ Configure the database user and password:
 
 Test the connection as the gitlab (uid=git) user.
 
-    psql -d gitlabhq_production -U git -W # prompts for your password.
+    # you should be root
+    whoami
+    
+    # This will prompt you for the password of database user git
+    sudo -u git psql -d gitlabhq_production -U git -W
+    
+    # If you see:
+    #   gitlabhq_production=>
+    # Then your password has been accepted successfully and you can type \q to quit
 
 
 ----------
