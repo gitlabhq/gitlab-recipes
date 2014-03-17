@@ -188,6 +188,33 @@ To remove this alias in the future:
     
     rm -i /usr/bin/editor
 
+
+### Install Git from Source (optional)
+
+Remove the system Git
+
+    yum -y remove git
+
+Install the pre-requisite files for Git compilation
+
+    yum install zlib-devel perl-CPAN gettext curl-devel expat-devel gettext-devel openssl-devel
+    
+Download and extract Git 1.9.0
+
+    mkdir /tmp/git && cd /tmp/git
+    curl --progress https://git-core.googlecode.com/files/git-1.9.0.tar.gz | tar xz
+    cd git-1.9.0/
+    ./configure
+    make
+    make prefix=/usr/local install
+    
+Make sure Git is in your `$PATH`:
+
+    which git
+    
+You might have to logout and login again for the `$PATH` to take effect.
+
+
 ----------
 
 ## 2. Ruby
@@ -348,6 +375,7 @@ If you see the following:
     gitlabhq_production=>
 
 Your password has been accepted successfully and you can type \q to quit.
+
 
 ----------
 ## 6. GitLab
