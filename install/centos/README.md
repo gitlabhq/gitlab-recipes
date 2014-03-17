@@ -335,18 +335,19 @@ Configure the database user and password:
     template1=# \q
     exit # exit uid=postgres, return to root
 
-Test the connection as the gitlab (uid=git) user.
+Test the connection as the gitlab (uid=git) user. You should be root to begin this test:
 
-    # you should be root
     whoami
     
-    # This will prompt you for the password of database user git
+Attempt to log in to Postgres as the git user:
+
     sudo -u git psql -d gitlabhq_production -U git -W
     
-    # If you see:
-    #   gitlabhq_production=>
-    # Then your password has been accepted successfully and you can type \q to quit
+If you see the following:
 
+    gitlabhq_production=>
+
+Your password has been accepted successfully and you can type \q to quit.
 
 ----------
 ## 6. GitLab
