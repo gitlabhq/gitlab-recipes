@@ -177,6 +177,17 @@ mail server. The recommended one is postfix and you can install it with:
 
 To use and configure sendmail instead of postfix see [Advanced Email Configurations](configure_email.md).
 
+### Configure the default editor
+
+You can choose between editors such as nano, vi, vim, etc.
+In this case we will use vim as the default editor for consistency.
+
+    ln -s /usr/bin/vim /usr/bin/editor
+    
+To remove this alias in the future:
+    
+    rm -i /usr/bin/editor
+
 ----------
 
 ## 2. Ruby
