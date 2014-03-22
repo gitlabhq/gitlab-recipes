@@ -1,0 +1,105 @@
+#!/bin/bash
+#
+# GitLab
+# Contributors  : @elvanja, @troyanov, @eiyaya, @foyo23, @nielsbasjes, @relip, @JasonMing, @andronat, @axilleas
+# App Version   : 6.x
+
+# chkconfig: 2345 82 55
+# processname: sidekiq
+# description: Runs sidekiq for nginx integration.
+
+# Related (kudos @4sak3n0ne):
+# https://github.com/gitlabhq/gitlabhq/issues/1049#issuecomment-8386882
+# https://gist.github.com/3062860
+
+# Include RedHat function library
+. /etc/rc.d/init.d/functions
+
+# The name of the service
+NAME=${0##*/}
+
+### Environment variables
+RAILS_ENV="production"
+
+# The username and path to the gitlab source
+USER=git
+APP_PATH=/home/git/gitlab
+
+# The PID and LOCK files used by unicorn and sidekiq
+SPID=$APP_PATH/tmp/pids/sidekiq.pid
+SLOCK=/var/lock/subsys/sidekiq
+
+# Evaluate the real path for the user (should already have RVM)
+PATH_PATCH="PATH=$(su $USER -l -c "echo \"\$PATH\"") && export PATH && "
+
+start() {
+  cd $APP_PATH
+
+  # Start sidekiq
+  echo -n $"Starting sidekiq: "
+  daemon --pidfile=$SPID --user=$USER "$PATH_PATCH RAILS_ENV=$RAILS_ENV script/background_jobs start"
+  sidekiq=$?
+  [ $sidekiq -eq 0 ] && touch $SLOCK
+  echo
+
+  retval=$sidekiq
+  return $retval
+}
+
+stop() {
+  cd $APP_PATH
+
+  # Stop sidekiq
+  echo -n $"Stopping sidekiq: "
+  killproc -p $SPID
+  sidekiq=$?
+  [ $sidekiq -eq 0 ] && rm -f $SLOCK
+  echo
+
+  retval=$sidekiq
+  return $retval
+}
+
+restart() {
+  stop
+  start
+}
+
+get_status() {
+  status -p $SPID sidekiq
+  sidekiq=$?
+
+  retval=$sidekiq
+  return $retval
+}
+
+query_status() {
+  get_status >/dev/null 2>&1
+  return $?
+}
+
+case "$1" in
+  start)
+    query_status && exit 0
+    start
+    ;;
+  stop)
+    query_status || exit 0
+    stop
+    ;;
+  restart)
+    restart
+    ;;
+  status)
+    get_status
+	exit $?
+    ;;
+  *)
+    N=/etc/init.d/$NAME
+    echo "Usage: $N {start|stop|restart|status}" >&2
+    exit 1
+    ;;
+esac
+
+exit 0
+

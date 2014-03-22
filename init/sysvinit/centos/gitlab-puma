@@ -1,20 +1,28 @@
 #!/bin/bash
 #
 # GitLab
-# Maintainer: @elvanja, @troyanov, @eiyaya, @foyo23
-# App Version: 5.0.0
+# Contributors  : @elvanja, @troyanov, @eiyaya, @foyo23, @nielsbasjes, @relip, @JasonMing, @andronat
+# App Version   : 6.x
 
 # chkconfig: 2345 82 55
-# processname: unicorn
+# processname: puma
 # processname: sidekiq
-# description: Runs unicorn and sidekiq for nginx integration.
+# description: Runs puma and sidekiq for nginx integration.
 
 # Related (kudos @4sak3n0ne):
 # https://github.com/gitlabhq/gitlabhq/issues/1049#issuecomment-8386882
 # https://gist.github.com/3062860
 
+# Save original $PATH
+# /etc/rc.d/init.d/functions resets $PATH to default(/sbin:/usr/sbin:/bin:/usr/bin).
+# Consequently, rvm and compiled ruby with custom path (which isn't /usr/bin) cannot be executed.
+ORIGINAL_PATH=$PATH
+
 # Include RedHat function library
 . /etc/rc.d/init.d/functions
+
+# Restore original $PATH
+PATH=$ORIGINAL_PATH
 
 # The name of the service
 NAME=git
@@ -23,26 +31,27 @@ NAME=git
 USER=git
 APP_PATH=/home/$USER/gitlab
 
-# The PID and LOCK files used by unicorn and sidekiq
-UPID=$APP_PATH/tmp/pids/unicorn.pid
-ULOCK=/var/lock/subsys/unicorn
+# The PID and LOCK files used by puma and sidekiq
+UPID=$APP_PATH/tmp/pids/puma.pid
+ULOCK=/var/lock/subsys/puma
 SPID=$APP_PATH/tmp/pids/sidekiq.pid
 SLOCK=/var/lock/subsys/sidekiq
 
-# The options to use when running unicorn
-OPTS="-c $APP_PATH/config/unicorn.rb -E production -D"
+# The options to use when running puma
+OPTS="-C $APP_PATH/config/puma.rb -e production"
 
 # Ruby related path update
-RUBY_PATH_PATCH="PATH=$PATH:/usr/local/bin:/usr/local/lib:/home/git/bin && export PATH && "
+RVM_PATH="/usr/local/rvm/bin"
+RUBY_PATH_PATCH="PATH=/usr/local/bin:/usr/local/lib:/home/git/bin:$RVM_PATH:$PATH && export PATH && "
 
 start() {
   cd $APP_PATH
 
-  # Start unicorn
-  echo -n $"Starting unicorn: "
-  daemon --pidfile=$UPID --user=$USER "$RUBY_PATH_PATCH bundle exec unicorn_rails $OPTS"
-  unicorn=$?
-  [ $unicorn -eq 0 ] && touch $ULOCK
+  # Start puma
+  echo -n $"Starting puma: "
+  daemon --pidfile=$UPID --user=$USER "$RUBY_PATH_PATCH bundle exec puma $OPTS"
+  puma=$?
+  [ $puma -eq 0 ] && touch $ULOCK
   echo
 
   # Start sidekiq
@@ -52,18 +61,18 @@ start() {
   [ $sidekiq -eq 0 ] && touch $SLOCK
   echo
 
-  retval=$unicorn || $sidekiq
+  retval=$puma || $sidekiq
   return $retval
 }
 
 stop() {
   cd $APP_PATH
 
-  # Stop unicorn
-  echo -n $"Stopping unicorn: "
+  # Stop puma
+  echo -n $"Stopping puma: "
   killproc -p $UPID
-  unicorn=$?
-  [ $unicorn -eq 0 ] && rm -f $ULOCK
+  puma=$?
+  [ $puma -eq 0 ] && rm -f $ULOCK
   echo
 
   # Stop sidekiq
@@ -73,7 +82,7 @@ stop() {
   [ $sidekiq -eq 0 ] && rm -f $SLOCK
   echo
 
-  retval=$unicorn || $sidekiq
+  retval=$puma || $sidekiq
   return $retval
 }
 
@@ -83,7 +92,7 @@ restart() {
 }
 
 get_status() {
-  status -p $UPID unicorn
+  status -p $UPID puma
   status -p $SPID sidekiq
 }
 
@@ -114,3 +123,4 @@ case "$1" in
 esac
 
 exit 0
+

@@ -1,0 +1,124 @@
+#!/bin/bash
+#
+# GitLab
+# Contributors  : @elvanja, @troyanov, @eiyaya, @foyo23, @nielsbasjes, @relip, @JasonMing, @andronat, @axilleas, @mdirkse
+# App Version   : 6.x
+
+# chkconfig: 2345 82 55
+# processname: unicorn
+# processname: sidekiq
+# description: Runs unicorn and sidekiq for nginx integration.
+
+# Related (kudos @4sak3n0ne):
+# https://github.com/gitlabhq/gitlabhq/issues/1049#issuecomment-8386882
+# https://gist.github.com/3062860
+
+# Include RedHat function library
+. /etc/rc.d/init.d/functions
+
+# The name of the service
+NAME=${0##*/}
+
+### Environment variables
+RAILS_ENV="production"
+
+# The username and path to the gitlab source
+USER=git
+APP_PATH=/home/$USER/gitlab
+
+# The PID and LOCK files used by unicorn and sidekiq
+UPID=$APP_PATH/tmp/pids/unicorn.pid
+ULOCK=/var/lock/subsys/unicorn
+SPID=$APP_PATH/tmp/pids/sidekiq.pid
+SLOCK=/var/lock/subsys/sidekiq
+
+# Evaluate the real path for the user (should already have RVM)
+PATH_PATCH="PATH=$(su $USER -s /bin/bash -l -c "echo \"\$PATH\"") && export PATH && "
+
+start() {
+  cd $APP_PATH
+
+  # Start unicorn
+  echo -n $"Starting unicorn: "
+  daemon --pidfile=$UPID --user=$USER "$PATH_PATCH RAILS_ENV=$RAILS_ENV script/web start"
+  unicorn=$?
+  [ $unicorn -eq 0 ] && touch $ULOCK
+  echo
+
+  # Start sidekiq
+  echo -n $"Starting sidekiq: "
+  daemon --pidfile=$SPID --user=$USER "$PATH_PATCH RAILS_ENV=$RAILS_ENV script/background_jobs start"
+  sidekiq=$?
+  [ $sidekiq -eq 0 ] && touch $SLOCK
+  echo
+
+  retval=$unicorn || $sidekiq
+  return $retval
+}
+
+stop() {
+  cd $APP_PATH
+
+  # Stop unicorn
+  echo -n $"Stopping unicorn: "
+  killproc -p $UPID
+  unicorn=$?
+  [ $unicorn -eq 0 ] && rm -f $ULOCK
+  echo
+
+  # Stop sidekiq
+  echo -n $"Stopping sidekiq: "
+  killproc -p $SPID
+  sidekiq=$?
+  [ $sidekiq -eq 0 ] && rm -f $SLOCK
+  echo
+
+  retval=$unicorn || $sidekiq
+  return $retval
+}
+
+restart() {
+  stop
+  start
+}
+
+get_status() {
+  status -p $UPID unicorn
+  unicorn=$?
+
+  status -p $SPID sidekiq
+  sidekiq=$?
+
+  retval=$unicorn || $sidekiq
+  return $retval
+}
+
+query_status() {
+  get_status >/dev/null 2>&1
+  return $?
+}
+
+case "$1" in
+  start)
+    query_status && exit 0
+    start || exit 1
+    ;;
+  stop)
+    query_status || exit 0
+    stop || exit 1
+    ;;
+  restart)
+    restart || exit 1
+    ;;
+  status)
+    get_status
+	exit $?
+    ;;
+  *)
+    N=/etc/init.d/$NAME
+    echo "Usage: $N {start|stop|restart|status}" >&2
+    exit 1
+    ;;
+esac
+
+exit 0
