@@ -4,7 +4,7 @@ GitLab version    : 6.0 - 6.6
 Web Server        : Apache, Nginx
 Init system       : sysvinit
 Database          : MySQL, PostgreSQL
-Contributors      : @nielsbasjes, @axilleas, @mairin, @ponsjuh, @yorn, @psftw, @etcet, @mdirkse
+Contributors      : @nielsbasjes, @axilleas, @mairin, @ponsjuh, @yorn, @psftw, @etcet, @mdirkse, @nszceta
 Additional Notes  : In order to get a proper Ruby setup we build it from source
 ```
 
@@ -177,21 +177,64 @@ mail server. The recommended one is postfix and you can install it with:
 
 To use and configure sendmail instead of postfix see [Advanced Email Configurations](configure_email.md).
 
+### Configure the default editor
+
+You can choose between editors such as nano, vi, vim, etc.
+In this case we will use vim as the default editor for consistency.
+
+    ln -s /usr/bin/vim /usr/bin/editor
+    
+To remove this alias in the future:
+    
+    rm -i /usr/bin/editor
+
+
+### Install Git from Source (optional)
+
+Remove the system Git
+
+    yum -y remove git
+
+Install the pre-requisite files for Git compilation
+
+    yum install zlib-devel perl-CPAN gettext curl-devel expat-devel gettext-devel openssl-devel
+    
+Download and extract Git 1.9.0
+
+    mkdir /tmp/git && cd /tmp/git
+    curl --progress https://git-core.googlecode.com/files/git-1.9.0.tar.gz | tar xz
+    cd git-1.9.0/
+    ./configure
+    make
+    make prefix=/usr/local install
+    
+Make sure Git is in your `$PATH`:
+
+    which git
+    
+You might have to logout and login again for the `$PATH` to take effect.
+
+
 ----------
 
 ## 2. Ruby
 
 The use of ruby version managers such as [RVM](http://rvm.io/), [rbenv](https://github.com/sstephenson/rbenv) or [chruby](https://github.com/postmodern/chruby) with GitLab in production frequently leads to hard to diagnose problems. Version managers are not supported and we stronly advise everyone to follow the instructions below to use a system ruby.
 
-Remove the old Ruby 1.8 if present:
+Remove the old Ruby 1.8 package if present. Gitlab 6.7 only supports the Ruby 2.0.x release series:
 
     yum remove ruby
+
+Remove any other Ruby build if it is still present:
+
+    cd <your-ruby-source-path>
+    make uninstall
 
 Download Ruby and compile it:
 
     mkdir /tmp/ruby && cd /tmp/ruby
-    curl --progress ftp://ftp.ruby-lang.org/pub/ruby/2.1/ruby-2.1.0.tar.gz | tar xz
-    cd ruby-2.1.0
+    curl --progress ftp://ftp.ruby-lang.org/pub/ruby/2.0/ruby-2.0.0-p451.tar.gz | tar xz
+    cd ruby-2.0.0-p451
     ./configure --disable-install-rdoc
     make
     make prefix=/usr/local install
@@ -206,7 +249,7 @@ installed with:
     which ruby
     # /usr/local/bin/ruby
     ruby -v
-    # ruby 2.1.0p0 (2013-12-25 revision 44422) [x86_64-linux]
+    # ruby 2.0.0p451 (2014-02-24 revision 45167) [x86_64-linux]
 
 ----------
 
@@ -243,7 +286,7 @@ GitLab Shell is a ssh access and repository management application developed spe
     cd /home/git
 
     # Clone gitlab shell
-    sudo -u git -H git clone https://gitlab.com/gitlab-org/gitlab-shell.git -b v1.8.0
+    sudo -u git -H git clone https://gitlab.com/gitlab-org/gitlab-shell.git -b v1.9.1
 
     cd gitlab-shell
 
@@ -324,9 +367,19 @@ Configure the database user and password:
     template1=# \q
     exit # exit uid=postgres, return to root
 
-Test the connection as the gitlab (uid=git) user.
+Test the connection as the gitlab (uid=git) user. You should be root to begin this test:
 
-    psql -d gitlabhq_production -U git -W # prompts for your password.
+    whoami
+    
+Attempt to log in to Postgres as the git user:
+
+    sudo -u git psql -d gitlabhq_production -U git -W
+    
+If you see the following:
+
+    gitlabhq_production=>
+
+Your password has been accepted successfully and you can type \q to quit.
 
 
 ----------
