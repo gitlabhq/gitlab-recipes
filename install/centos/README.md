@@ -283,7 +283,7 @@ Create a new user and database for GitLab:
     # Create the GitLab production database
     CREATE DATABASE IF NOT EXISTS `gitlabhq_production` DEFAULT CHARACTER SET `utf8` COLLATE `utf8_unicode_ci`;
 
-    # Grant the GitLab user necessary permissopns on the table.
+    # Grant the GitLab user necessary permissions on the table.
     GRANT SELECT, LOCK TABLES, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER ON `gitlabhq_production`.* TO 'git'@'localhost';
 
     # Quit the database session
@@ -448,7 +448,7 @@ Make GitLab start on boot:
 
 ### Set up logrotate
 
-    sudo cp lib/support/logrotate/gitlab /etc/logrotate.d/gitlab
+    cp lib/support/logrotate/gitlab /etc/logrotate.d/gitlab
 
 ### Check Application Status
 
@@ -460,7 +460,7 @@ Check if GitLab and its environment are configured correctly:
 
     service gitlab start
 
-## Compile assets
+### Compile assets
 
     sudo -u git -H bundle exec rake assets:precompile RAILS_ENV=production
 
