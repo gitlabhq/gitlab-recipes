@@ -4,7 +4,7 @@ GitLab version    : 6.0 - 6.6
 Web Server        : Apache, Nginx
 Init system       : sysvinit
 Database          : MySQL, PostgreSQL
-Contributors      : @nielsbasjes, @axilleas, @mairin, @ponsjuh, @yorn, @psftw, @etcet, @mdirkse
+Contributors      : @nielsbasjes, @axilleas, @mairin, @ponsjuh, @yorn, @psftw, @etcet, @mdirkse, @nszceta
 Additional Notes  : In order to get a proper Ruby setup we build it from source
 ```
 
@@ -221,15 +221,20 @@ You might have to logout and login again for the `$PATH` to take effect.
 
 The use of ruby version managers such as [RVM](http://rvm.io/), [rbenv](https://github.com/sstephenson/rbenv) or [chruby](https://github.com/postmodern/chruby) with GitLab in production frequently leads to hard to diagnose problems. Version managers are not supported and we stronly advise everyone to follow the instructions below to use a system ruby.
 
-Remove the old Ruby 1.8 if present:
+Remove the old Ruby 1.8 package if present. Gitlab 6.7 only supports the Ruby 2.0.x release series:
 
     yum remove ruby
+
+Remove any other Ruby build if it is still present:
+
+    cd <your-ruby-source-path>
+    make uninstall
 
 Download Ruby and compile it:
 
     mkdir /tmp/ruby && cd /tmp/ruby
-    curl --progress ftp://ftp.ruby-lang.org/pub/ruby/2.1/ruby-2.1.1.tar.gz | tar xz
-    cd ruby-2.1.1
+    curl --progress ftp://ftp.ruby-lang.org/pub/ruby/2.0/ruby-2.0.0-p451.tar.gz | tar xz
+    cd ruby-2.0.0-p451
     ./configure --disable-install-rdoc
     make
     make prefix=/usr/local install
@@ -244,7 +249,7 @@ installed with:
     which ruby
     # /usr/local/bin/ruby
     ruby -v
-    # ruby 2.1.1p76 (2014-02-24 revision 45161) [x86_64-linux]
+    # ruby 2.0.0p451 (2014-02-24 revision 45167) [x86_64-linux]
 
 ----------
 
