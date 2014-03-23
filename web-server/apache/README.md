@@ -53,12 +53,13 @@ In a RHEL6 production environment it is assumed [SELinux is enabled](http://stop
 
     setsebool -P httpd_can_network_connect on
     setsebool -P httpd_can_network_relay on
-    setsebool -P httpd_enable_homedirs on
     setsebool -P httpd_read_user_content on
-    semanage fcontext -a -t user_home_dir_t '/home/git(/.*)?'
-    semanage fcontext -a -t ssh_home_t '/home/git/.ssh(/.*)?'
-    semanage fcontext -a -t httpd_sys_content_t '/home/git/gitlab/public(/.*)?'
-    semanage fcontext -a -t httpd_sys_content_t '/home/git/repositories(/.*)?'
+    semanage -i - <<EOF
+    fcontext -a -t user_home_dir_t '/home/git(/.*)?'
+    fcontext -a -t ssh_home_t '/home/git/.ssh(/.*)?'
+    fcontext -a -t httpd_sys_content_t '/home/git/gitlab/public(/.*)?'
+    fcontext -a -t httpd_sys_content_t '/home/git/repositories(/.*)?'
+    EOF
     restorecon -R /home/git
 
 **Note:** `semanage` is part of the `policycoreutils-python` package.
