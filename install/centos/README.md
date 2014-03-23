@@ -1,6 +1,6 @@
 ```
-Distribution      : CentOS 6.5
-GitLab version    : 6.0 - 6.6
+Distribution      : CentOS 6.5 Minimal
+GitLab version    : 6.0 - 6.7
 Web Server        : Apache, Nginx
 Init system       : sysvinit
 Database          : MySQL, PostgreSQL
@@ -391,9 +391,9 @@ Your password has been accepted successfully and you can type \q to quit.
 ### Clone the Source
 
     # Clone GitLab repository
-    sudo -u git -H git clone https://gitlab.com/gitlab-org/gitlab-ce.git -b 6-6-stable gitlab
+    sudo -u git -H git clone https://gitlab.com/gitlab-org/gitlab-ce.git -b 6-7-stable gitlab
 
-**Note:** You can change `6-6-stable` to `master` if you want the *bleeding edge* version, but do so with caution!
+**Note:** You can change `6-7-stable` to `master` if you want the *bleeding edge* version, but do so with caution!
 
 ### Configure it
 
