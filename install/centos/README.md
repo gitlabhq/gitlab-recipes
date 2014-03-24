@@ -293,7 +293,8 @@ GitLab Shell is a ssh access and repository management application developed spe
     sudo -u git -H cp config.yml.example config.yml
 
     # Edit config and replace gitlab_url
-    # with something like 'http://domain.com/'
+    # with something like 'https://domain.com/'
+    # also edit self_signed_cert to true if you are going to use selfsigned cert 
     sudo -u git -H editor config.yml
 
     # Do setup
