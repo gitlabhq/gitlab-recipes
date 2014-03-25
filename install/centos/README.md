@@ -257,7 +257,7 @@ installed with:
 
 Create a `git` user for Gitlab:
 
-    adduser --system --shell /sbin/nologin --comment 'GitLab' --create-home --home-dir /home/git/ git
+    adduser --system --shell /bin/bash --comment 'GitLab' --create-home --home-dir /home/git/ git
 
 For extra security, the shell we use for this user does not allow logins via a terminal.
 
