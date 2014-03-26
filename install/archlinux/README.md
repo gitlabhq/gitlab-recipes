@@ -112,7 +112,10 @@ Install the Bundler Ruby Gem:
     ln -s /usr/bin/bundle-2.0 /usr/bin/bundle
     bundle --version
     # Bundler version 1.5.3
-
+    ln -s /usr/bin/gem-2.0 /usr/bin/gem
+    gem --version
+    # 2.0.14
+    
 ----------
 
 ## 3. System Users
