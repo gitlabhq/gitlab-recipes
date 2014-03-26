@@ -115,6 +115,9 @@ Install the Bundler Ruby Gem:
     ln -s /usr/bin/gem-2.0 /usr/bin/gem
     gem --version
     # 2.0.14
+    ln -s /usr/bin/rake-2.0 /usr/bin/rake
+    rake --version
+    # rake, version 0.9.6
     
 ----------
 
