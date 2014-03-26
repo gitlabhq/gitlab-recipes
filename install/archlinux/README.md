@@ -44,30 +44,32 @@ We start with a completely clean Arch Linux installation.
 
 Make sure you have configured a static IP or otherwise dhcp is enabled as follows:
 
-::
-
     systemctl enable dhcpcd
     systemctl start dhcpcd
 
-::
+Install the basic packages needed for Gitlab:
 
     pacman -Syu
-    pacman -S vim readline readline-devel ncurses-devel gdbm-devel glibc-devel tcl-devel openssl-devel curl-devel expat-devel db4-devel byacc sqlite-devel gcc-c++ libyaml libyaml-devel libffi libffi-devel libxml2 libxml2-devel libxslt libxslt-devel libicu libicu-devel system-config-firewall-tui redis sudo wget crontabs logwatch logrotate perl-Time-HiRes git patch
+    pacman -S vim readline readline-devel ncurses-devel gdbm-devel glibc-devel \
+    tcl-devel openssl-devel curl-devel expat-devel db4-devel byacc sqlite-devel \
+    gcc-c++ libyaml libyaml-devel libffi libffi-devel libxml2 libxml2-devel \
+    libxslt libxslt-devel libicu libicu-devel system-config-firewall-tui redis \
+    sudo wget crontabs logwatch logrotate perl-Time-HiRes git patch
     
     // TODO: FIX PACKAGE NAMES
     
 ### Configure redis
 Make sure redis is started on boot:
 
-    chkconfig redis on
-    service redis start
+    systemctl enable redis
+    systemctl start redis
 
 ### Install mail server
 
 In order to receive mail notifications, make sure to install a
 mail server. The recommended one is postfix and you can install it with:
 
-    yum -y install postfix
+    pacman -S postfix
 
 To use and configure sendmail instead of postfix see [Advanced Email Configurations](configure_email.md).
 
@@ -82,68 +84,13 @@ To remove this alias in the future:
     
     rm -i /usr/bin/editor
 
-
-### Install Git from Source (optional)
-
-Remove the system Git
-
-    yum -y remove git
-
-Install the pre-requisite files for Git compilation
-
-    yum install zlib-devel perl-CPAN gettext curl-devel expat-devel gettext-devel openssl-devel
-    
-Download and extract Git 1.9.0
-
-    mkdir /tmp/git && cd /tmp/git
-    curl --progress https://git-core.googlecode.com/files/git-1.9.0.tar.gz | tar xz
-    cd git-1.9.0/
-    ./configure
-    make
-    make prefix=/usr/local install
-    
-Make sure Git is in your `$PATH`:
-
-    which git
-    
-You might have to logout and login again for the `$PATH` to take effect.
-
-
 ----------
 
 ## 2. Ruby
 
 The use of ruby version managers such as [RVM](http://rvm.io/), [rbenv](https://github.com/sstephenson/rbenv) or [chruby](https://github.com/postmodern/chruby) with GitLab in production frequently leads to hard to diagnose problems. Version managers are not supported and we stronly advise everyone to follow the instructions below to use a system ruby.
 
-Remove the old Ruby 1.8 package if present. Gitlab 6.7 only supports the Ruby 2.0.x release series:
-
-    yum remove ruby
-
-Remove any other Ruby build if it is still present:
-
-    cd <your-ruby-source-path>
-    make uninstall
-
-Download Ruby and compile it:
-
-    mkdir /tmp/ruby && cd /tmp/ruby
-    curl --progress ftp://ftp.ruby-lang.org/pub/ruby/2.0/ruby-2.0.0-p451.tar.gz | tar xz
-    cd ruby-2.0.0-p451
-    ./configure --disable-install-rdoc
-    make
-    make prefix=/usr/local install
-
-Install the Bundler Gem:
-
-    gem install bundler --no-ri --no-rdoc
-
-Logout and login again for the `$PATH` to take effect. Check that ruby is properly
-installed with:
-
-    which ruby
-    # /usr/local/bin/ruby
-    ruby -v
-    # ruby 2.0.0p451 (2014-02-24 revision 45167) [x86_64-linux]
+Gitlab 6.7 currently supports Ruby 2.0, available in the AUR at `https://aur.archlinux.org/packages/ruby2.0/`
 
 ----------
 
@@ -197,43 +144,7 @@ GitLab Shell is a ssh access and repository management application developed spe
 
 ## 5. Database
 
-### 5.1 MySQL
-
-Install `mysql` and enable the `mysqld` service to start on boot:
-
-    yum install -y mysql-server mysql-devel
-    chkconfig mysqld on
-    service mysqld start
-
-Secure MySQL by entering a root password and say "Yes" to all questions:
-
-    /usr/bin/mysql_secure_installation
-
-Create a new user and database for GitLab:
-
-    # Login to MySQL
-    mysql -u root -p
-    # Type the database root password
-    # Create a user for GitLab. (change supersecret to a real password)
-    CREATE USER 'git'@'localhost' IDENTIFIED BY 'supersecret';
-
-    # Create the GitLab production database
-    CREATE DATABASE IF NOT EXISTS `gitlabhq_production` DEFAULT CHARACTER SET `utf8` COLLATE `utf8_unicode_ci`;
-
-    # Grant the GitLab user necessary permissopns on the table.
-    GRANT SELECT, LOCK TABLES, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER ON `gitlabhq_production`.* TO 'git'@'localhost';
-
-    # Quit the database session
-    \q
-
-Try connecting to the new database with the new user:
-
-    mysql -u git -p -D gitlabhq_production
-    # Type the password you replaced supersecret with earlier
-    # Quit the database session
-    \q
-
-### 5.2 PostgreSQL
+### 5.1 PostgreSQL
 
 Install `postgresql-server` and the `postgreqsql-devel` libraries:
 
@@ -519,20 +430,9 @@ nobody can access your GitLab by using this login information later on.
 
 **Enjoy!**
 
-## Links used in this guide
+## Additional Information
 
-- [EPEL information](http://www.thegeekstuff.com/2012/06/enable-epel-repository/)
-- [SELinux booleans](http://wiki.centos.org/TipsAndTricks/SelinuxBooleans)
-
-
-[EPEL]: https://fedoraproject.org/wiki/EPEL
-[PUIAS]: https://puias.math.ias.edu/wiki/YumRepositories6#Computational
-[SDL]: https://puias.math.ias.edu
-[PU]: http://www.princeton.edu/
-[IAS]: http://www.ias.edu/
-[keys]: https://fedoraproject.org/keys
 [issue-nginx]: https://github.com/gitlabhq/gitlabhq/issues/5774
-[nginx-centos]: http://wiki.nginx.org/Install#Official_Red_Hat.2FCentOS_packages
 
 
 ## Useful links
