@@ -95,9 +95,23 @@ The use of ruby version managers such as [RVM](http://rvm.io/), [rbenv](https://
     pacman -S gdbm libffi libyaml openssl
     cd ruby2.0-headless
     makepkg --asroot
+    pacman -U ruby2.0-headless-2.0.0_p451-2-x86_64.pkg.tar.xz
     ln -s /usr/bin/ruby-2.0 /usr/bin/ruby
     ruby --version
     # ruby 2.0.0p456 (2014-03-03) [x86_64-linux]
+    
+Install the Bundler Ruby Gem:
+
+    mkdir /tmp/bundler
+    cd /tmp/bundler
+    wget https://aur.archlinux.org/packages/ru/ruby2.0-bundler/ruby2.0-bundler.tar.gz
+    tar -zxf ruby2.0-bundler.tar.gz
+    cd ruby2.0-bundler
+    makepkg --asroot
+    pacman -U ruby2.0-bundler-1.5.3-1-any.pkg.tar.xz
+    ln -s /usr/bin/bundle-2.0 /usr/bin/bundle
+    bundle --version
+    # Bundler version 1.5.3
 
 ----------
 
@@ -105,23 +119,10 @@ The use of ruby version managers such as [RVM](http://rvm.io/), [rbenv](https://
 
 Create a `git` user for Gitlab:
 
-    adduser --system --shell /sbin/nologin --comment 'GitLab User' --create-home --home-dir /home/git/ git
+    userdel git
+    useradd --system --shell /sbin/nologin --comment 'GitLab User' --create-home --home-dir /home/git/ git
 
 For extra security, the shell we use for this user does not allow logins via a terminal.
-
-**Important:** In order to include `/usr/local/bin` to git user's PATH, one way is to edit the sudoers file. As root run:
-
-    visudo
-
-Then search for this line:
-
-    Defaults    secure_path = /sbin:/bin:/usr/sbin:/usr/bin
-
-and append `/usr/local/bin` like so:
-
-    Defaults    secure_path = /sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin
-
-Save and exit.
 
 ----------
 
@@ -145,7 +146,7 @@ GitLab Shell is a ssh access and repository management application developed spe
     sudo -u git -H editor config.yml
 
     # Do setup
-    sudo -u git -H /usr/local/bin/ruby ./bin/install
+    sudo -u git -H /usr/bin/ruby ./bin/install
 
 ----------
 
@@ -153,31 +154,43 @@ GitLab Shell is a ssh access and repository management application developed spe
 
 ### 5.1 PostgreSQL
 
-Install `postgresql-server` and the `postgreqsql-devel` libraries:
+Install Postgresql 9.1:
 
-    pacman -S postgresql91
+    mkdir /tmp/postgresql
+    cd /tmp/postgresql
+    wget https://aur.archlinux.org/packages/po/postgresql-9.1/postgresql-9.1.tar.gz
+    makepkg --asroot
+    pacman -U postgres*.tar.xz
+    
+    # If you get this message, accept the 'yes' resolution.
+    # :: postgresql and postgresql-libs are in conflict. Remove postgresql-libs? [y/N] y
 
 Initialize the database:
 
-    service postgresql initdb
-
-Start the service and configure service to start on boot:
-
-    service postgresql start
-    chkconfig postgresql on
+    mkdir /var/lib/postgres
+    chown -R postgres:postgres /var/lib/postgres
+    chmod -R 700 /var/lib/postgres
+    su - postgres
+    initdb --locale en_US.UTF-8 -E UTF8 -D '/var/lib/postgres/data'
+    # return to the root user (from postgres user)
+    logout
+    systemctl start postgresql
+    systemctl enable postgresql
 
 Configure the database user and password:
 
     su - postgres
     psql -d template1
-    psql (8.4.13)
+    # psql (9.1.13)
 
     template1=# CREATE USER git WITH PASSWORD 'your-password-here';
     CREATE ROLE
     template1=# CREATE DATABASE gitlabhq_production OWNER git;
     CREATE DATABASE
     template1=# \q
-    exit # exit uid=postgres, return to root
+    
+    # return to root user (from postgres user)
+    logout
 
 Test the connection as the gitlab (uid=git) user. You should be root to begin this test:
 
@@ -191,8 +204,8 @@ If you see the following:
 
     gitlabhq_production=>
 
-Your password has been accepted successfully and you can type \q to quit.
-
+Your password has been accepted successfully
+Type \q to quit.
 
 ----------
 ## 6. GitLab
@@ -256,36 +269,25 @@ Your password has been accepted successfully and you can type \q to quit.
     sudo -u git -H git config --global core.autocrlf input
 
 **Important Note:**
-Make sure to edit both `gitlab.yml` and `unicorn.rb` to match your setup.
+Make sure to edit both `gitlab.yml` and `unicorn.rb` (above) to match your setup.
 
 ### Configure GitLab DB settings
-
-    # For MySQL
-    sudo -u git -H cp config/database.yml{.mysql,}
-
-    # Make sure to update username/password in config/database.yml.
-    # You only need to adapt the production settings (first part).
-    # If you followed the database guide then please do as follows:
-    # Change 'secure password' with the value you have given to $password
-    # You can keep the double quotes around the password
-    sudo -u git -H editor config/database.yml
-
-    or
 
     # For PostgreSQL
     sudo -u git -H cp config/database.yml{.postgresql,}
 
     # Make config/database.yml readable to git only
     sudo -u git -H chmod o-rwx config/database.yml
+    
+Edit the password for the git user in `config/database.yml`
+
+    sudo -u git -H editor config/database.yml
 
 ### Install Gems
 
     cd /home/git/gitlab
 
-    # For MySQL (note, the option says "without ... postgres")
-    sudo -u git -H /usr/local/bin/bundle install --deployment --without development test postgres aws
-
-    # Or for PostgreSQL (note, the option says "without ... mysql")
+    # For PostgreSQL (note, the option says "without ... mysql")
     sudo -u git -H bundle install --deployment --without development test mysql aws
 
 ### Initialize Database and Activate Advanced Features
