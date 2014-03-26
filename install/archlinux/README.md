@@ -20,6 +20,10 @@ any assumptions GitLab makes about its environment.
 
 **This guide assumes that you run every command as root.**
 
+** Never upgrade your packages blindly **
+
+** Always test the effects of the package upgrade first and be prepared to downgrade if needed **
+
 #### If you find a bug
 
 If you find a bug/error in this guide please submit an issue or a Merge Request
@@ -50,13 +54,8 @@ Make sure you have configured a static IP or otherwise dhcp is enabled as follow
 Install the basic packages needed for Gitlab:
 
     pacman -Syu
-    pacman -S vim readline readline-devel ncurses-devel gdbm-devel glibc-devel \
-    tcl-devel openssl-devel curl-devel expat-devel db4-devel byacc sqlite-devel \
-    gcc-c++ libyaml libyaml-devel libffi libffi-devel libxml2 libxml2-devel \
-    libxslt libxslt-devel libicu libicu-devel system-config-firewall-tui redis \
-    sudo wget crontabs logwatch logrotate perl-Time-HiRes git patch
-    
-    // TODO: FIX PACKAGE NAMES
+    pacman -S base-devel vim readline ncurses gdbm glibc tcl openssl curl expat python2 bison sqlite \
+    gcc libyaml libffi libxml2 libxslt redis sudo wget logwatch logrotate perl git patch openssh
     
 ### Configure redis
 Make sure redis is started on boot:
@@ -90,7 +89,15 @@ To remove this alias in the future:
 
 The use of ruby version managers such as [RVM](http://rvm.io/), [rbenv](https://github.com/sstephenson/rbenv) or [chruby](https://github.com/postmodern/chruby) with GitLab in production frequently leads to hard to diagnose problems. Version managers are not supported and we stronly advise everyone to follow the instructions below to use a system ruby.
 
-Gitlab 6.7 currently supports Ruby 2.0, available in the AUR at `https://aur.archlinux.org/packages/ruby2.0/`
+    mkdir /tmp/ruby
+    cd /tmp/ruby
+    wget https://aur.archlinux.org/packages/ru/ruby2.0-headless/ruby2.0-headless.tar.gz
+    pacman -S gdbm libffi libyaml openssl
+    cd ruby2.0-headless
+    makepkg --asroot
+    ln -s /usr/bin/ruby-2.0 /usr/bin/ruby
+    ruby --version
+    # ruby 2.0.0p456 (2014-03-03) [x86_64-linux]
 
 ----------
 
@@ -98,7 +105,7 @@ Gitlab 6.7 currently supports Ruby 2.0, available in the AUR at `https://aur.arc
 
 Create a `git` user for Gitlab:
 
-    adduser --system --shell /sbin/nologin --comment 'GitLab' --create-home --home-dir /home/git/ git
+    adduser --system --shell /sbin/nologin --comment 'GitLab User' --create-home --home-dir /home/git/ git
 
 For extra security, the shell we use for this user does not allow logins via a terminal.
 
@@ -148,7 +155,7 @@ GitLab Shell is a ssh access and repository management application developed spe
 
 Install `postgresql-server` and the `postgreqsql-devel` libraries:
 
-    yum install postgresql-server postgresql-devel
+    pacman -S postgresql91
 
 Initialize the database:
 
