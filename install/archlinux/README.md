@@ -55,7 +55,7 @@ Install the basic packages needed for Gitlab:
 
     pacman -Syu
     pacman -S base-devel vim readline ncurses gdbm glibc tcl openssl curl expat python2 bison sqlite \
-    gcc libyaml libffi libxml2 libxslt redis sudo wget logwatch logrotate perl git patch openssh
+    gcc libyaml libffi libxml2 libxslt redis sudo wget logwatch logrotate perl git patch openssh icu
     
 ### Configure redis
 Make sure redis is started on boot:
@@ -294,6 +294,7 @@ Edit the password for the git user in `config/database.yml`
     cd /home/git/gitlab
 
     # For PostgreSQL (note, the option says "without ... mysql")
+    
     sudo -u git -H bundle install --deployment --without development test mysql aws
 
 ### Initialize Database and Activate Advanced Features
@@ -302,38 +303,50 @@ Edit the password for the git user in `config/database.yml`
 
     # Type 'yes' to create the database tables.
 
-    # When done you see 'Administrator account created:'
+    # 'Administrator account created:' will appear when everything is finished.
 
 Type 'yes' to create the database.
 When done you see 'Administrator account created:'
 
 ### Install Init Script
 
-Download the init script (will be /etc/init.d/gitlab):
+Place `gitlab.target`, `gitlab-sidekiq.service`, and `gitlab-unicorn.service`
+into the `/usr/lib/systemd/system/` folder.
 
-    wget -O /etc/init.d/gitlab https://gitlab.com/gitlab-org/gitlab-recipes/raw/master/init/sysvinit/centos/gitlab-unicorn
-    chmod +x /etc/init.d/gitlab
-    chkconfig --add gitlab
+    cp -v gitlab-sidekiq.service gitlab-unicorn.service gitlab.target /usr/lib/systemd/system/
 
-Make GitLab start on boot:
+Place `gitlab.logrotate` into the `/etc/logrotate.d/gitlab` folder.
 
-    chkconfig gitlab on
+    mkdir -p "/etc/logrotate.d/gitlab"
+    cp -v gitlab.logrotate /etc/logrotate.d/gitlab
 
-### Set up logrotate
+Copy `gitlab.tmpfiles.d` into the file `/usr/lib/tmpfiles.d/gitlab.conf`.
 
-    sudo cp lib/support/logrotate/gitlab /etc/logrotate.d/gitlab
+    mkdir -p "/usr/lib/tmpfiles.d"
+    cp -v gitlab.tmpfiles.d "/usr/lib/tmpfiles.d/gitlab.conf"
+
+Start services on startup:
+
+    mkdir -p /var/run/gitlab/
+    touch /var/run/gitlab/sidekiq.pid
+    chmod 777 /var/run/gitlab/sidekiq.pid
+
+    systemctl enable gitlab.target
+    systemctl enable gitlab-sidekiq.service
+    systemctl enable gitlab-unicorn.service
+    
+    systemctl start gitlab.target
+    systemctl start gitlab-unicorn.service
+    systemctl start gitlab-sidekiq.service
 
 ### Check Application Status
 
 Check if GitLab and its environment are configured correctly:
 
+    cd /home/git/gitlab
     sudo -u git -H bundle exec rake gitlab:env:info RAILS_ENV=production
 
-### Start your GitLab instance:
-
-    service gitlab start
-
-## Compile assets
+## Precompile assets
 
     sudo -u git -H bundle exec rake assets:precompile RAILS_ENV=production
 
@@ -362,52 +375,6 @@ Finally start nginx with:
 
     service nginx start
 
-### Apache
-
-We will configure apache with module `mod_proxy` which is loaded by default when
-installing apache and `mod_ssl` which will provide ssl support:
-
-    yum -y install httpd mod_ssl
-    chkconfig httpd on
-    wget -O /etc/httpd/conf.d/gitlab.conf https://gitlab.com/gitlab-org/gitlab-recipes/raw/master/web-server/apache/gitlab-ssl.conf
-    mv /etc/httpd/conf.d/ssl.conf{,.bak}
-    mkdir /var/log/httpd/logs/
-
-Open `/etc/httpd/conf.d/gitlab.conf` with your editor and replace `git.example.org` with your FQDN. Also make sure the path to your certificates is valid.
-
-Add `LoadModule ssl_module /etc/httpd/modules/mod_ssl.so` in `/etc/httpd/conf/httpd.conf`.
-
-#### SELinux
-
-To configure SELinux read the **SELinux modifications** section in [README](https://gitlab.com/gitlab-org/gitlab-recipes/blob/master/web-server/apache/README.md).
-
-Finally, start apache:
-
-    service httpd start
-
-**Note:**
-If you want to run other websites on the same system, you'll need to add in `/etc/httpd/conf/httpd.conf`:
-
-    NameVirtualHost *:80
-    <IfModule mod_ssl.c>
-        # If you add NameVirtualHost *:443 here, you will also have to change
-        # the VirtualHost statement in /etc/httpd/conf.d/gitlab.conf
-        # to <VirtualHost *:443>
-        NameVirtualHost *:443
-        Listen 443
-    </IfModule>
-
-## 8. Configure the firewall
-
-Poke an iptables hole so users can access the web server (http and https ports) and ssh.
-
-    lokkit -s http -s https -s ssh
-
-Restart the service for the changes to take effect:
-
-    service iptables restart
-
-
 ## Done!
 
 ### Double-check Application Status
@@ -426,7 +393,7 @@ Now, the output will complain that your init script is not up-to-date as follows
       doc/install/installation.md in section "Install Init Script"
       Please fix the error above and rerun the checks.
 
-Do not mind about that error if you are sure that you have downloaded the up-to-date file from https://gitlab.com/gitlab-org/gitlab-recipes/raw/master/init/sysvinit/centos/gitlab-unicorn and saved it to `/etc/init.d/gitlab`.
+Do not mind about that error if you are sure that you have the correct systemd rules installed.
 
 If all other items are green, then congratulations on successfully installing GitLab!
 However there are still a few steps left.
