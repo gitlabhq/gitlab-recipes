@@ -359,21 +359,27 @@ Use either Nginx or Apache, not both. Official installation guide recommends ngi
 You will need a new version of nginx otherwise you might encounter an issue like [this][issue-nginx].
 To do so, follow the instructions provided by the [nginx wiki][nginx-centos] and then install nginx with:
 
-    yum update
-    yum -y install nginx
-    chkconfig nginx on
-    wget -O /etc/nginx/conf.d/gitlab.conf https://gitlab.com/gitlab-org/gitlab-recipes/raw/master/web-server/nginx/gitlab-ssl
+    pacman -S nginx
+    systemctl enable nginx
+    mkdir "/etc/nginx/conf.d"
+    
+    wget -O /etc/nginx/conf.d/gitlab.conf \
+    https://gitlab.com/gitlab-org/gitlab-recipes/raw/master/web-server/nginx/gitlab-ssl
+    
+    echo "http { include /etc/nginx/conf.d/gitlab.conf; }" >> /etc/nginx/nginx.conf
 
 Edit `/etc/nginx/conf.d/gitlab` and replace `git.example.com` with your FQDN. Make sure to read the comments in order to properly set up ssl.
 
 Add `nginx` user to `git` group:
 
-    usermod -a -G git nginx
+    usermod -a -G git http
     chmod g+rx /home/git/
+
+Follow the instructions at the top of /etc/nginx/conf.d/gitlab.conf and generaate SSL certificates.
 
 Finally start nginx with:
 
-    service nginx start
+    systemctl start nginx
 
 ## Done!
 
