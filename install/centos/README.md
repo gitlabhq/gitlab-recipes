@@ -439,7 +439,7 @@ Your password has been accepted successfully and you can type \q to quit.
     sudo -u git -H cp config/initializers/rack_attack.rb.example config/initializers/rack_attack.rb
 
     # Configure Git global settings for git user, useful when editing via web
-    # Edit user.email according to what is set in gitlab.yml
+    # Edit user.email according to what is set in config/gitlab.yml
     sudo -u git -H git config --global user.name "GitLab"
     sudo -u git -H git config --global user.email "gitlab@localhost"
     sudo -u git -H git config --global core.autocrlf input
