@@ -133,7 +133,7 @@ If you can't see them listed, use the folowing command (from `yum-utils` package
 
     yum -y update
     yum -y groupinstall 'Development Tools'
-    yum -y install vim-enhanced readline readline-devel ncurses-devel gdbm-devel glibc-devel tcl-devel openssl-devel curl-devel expat-devel db4-devel byacc sqlite-devel gcc-c++ libyaml libyaml-devel libffi libffi-devel libxml2 libxml2-devel libxslt libxslt-devel libicu libicu-devel system-config-firewall-tui redis sudo wget crontabs logwatch logrotate perl-Time-HiRes git patch
+    yum -y install readline readline-devel ncurses-devel gdbm-devel glibc-devel tcl-devel openssl-devel curl-devel expat-devel db4-devel byacc sqlite-devel libyaml libyaml-devel libffi libffi-devel libxml2 libxml2-devel libxslt libxslt-devel libicu libicu-devel system-config-firewall-tui redis sudo wget crontabs logwatch logrotate perl-Time-HiRes
 
 **RHEL Notes**
 
@@ -177,9 +177,9 @@ You can choose between editors such as nano, vi, vim, etc.
 In this case we will use vim as the default editor for consistency.
 
     ln -s /usr/bin/vim /usr/bin/editor
-    
+
 To remove this alias in the future:
-    
+
     rm -i /usr/bin/editor
 
 
@@ -192,7 +192,7 @@ Remove the system Git
 Install the pre-requisite files for Git compilation
 
     yum install zlib-devel perl-CPAN gettext curl-devel expat-devel gettext-devel openssl-devel
-    
+
 Download and extract Git 1.9.0
 
     mkdir /tmp/git && cd /tmp/git
@@ -201,13 +201,13 @@ Download and extract Git 1.9.0
     ./configure
     make
     make prefix=/usr/local install
-    
+
 Make sure Git is in your `$PATH`:
 
     which git
-    
-You might have to run `source ~/.bash_profile` for the `$PATH` to take effect.
 
+You might have to logout and login again for the `$PATH` to take effect.
+**Note:** When editing `config/gitlab.yml` (step 6), change the git bin_path to `/usr/local/bin/git`.
 
 ----------
 
@@ -376,11 +376,11 @@ Configure the database user and password:
 Test the connection as the gitlab (uid=git) user. You should be root to begin this test:
 
     whoami
-    
+
 Attempt to log in to Postgres as the git user:
 
     sudo -u git psql -d gitlabhq_production -U git -W
-    
+
 If you see the following:
 
     gitlabhq_production=>
