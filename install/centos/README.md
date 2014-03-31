@@ -421,10 +421,10 @@ NOTE: set to something like "host    all             all             127.0.0.1/3
     sudo -u git -H editor config/gitlab.yml
 
     # Make sure GitLab can write to the log/ and tmp/ directories
-    sudo chown -R git log/
-    sudo chown -R git tmp/
-    sudo chmod -R u+rwX  log/
-    sudo chmod -R u+rwX  tmp/
+    chown -R git log/
+    chown -R git tmp/
+    chmod -R u+rwX  log/
+    chmod -R u+rwX  tmp/
 
     # Create directory for satellites
     sudo -u git -H mkdir /home/git/gitlab-satellites
@@ -432,12 +432,12 @@ NOTE: set to something like "host    all             all             127.0.0.1/3
     # Create directories for sockets/pids and make sure GitLab can write to them
     sudo -u git -H mkdir tmp/pids/
     sudo -u git -H mkdir tmp/sockets/
-    sudo chmod -R u+rwX  tmp/pids/
-    sudo chmod -R u+rwX  tmp/sockets/
+    chmod -R u+rwX  tmp/pids/
+    chmod -R u+rwX  tmp/sockets/
 
     # Create public/uploads directory otherwise backup will fail
     sudo -u git -H mkdir public/uploads
-    sudo chmod -R u+rwX  public/uploads
+    chmod -R u+rwX  public/uploads
 
     # Copy the example Unicorn config
     sudo -u git -H cp config/unicorn.rb.example config/unicorn.rb
