@@ -364,8 +364,9 @@ Configure the database user and password:
 
     su - postgres
     psql -d template1
-    psql (8.4.13)
 
+    psql (8.4.20)
+    Type "help" for help.
     template1=# CREATE USER git WITH PASSWORD 'your-password-here';
     CREATE ROLE
     template1=# CREATE DATABASE gitlabhq_production OWNER git;
@@ -377,7 +378,7 @@ Test the connection as the gitlab (uid=git) user. You should be root to begin th
 
     whoami
 
-Attempt to log in to Postgres as the git user:
+Attempt to log in to Postgres as the git user (enter the password you set up above):
 
     sudo -u git psql -d gitlabhq_production -U git -W
 
