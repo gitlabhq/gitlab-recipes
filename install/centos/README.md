@@ -99,17 +99,11 @@ repositories only provide v1.7.1 which is not compatible with GitLab.
 Although the PUIAS offers an RPM to install the repo, it requires the
 other PUIAS repos as a dependency, so you'll have to add it manually.
 
-Create `/etc/yum.repos.d/PUIAS_6_computational.repo` and add the following lines:
+Download PUIAS repo:
 
-    [PUIAS_6_computational]
-    name=PUIAS computational Base $releasever - $basearch
-    mirrorlist=http://puias.math.ias.edu/data/puias/computational/$releasever/$basearch/mirrorlist
-    #baseurl=http://puias.math.ias.edu/data/puias/computational/$releasever/$basearch
-    enabled=1
-    gpgcheck=1
-    gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-puias
+    wget -O /etc/yum.repos.d/PUIAS_6_computational.repo https://gitlab.com/gitlab-org/gitlab-recipes/raw/master/install/centos/PUIAS_6_computational.repo
 
-Next download and install the gpg key.
+Next download and install the gpg key:
 
     wget -O /etc/pki/rpm-gpg/RPM-GPG-KEY-puias http://springdale.math.ias.edu/data/puias/6/x86_64/os/RPM-GPG-KEY-puias
     rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-puias
