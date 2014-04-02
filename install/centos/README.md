@@ -212,7 +212,7 @@ Make sure Git is in your `$PATH`:
 
     which git
     
-You might have to logout and login again for the `$PATH` to take effect.
+You might have to run `source ~/.bash_profile` for the `$PATH` to take effect.
 
 
 ----------
