@@ -98,6 +98,7 @@ Computational repository to obtain a git v1.8.x package since the base CentOS
 repositories only provide v1.7.1 which is not compatible with GitLab.
 Although the PUIAS offers an RPM to install the repo, it requires the
 other PUIAS repos as a dependency, so you'll have to add it manually.
+Otherwise you can install git from source (instructions below).
 
 Download PUIAS repo:
 
@@ -185,15 +186,19 @@ To remove this alias in the future:
 
 ### Install Git from Source (optional)
 
-Remove the system Git
+Make sure Git is version 1.7.10 or higher, for example 1.7.12 or 1.8.4
+
+    git --version
+
+If not install it from source. Remove the system Git:
 
     yum -y remove git
 
-Install the pre-requisite files for Git compilation
+Install the pre-requisite files for Git compilation:
 
     yum install zlib-devel perl-CPAN gettext curl-devel expat-devel gettext-devel openssl-devel
 
-Download and extract Git 1.9.0
+Download and extract it:
 
     mkdir /tmp/git && cd /tmp/git
     curl --progress https://git-core.googlecode.com/files/git-1.9.0.tar.gz | tar xz
