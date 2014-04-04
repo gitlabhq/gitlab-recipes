@@ -1,0 +1,12 @@
+# GitLab logrotate settings
+# based on: http://stackoverflow.com/a/4883967
+
+/usr/share/webapps/gitlab/log/*.log {
+    weekly
+    missingok
+    rotate 52
+    compress
+    delaycompress
+    notifempty
+    copytruncate
+}
