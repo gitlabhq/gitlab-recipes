@@ -345,6 +345,7 @@ Try connecting to the new database with the new user:
 NOTE: because we need to make use of extensions we need at least pgsql 9.1 and the default 8.x on centos will not work.  We need to get the PGDG repositories enabled 
 
 Install the pgdg repositories
+
     rpm -Uvh http://yum.postgresql.org/9.3/redhat/rhel-6-x86_64/pgdg-centos93-9.3-1.noarch.rpm
 
 
