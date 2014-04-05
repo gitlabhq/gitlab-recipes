@@ -319,22 +319,21 @@ Secure your installation:
 
     mysql_secure_installation
 
-Login to MySQL:
+Login to MySQL (type the database root password):
 
     mysql -u root -p
 
-Type the database root password.
 
 Create a user for GitLab (change $password in the command below to a real password you pick):
 
-    mysql> CREATE USER 'git'@'localhost' IDENTIFIED BY '$password';
+    CREATE USER 'git'@'localhost' IDENTIFIED BY '$password';
 
 Ensure you can use the InnoDB engine which is necessary to support long indexes.
 If this fails, check your MySQL config files (e.g. `/etc/mysql/*.cnf`, `/etc/mysql/conf.d/*`) for the setting "innodb = off".
 
     SET storage_engine=INNODB;
 
-Create the GitLab production database"
+Create the GitLab production database:
 
     CREATE DATABASE IF NOT EXISTS `gitlabhq_production` DEFAULT CHARACTER SET `utf8` COLLATE `utf8_unicode_ci`;
 
