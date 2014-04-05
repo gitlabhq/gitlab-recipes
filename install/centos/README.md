@@ -311,32 +311,48 @@ Install `mysql` and enable the `mysqld` service to start on boot:
     chkconfig mysqld on
     service mysqld start
 
-Secure MySQL by entering a root password and say "Yes" to all questions:
+Ensure you have MySQL version 5.5.14 or later:
 
-    /usr/bin/mysql_secure_installation
+    mysql --version
 
-Create a new user and database for GitLab:
+Secure your installation:
 
-    # Login to MySQL
+    mysql_secure_installation
+
+Login to MySQL:
+
     mysql -u root -p
-    # Type the database root password
-    # Create a user for GitLab. (change supersecret to a real password)
-    CREATE USER 'git'@'localhost' IDENTIFIED BY 'supersecret';
 
-    # Create the GitLab production database
+Type the database root password.
+
+Create a user for GitLab (change $password in the command below to a real password you pick):
+
+    mysql> CREATE USER 'git'@'localhost' IDENTIFIED BY '$password';
+
+Ensure you can use the InnoDB engine which is necessary to support long indexes.
+If this fails, check your MySQL config files (e.g. `/etc/mysql/*.cnf`, `/etc/mysql/conf.d/*`) for the setting "innodb = off".
+
+    SET storage_engine=INNODB;
+
+Create the GitLab production database"
+
     CREATE DATABASE IF NOT EXISTS `gitlabhq_production` DEFAULT CHARACTER SET `utf8` COLLATE `utf8_unicode_ci`;
 
-    # Grant the GitLab user necessary permissions on the table.
+Grant the GitLab user necessary permissions on the table:
+
     GRANT SELECT, LOCK TABLES, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER ON `gitlabhq_production`.* TO 'git'@'localhost';
 
-    # Quit the database session
+Quit the database session:
+
     \q
 
 Try connecting to the new database with the new user:
 
-    mysql -u git -p -D gitlabhq_production
-    # Type the password you replaced supersecret with earlier
-    # Quit the database session
+    sudo -u git -H mysql -u git -p -D gitlabhq_production
+
+Type the password you replaced $password with earlier.
+Quit the database session:
+
     \q
 
 ### 5.2 PostgreSQL
@@ -372,7 +388,7 @@ Configure the database user and password:
 
     psql (8.4.20)
     Type "help" for help.
-    template1=# CREATE USER git WITH PASSWORD 'your-password-here';
+    template1=# CREATE USER git CREATEDB;
     CREATE ROLE
     template1=# CREATE DATABASE gitlabhq_production OWNER git;
     CREATE DATABASE
@@ -383,21 +399,23 @@ Test the connection as the gitlab (uid=git) user. You should be root to begin th
 
     whoami
 
-Attempt to log in to Postgres as the git user (enter the password you set up above):
+Attempt to log in to Postgres as the git user:
 
-    sudo -u git psql -d gitlabhq_production -U git -W
+    sudo -u git psql -d gitlabhq_production
 
 If you see the following:
 
     gitlabhq_production=>
 
-Your password has been accepted successfully and you can type \q to quit.
+your password has been accepted successfully and you can type \q to quit.
 
-You should ensure you are using the right settings in your pg_hba.conf to not get ident issues
-NOTE: set to something like "host    all             all             127.0.0.1/32            trust"  use trust over ident
+Ensure you are using the right settings in your `/var/lib/pgsql/9.3/data/pg_hba.conf`
+to not get ident issues (you can use trust over ident):
 
-   vi /var/lib/pgsql/9.3/data/pg_hba.conf
+    host    all             all             127.0.0.1/32            trust
 
+Check the official [documentation][psql-doc-auth] for more information on
+authentication methods.
 
 ----------
 ## 6. GitLab
