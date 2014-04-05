@@ -451,15 +451,13 @@ authentication methods.
 
     # Create directory for satellites
     sudo -u git -H mkdir /home/git/gitlab-satellites
+    chmod u+rwx,g+rx,o-rwx /home/git/gitlab-satellites
 
-    # Create directories for sockets/pids and make sure GitLab can write to them
-    sudo -u git -H mkdir tmp/pids/
-    sudo -u git -H mkdir tmp/sockets/
+    # Make sure GitLab can write to the tmp/pids/ and tmp/sockets/ directories
     chmod -R u+rwX  tmp/pids/
     chmod -R u+rwX  tmp/sockets/
 
-    # Create public/uploads directory otherwise backup will fail
-    sudo -u git -H mkdir public/uploads
+    # Make sure GitLab can write to the public/uploads/ directory
     chmod -R u+rwX  public/uploads
 
     # Copy the example Unicorn config
