@@ -342,18 +342,33 @@ Try connecting to the new database with the new user:
 
 ### 5.2 PostgreSQL
 
-Install `postgresql-server` and the `postgreqsql-devel` libraries:
+GitLab makes use of the `CREATE EXTENSION` statement, this is available starting version 9.1. Version 9.3 is available and can be installed as follows, recipe taken from [here](https://wiki.postgresql.org/wiki/YUM_Installation)
 
-    yum install postgresql-server postgresql-devel
+Configure your YUM repository by editing the `/etc/yum.repos.d/CentOS-Base.repo, [base] and [updates] sections`. Append the following line
+
+     exclude=postgresql*
+
+Download and install the PGDG RPM file
+
+    curl -O http://yum.postgresql.org/9.3/redhat/rhel-6-x86_64/pgdg-centos93-9.3-1.noarch.rpm
+
+Install the RPM distribution
+
+    rpm -ivh pgdg-centos93-9.3-1.noarch.rpm
+
+Install `postgresql93-server` and the `postgreqsql93-devel` libraries:
+
+yum install postgresql93-server postgresql93-devel
+
 
 Initialize the database:
 
-    service postgresql initdb
+    service postgresql-9.3 initdb
 
 Start the service and configure service to start on boot:
 
-    service postgresql start
-    chkconfig postgresql on
+    service postgresql-9.3 start
+    chkconfig postgresql-9.3 on
 
 Configure the database user and password:
 
