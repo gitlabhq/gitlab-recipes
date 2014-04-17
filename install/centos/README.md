@@ -572,7 +572,7 @@ NameVirtualHost *:80
 
 Poke a selinux hole for httpd so it can be in front of GitLab:
 
-    setsebool -P httpd_can_network_connect on
+    semanage port -m -t http_port_t -p tcp 8080
 
 Start apache:
 
