@@ -20,7 +20,7 @@
 ## [Optional] Generate a self-signed ssl certificate:
 ##    mkdir /etc/nginx/ssl/
 ##    cd /etc/nginx/ssl/
-##    sudo openssl req -new -x509 -nodes -days 3560 -out gitlab.crt -keyout gitlab.key
+##    sudo openssl req -new rsa:2048 -x509 -nodes -days 3560 -out gitlab.crt -keyout gitlab.key
 ##    sudo chmod o-r gitlab.key
 ##
 ## Edit `gitlab-shell/config.yml`:
