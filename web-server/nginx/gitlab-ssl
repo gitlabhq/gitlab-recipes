@@ -43,6 +43,10 @@ server {
     server_tokens off;
     root /home/git/gitlab/public;
 
+    # Increase this if you want to upload large attachments
+    # Or if you want to accept large git objects over http
+    client_max_body_size 20m;
+
     ssl on;
     ssl_certificate /etc/nginx/gitlab.crt;
     ssl_certificate_key /etc/nginx/gitlab.key;
@@ -75,4 +79,6 @@ server {
 
         proxy_pass http://gitlab;
     }
+    
+    error_page 502 /502.html;
 }
