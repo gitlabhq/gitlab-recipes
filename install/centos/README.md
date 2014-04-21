@@ -491,6 +491,7 @@ Make sure to edit both `gitlab.yml` and `unicorn.rb` to match your setup.
     sudo -u git -H /usr/local/bin/bundle install --deployment --without development test postgres aws
 
     # Or for PostgreSQL (note, the option says "without ... mysql")
+    sudo -u git -H bundle config build.pg --with-pg-config=/usr/pgsql-9.3/bin/pg_config
     sudo -u git -H bundle install --deployment --without development test mysql aws
 
 ### Initialize Database and Activate Advanced Features
