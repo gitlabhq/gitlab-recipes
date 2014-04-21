@@ -1,6 +1,6 @@
 ```
 Distribution      : CentOS 6.5 Minimal
-GitLab version    : 6.0 - 6.7
+GitLab version    : 6.0 - 6.8
 Web Server        : Apache, Nginx
 Init system       : sysvinit
 Database          : MySQL, PostgreSQL
@@ -212,7 +212,7 @@ Make sure Git is in your `$PATH`:
     which git
 
 You might have to logout and login again for the `$PATH` to take effect.
-**Note:** When editing `config/gitlab.yml` (step 6), change the git bin_path to `/usr/local/bin/git`.
+**Note:** When editing `config/gitlab.yml` (step 6), change the git `bin_path` to `/usr/local/bin/git`.
 
 ----------
 
@@ -220,7 +220,7 @@ You might have to logout and login again for the `$PATH` to take effect.
 
 The use of ruby version managers such as [RVM](http://rvm.io/), [rbenv](https://github.com/sstephenson/rbenv) or [chruby](https://github.com/postmodern/chruby) with GitLab in production frequently leads to hard to diagnose problems. Version managers are not supported and we strongly advise everyone to follow the instructions below to use a system ruby.
 
-Remove the old Ruby 1.8 package if present. Gitlab 6.7 only supports the Ruby 2.0.x release series:
+Remove the old Ruby 1.8 package if present. GitLab only supports the Ruby 2.0+ release series:
 
     yum remove ruby
 
@@ -256,9 +256,7 @@ installed with:
 
 Create a `git` user for Gitlab:
 
-    adduser --system --shell /sbin/nologin --comment 'GitLab' --create-home --home-dir /home/git/ git
-
-For extra security, the shell we use for this user does not allow logins via a terminal.
+    adduser --system --shell /bin/bash --comment 'GitLab' --create-home --home-dir /home/git/ git
 
 **Important:** In order to include `/usr/local/bin` to git user's PATH, one way is to edit the sudoers file. As root run:
 
@@ -293,7 +291,7 @@ GitLab Shell is a ssh access and repository management application developed spe
 
     # Edit config and replace gitlab_url
     # with something like 'https://domain.com/'
-    # also edit self_signed_cert to true if you are going to use selfsigned cert 
+    # also edit self_signed_cert to true if you are going to use selfsigned cert
     sudo -u git -H editor config.yml
 
     # Do setup
@@ -356,7 +354,7 @@ Quit the database session:
 
 ### 5.2 PostgreSQL
 
-NOTE: because we need to make use of extensions we need at least pgsql 9.1 and the default 8.x on centos will not work.  We need to get the PGDG repositories enabled 
+NOTE: because we need to make use of extensions we need at least pgsql 9.1 and the default 8.x on centos will not work.  We need to get the PGDG repositories enabled
 
 Install the pgdg repositories
 
@@ -425,9 +423,9 @@ authentication methods.
 ### Clone the Source
 
     # Clone GitLab repository
-    sudo -u git -H git clone https://gitlab.com/gitlab-org/gitlab-ce.git -b 6-7-stable gitlab
+    sudo -u git -H git clone https://gitlab.com/gitlab-org/gitlab-ce.git -b 6-8-stable gitlab
 
-**Note:** You can change `6-7-stable` to `master` if you want the *bleeding edge* version, but do so with caution!
+**Note:** You can change `6-8-stable` to `master` if you want the *bleeding edge* version, but do so with caution!
 
 ### Configure it
 
@@ -672,3 +670,4 @@ nobody can access your GitLab by using this login information later on.
 [keys]: https://fedoraproject.org/keys
 [issue-nginx]: https://github.com/gitlabhq/gitlabhq/issues/5774
 [nginx-centos]: http://wiki.nginx.org/Install#Official_Red_Hat.2FCentOS_packages
+[psql-doc-auth]: http://www.postgresql.org/docs/9.3/static/auth-methods.html
