@@ -551,7 +551,7 @@ Check if GitLab and its environment are configured correctly:
 
     sudo -u git -H bundle exec rake gitlab:env:info RAILS_ENV=production
 
-### Start your GitLab instance:
+### Start your GitLab instance
 
     service gitlab start
 
@@ -573,7 +573,7 @@ To do so, follow the instructions provided by the [nginx wiki][nginx-centos] and
     chkconfig nginx on
     wget -O /etc/nginx/conf.d/gitlab.conf https://gitlab.com/gitlab-org/gitlab-recipes/raw/master/web-server/nginx/gitlab-ssl
 
-Edit `/etc/nginx/conf.d/gitlab` and replace `git.example.com` with your FQDN. Make sure to read the comments in order to properly set up ssl.
+Edit `/etc/nginx/conf.d/gitlab.conf` and replace `git.example.com` with your FQDN. Make sure to read the comments in order to properly set up SSL.
 
 Add `nginx` user to `git` group:
 
