@@ -283,7 +283,7 @@ GitLab Shell is a ssh access and repository management application developed spe
     cd /home/git
 
     # Clone gitlab shell
-    sudo -u git -H git clone https://gitlab.com/gitlab-org/gitlab-shell.git -b v1.9.1
+    sudo -u git -H git clone https://gitlab.com/gitlab-org/gitlab-shell.git -b v1.9.3
 
     cd gitlab-shell
 
@@ -291,11 +291,15 @@ GitLab Shell is a ssh access and repository management application developed spe
 
     # Edit config and replace gitlab_url
     # with something like 'https://domain.com/'
-    # also edit self_signed_cert to true if you are going to use selfsigned cert
+    # also edit self_signed_cert to true if you are going to use a self signed cert
     sudo -u git -H editor config.yml
 
     # Do setup
     sudo -u git -H /usr/local/bin/ruby ./bin/install
+
+    # Ensure the correct SELinux contexts are set
+    # Read http://wiki.centos.org/HowTos/Network/SecuringSSH
+    restorecon -Rv /home/git/.ssh
 
 ----------
 
