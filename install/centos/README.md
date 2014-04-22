@@ -360,18 +360,25 @@ Quit the database session:
 
 NOTE: because we need to make use of extensions we need at least pgsql 9.1 and the default 8.x on centos will not work.  We need to get the PGDG repositories enabled
 
-Install the pgdg repositories
+If there are any previous versions remove them:
+
+    yum remove postgresql
+
+Install the pgdg repositories:
 
     rpm -Uvh http://yum.postgresql.org/9.3/redhat/rhel-6-x86_64/pgdg-centos93-9.3-1.noarch.rpm
-
 
 Install `postgresql93-server` and the `postgreqsql93-devel` libraries:
 
     yum install postgresql93-server postgresql93-devel
 
-Rename the service script
+Rename the service script:
 
     mv /etc/init.d/{postgresql-9.3,postgresql}
+
+Make a symlink for `pg_dump` otherwise backup will fail:
+
+    ln -s /usr/pgsql-9.3/bin/pg_dump /usr/bin/pg_dump
 
 Initialize the database:
 
