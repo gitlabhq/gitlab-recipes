@@ -1,6 +1,6 @@
 ```
 Distribution      : CentOS 6.5 Minimal
-GitLab version    : 6.0 - 6.7
+GitLab version    : 6.0 - 6.8
 Web Server        : Apache, Nginx
 Init system       : sysvinit
 Database          : MySQL, PostgreSQL
@@ -98,18 +98,13 @@ Computational repository to obtain a git v1.8.x package since the base CentOS
 repositories only provide v1.7.1 which is not compatible with GitLab.
 Although the PUIAS offers an RPM to install the repo, it requires the
 other PUIAS repos as a dependency, so you'll have to add it manually.
+Otherwise you can install git from source (instructions below).
 
-Create `/etc/yum.repos.d/PUIAS_6_computational.repo` and add the following lines:
+Download PUIAS repo:
 
-    [PUIAS_6_computational]
-    name=PUIAS computational Base $releasever - $basearch
-    mirrorlist=http://puias.math.ias.edu/data/puias/computational/$releasever/$basearch/mirrorlist
-    #baseurl=http://puias.math.ias.edu/data/puias/computational/$releasever/$basearch
-    enabled=1
-    gpgcheck=1
-    gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-puias
+    wget -O /etc/yum.repos.d/PUIAS_6_computational.repo https://gitlab.com/gitlab-org/gitlab-recipes/raw/master/install/centos/PUIAS_6_computational.repo
 
-Next download and install the gpg key.
+Next download and install the gpg key:
 
     wget -O /etc/pki/rpm-gpg/RPM-GPG-KEY-puias http://springdale.math.ias.edu/data/puias/6/x86_64/os/RPM-GPG-KEY-puias
     rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-puias
@@ -139,7 +134,7 @@ If you can't see them listed, use the folowing command (from `yum-utils` package
 
     yum -y update
     yum -y groupinstall 'Development Tools'
-    yum -y install vim-enhanced readline readline-devel ncurses-devel gdbm-devel glibc-devel tcl-devel openssl-devel curl-devel expat-devel db4-devel byacc sqlite-devel gcc-c++ libyaml libyaml-devel libffi libffi-devel libxml2 libxml2-devel libxslt libxslt-devel libicu libicu-devel system-config-firewall-tui redis sudo wget crontabs logwatch logrotate perl-Time-HiRes git patch
+    yum -y install readline readline-devel ncurses-devel gdbm-devel glibc-devel tcl-devel openssl-devel curl-devel expat-devel db4-devel byacc sqlite-devel libyaml libyaml-devel libffi libffi-devel libxml2 libxml2-devel libxslt libxslt-devel libicu libicu-devel system-config-firewall-tui redis sudo wget crontabs logwatch logrotate perl-Time-HiRes
 
 **RHEL Notes**
 
@@ -183,23 +178,27 @@ You can choose between editors such as nano, vi, vim, etc.
 In this case we will use vim as the default editor for consistency.
 
     ln -s /usr/bin/vim /usr/bin/editor
-    
+
 To remove this alias in the future:
-    
+
     rm -i /usr/bin/editor
 
 
 ### Install Git from Source (optional)
 
-Remove the system Git
+Make sure Git is version 1.7.10 or higher, for example 1.7.12 or 1.8.4
+
+    git --version
+
+If not install it from source. Remove the system Git:
 
     yum -y remove git
 
-Install the pre-requisite files for Git compilation
+Install the pre-requisite files for Git compilation:
 
     yum install zlib-devel perl-CPAN gettext curl-devel expat-devel gettext-devel openssl-devel
-    
-Download and extract Git 1.9.0
+
+Download and extract it:
 
     mkdir /tmp/git && cd /tmp/git
     curl --progress https://git-core.googlecode.com/files/git-1.9.0.tar.gz | tar xz
@@ -207,13 +206,13 @@ Download and extract Git 1.9.0
     ./configure
     make
     make prefix=/usr/local install
-    
+
 Make sure Git is in your `$PATH`:
 
     which git
-    
-You might have to run `source ~/.bash_profile` for the `$PATH` to take effect.
 
+You might have to logout and login again for the `$PATH` to take effect.
+**Note:** When editing `config/gitlab.yml` (step 6), change the git `bin_path` to `/usr/local/bin/git`.
 
 ----------
 
@@ -221,7 +220,7 @@ You might have to run `source ~/.bash_profile` for the `$PATH` to take effect.
 
 The use of ruby version managers such as [RVM](http://rvm.io/), [rbenv](https://github.com/sstephenson/rbenv) or [chruby](https://github.com/postmodern/chruby) with GitLab in production frequently leads to hard to diagnose problems. Version managers are not supported and we strongly advise everyone to follow the instructions below to use a system ruby.
 
-Remove the old Ruby 1.8 package if present. Gitlab 6.7 only supports the Ruby 2.0.x release series:
+Remove the old Ruby 1.8 package if present. GitLab only supports the Ruby 2.0+ release series:
 
     yum remove ruby
 
@@ -257,9 +256,7 @@ installed with:
 
 Create a `git` user for Gitlab:
 
-    adduser --system --shell /sbin/nologin --comment 'GitLab' --create-home --home-dir /home/git/ git
-
-For extra security, the shell we use for this user does not allow logins via a terminal.
+    adduser --system --shell /bin/bash --comment 'GitLab' --create-home --home-dir /home/git/ git
 
 **Important:** In order to include `/usr/local/bin` to git user's PATH, one way is to edit the sudoers file. As root run:
 
@@ -286,7 +283,7 @@ GitLab Shell is a ssh access and repository management application developed spe
     cd /home/git
 
     # Clone gitlab shell
-    sudo -u git -H git clone https://gitlab.com/gitlab-org/gitlab-shell.git -b v1.9.1
+    sudo -u git -H git clone https://gitlab.com/gitlab-org/gitlab-shell.git -b v1.9.3
 
     cd gitlab-shell
 
@@ -294,11 +291,15 @@ GitLab Shell is a ssh access and repository management application developed spe
 
     # Edit config and replace gitlab_url
     # with something like 'https://domain.com/'
-    # also edit self_signed_cert to true if you are going to use selfsigned cert 
+    # also edit self_signed_cert to true if you are going to use a self signed cert
     sudo -u git -H editor config.yml
 
     # Do setup
     sudo -u git -H /usr/local/bin/ruby ./bin/install
+
+    # Ensure the correct SELinux contexts are set
+    # Read http://wiki.centos.org/HowTos/Network/SecuringSSH
+    restorecon -Rv /home/git/.ssh
 
 ----------
 
@@ -312,37 +313,52 @@ Install `mysql` and enable the `mysqld` service to start on boot:
     chkconfig mysqld on
     service mysqld start
 
-Secure MySQL by entering a root password and say "Yes" to all questions:
+Ensure you have MySQL version 5.5.14 or later:
 
-    /usr/bin/mysql_secure_installation
+    mysql --version
 
-Create a new user and database for GitLab:
+Secure your installation:
 
-    # Login to MySQL
+    mysql_secure_installation
+
+Login to MySQL (type the database root password):
+
     mysql -u root -p
-    # Type the database root password
-    # Create a user for GitLab. (change supersecret to a real password)
-    CREATE USER 'git'@'localhost' IDENTIFIED BY 'supersecret';
 
-    # Create the GitLab production database
+
+Create a user for GitLab (change $password in the command below to a real password you pick):
+
+    CREATE USER 'git'@'localhost' IDENTIFIED BY '$password';
+
+Ensure you can use the InnoDB engine which is necessary to support long indexes.
+If this fails, check your MySQL config files (e.g. `/etc/mysql/*.cnf`, `/etc/mysql/conf.d/*`) for the setting "innodb = off".
+
+    SET storage_engine=INNODB;
+
+Create the GitLab production database:
+
     CREATE DATABASE IF NOT EXISTS `gitlabhq_production` DEFAULT CHARACTER SET `utf8` COLLATE `utf8_unicode_ci`;
 
-    # Grant the GitLab user necessary permissions on the table.
+Grant the GitLab user necessary permissions on the table:
+
     GRANT SELECT, LOCK TABLES, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER ON `gitlabhq_production`.* TO 'git'@'localhost';
 
-    # Quit the database session
+Quit the database session:
+
     \q
 
 Try connecting to the new database with the new user:
 
-    mysql -u git -p -D gitlabhq_production
-    # Type the password you replaced supersecret with earlier
-    # Quit the database session
+    sudo -u git -H mysql -u git -p -D gitlabhq_production
+
+Type the password you replaced $password with earlier.
+Quit the database session:
+
     \q
 
 ### 5.2 PostgreSQL
 
-NOTE: because we need to make use of extensions we need at least pgsql 9.1 and the default 8.x on centos will not work.  We need to get the PGDG repositories enabled 
+NOTE: because we need to make use of extensions we need at least pgsql 9.1 and the default 8.x on centos will not work.  We need to get the PGDG repositories enabled
 
 Install the pgdg repositories
 
@@ -370,9 +386,10 @@ Configure the database user and password:
 
     su - postgres
     psql -d template1
-    psql (8.4.13)
 
-    template1=# CREATE USER git WITH PASSWORD 'your-password-here';
+    psql (8.4.20)
+    Type "help" for help.
+    template1=# CREATE USER git CREATEDB;
     CREATE ROLE
     template1=# CREATE DATABASE gitlabhq_production OWNER git;
     CREATE DATABASE
@@ -382,22 +399,24 @@ Configure the database user and password:
 Test the connection as the gitlab (uid=git) user. You should be root to begin this test:
 
     whoami
-    
+
 Attempt to log in to Postgres as the git user:
 
-    sudo -u git psql -d gitlabhq_production -U git -W
-    
+    sudo -u git psql -d gitlabhq_production
+
 If you see the following:
 
     gitlabhq_production=>
 
-Your password has been accepted successfully and you can type \q to quit.
+your password has been accepted successfully and you can type \q to quit.
 
-You should ensure you are using the right settings in your pg_hba.conf to not get ident issues
-NOTE: set to something like "host    all             all             127.0.0.1/32            trust"  use trust over ident
+Ensure you are using the right settings in your `/var/lib/pgsql/9.3/data/pg_hba.conf`
+to not get ident issues (you can use trust over ident):
 
-   vi /var/lib/pgsql/9.3/data/pg_hba.conf
+    host    all             all             127.0.0.1/32            trust
 
+Check the official [documentation][psql-doc-auth] for more information on
+authentication methods.
 
 ----------
 ## 6. GitLab
@@ -408,9 +427,9 @@ NOTE: set to something like "host    all             all             127.0.0.1/3
 ### Clone the Source
 
     # Clone GitLab repository
-    sudo -u git -H git clone https://gitlab.com/gitlab-org/gitlab-ce.git -b 6-7-stable gitlab
+    sudo -u git -H git clone https://gitlab.com/gitlab-org/gitlab-ce.git -b 6-8-stable gitlab
 
-**Note:** You can change `6-7-stable` to `master` if you want the *bleeding edge* version, but do so with caution!
+**Note:** You can change `6-8-stable` to `master` if you want the *bleeding edge* version, but do so with caution!
 
 ### Configure it
 
@@ -426,23 +445,21 @@ NOTE: set to something like "host    all             all             127.0.0.1/3
     sudo -u git -H editor config/gitlab.yml
 
     # Make sure GitLab can write to the log/ and tmp/ directories
-    sudo chown -R git log/
-    sudo chown -R git tmp/
-    sudo chmod -R u+rwX  log/
-    sudo chmod -R u+rwX  tmp/
+    chown -R git log/
+    chown -R git tmp/
+    chmod -R u+rwX  log/
+    chmod -R u+rwX  tmp/
 
     # Create directory for satellites
     sudo -u git -H mkdir /home/git/gitlab-satellites
+    chmod u+rwx,g+rx,o-rwx /home/git/gitlab-satellites
 
-    # Create directories for sockets/pids and make sure GitLab can write to them
-    sudo -u git -H mkdir tmp/pids/
-    sudo -u git -H mkdir tmp/sockets/
-    sudo chmod -R u+rwX  tmp/pids/
-    sudo chmod -R u+rwX  tmp/sockets/
+    # Make sure GitLab can write to the tmp/pids/ and tmp/sockets/ directories
+    chmod -R u+rwX  tmp/pids/
+    chmod -R u+rwX  tmp/sockets/
 
-    # Create public/uploads directory otherwise backup will fail
-    sudo -u git -H mkdir public/uploads
-    sudo chmod -R u+rwX  public/uploads
+    # Make sure GitLab can write to the public/uploads/ directory
+    chmod -R u+rwX  public/uploads
 
     # Copy the example Unicorn config
     sudo -u git -H cp config/unicorn.rb.example config/unicorn.rb
@@ -488,7 +505,7 @@ Make sure to edit both `gitlab.yml` and `unicorn.rb` to match your setup.
     cd /home/git/gitlab
 
     # For MySQL (note, the option says "without ... postgres")
-    sudo -u git -H /usr/local/bin/bundle install --deployment --without development test postgres aws
+    sudo -u git -H bundle install --deployment --without development test postgres aws
 
     # Or for PostgreSQL (note, the option says "without ... mysql")
     sudo -u git -H bundle config build.pg --with-pg-config=/usr/pgsql-9.3/bin/pg_config
@@ -657,3 +674,4 @@ nobody can access your GitLab by using this login information later on.
 [keys]: https://fedoraproject.org/keys
 [issue-nginx]: https://github.com/gitlabhq/gitlabhq/issues/5774
 [nginx-centos]: http://wiki.nginx.org/Install#Official_Red_Hat.2FCentOS_packages
+[psql-doc-auth]: http://www.postgresql.org/docs/9.3/static/auth-methods.html
