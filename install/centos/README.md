@@ -399,7 +399,7 @@ Configure the database user and password:
     export PATH=$PATH:/usr/pgsql-9.3/bin/
     psql -d template1
 
-    psql (8.4.20)
+    psql (9.4.3)
     Type "help" for help.
     template1=# CREATE USER git CREATEDB;
     CREATE ROLE
@@ -494,25 +494,32 @@ Make sure to edit both `gitlab.yml` and `unicorn.rb` to match your setup.
 
 ### Configure GitLab DB settings
 
-    # For MySQL
-    sudo -u git -H cp config/database.yml{.mysql,}
+    # PostgreSQL only:
+    sudo -u git cp config/database.yml.postgresql config/database.yml
 
-    # Make sure to update username/password in config/database.yml.
+    # MySQL only:
+    sudo -u git cp config/database.yml.mysql config/database.yml
+
+    # MySQL and remote PostgreSQL only:
+    # Update username/password in config/database.yml.
     # You only need to adapt the production settings (first part).
     # If you followed the database guide then please do as follows:
     # Change 'secure password' with the value you have given to $password
     # You can keep the double quotes around the password
     sudo -u git -H editor config/database.yml
 
-    or
-
-    # For PostgreSQL
-    sudo -u git -H cp config/database.yml{.postgresql,}
-
+    # PostgreSQL and MySQL:
     # Make config/database.yml readable to git only
     sudo -u git -H chmod o-rwx config/database.yml
 
 ### Install Gems
+
+**Note:** As of bundler 1.5.2, you can invoke `bundle install -jN`
+(where `N` the number of your processor cores) and enjoy the parallel gems installation with measurable
+difference in completion time (~60% faster). Check the number of your cores with `nproc`.
+For more information check this [post](http://robots.thoughtbot.com/parallel-gem-installing-using-bundler).
+First make sure you have bundler >= 1.5.2 (run `bundle -v`) as it addresses some [issues](https://devcenter.heroku.com/changelog-items/411)
+that were [fixed](https://github.com/bundler/bundler/pull/2817) in 1.5.2.
 
     cd /home/git/gitlab
 
