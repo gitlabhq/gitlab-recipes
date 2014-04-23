@@ -372,13 +372,17 @@ Install `postgresql93-server` and the `postgreqsql93-devel` libraries:
 
     yum install postgresql93-server postgresql93-devel
 
+The executables are installed in `/usr/pgsql-9.3/bin/`. In order to be able to run them,
+you have to either add this path to your `$PATH` or make symlinks. Here, we will make
+symlinks to the commands used by GitLab:
+
+    ln -s /usr/pgsql-9.3/bin/pg_dump /usr/bin/pg_dump
+    ln -s /usr/pgsql-9.3/bin/pg_restore /usr/bin/pg_restore
+    ln -s /usr/pgsql-9.3/bin/psql /usr/bin/psql
+
 Rename the service script:
 
     mv /etc/init.d/{postgresql-9.3,postgresql}
-
-Make a symlink for `pg_dump` otherwise backup will fail:
-
-    ln -s /usr/pgsql-9.3/bin/pg_dump /usr/bin/pg_dump
 
 Initialize the database:
 
@@ -392,6 +396,7 @@ Start the service and configure service to start on boot:
 Configure the database user and password:
 
     su - postgres
+    export PATH=$PATH:/usr/pgsql-9.3/bin/
     psql -d template1
 
     psql (8.4.20)
