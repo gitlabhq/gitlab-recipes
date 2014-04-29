@@ -457,18 +457,15 @@ authentication methods.
     sudo -u git -H editor config/gitlab.yml
 
     # Make sure GitLab can write to the log/ and tmp/ directories
-    chown -R git log/
-    chown -R git tmp/
-    chmod -R u+rwX  log/
-    chmod -R u+rwX  tmp/
+    chown -R git {log,tmp}
+    chmod -R u+rwX  {log,tmp}
 
     # Create directory for satellites
     sudo -u git -H mkdir /home/git/gitlab-satellites
     chmod u+rwx,g+rx,o-rwx /home/git/gitlab-satellites
 
     # Make sure GitLab can write to the tmp/pids/ and tmp/sockets/ directories
-    chmod -R u+rwX  tmp/pids/
-    chmod -R u+rwX  tmp/sockets/
+    chmod -R u+rwX  tmp/{pids,sockets}
 
     # Make sure GitLab can write to the public/uploads/ directory
     chmod -R u+rwX  public/uploads
