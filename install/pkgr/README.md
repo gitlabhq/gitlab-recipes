@@ -184,6 +184,10 @@ If you need to upgrade to a newer version, run the following commands:
     gitlab-ce run rake db:migrate
     service gitlab-ce restart
 
+Finally, have a look at what the command-line utility that ships with the package has to offer. It's a great way to interact with your package installation:
+
+    gitlab-ce [run|scale|logs|config|config:set|config:get]
+
 You can find out about all the latest releases at <https://pkgr.io/apps/gitlabhq/gitlabhq>.
 
 **Enjoy!**
