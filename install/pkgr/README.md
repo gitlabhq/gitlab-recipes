@@ -18,11 +18,12 @@ The following steps have been known to work and should be followed from up to bo
 If you deviate from this guide, do it with caution and make sure you don't violate
 any assumptions GitLab makes about its environment.
 
-
 #### If you find a bug
 
 If you find a bug/error in this guide please submit an issue or a Merge Request
 following the contribution guide (see [CONTRIBUTING.md](https://gitlab.com/gitlab-org/gitlab-recipes/blob/master/CONTRIBUTING.md)).
+Should you encounter any issues regarding the pkgr.io package, please open an issue
+starting with [pkgrio].
 
 - - -
 
@@ -80,8 +81,8 @@ Now create a new postgres user and database:
 
 ```shell
 echo "CREATE USER \"user\" SUPERUSER PASSWORD 'pass';" | su - postgres -c psql && \
-  echo "CREATE DATABASE gitlabhq;" | su - postgres -c psql && \
-  echo "GRANT ALL PRIVILEGES ON DATABASE \"gitlabhq\" TO \"user\";" | su - postgres -c psql
+echo "CREATE DATABASE gitlabhq;" | su - postgres -c psql && \
+echo "GRANT ALL PRIVILEGES ON DATABASE \"gitlabhq\" TO \"user\";" | su - postgres -c psql
 ```
 
 ## 3. Configure the package
