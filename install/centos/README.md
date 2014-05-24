@@ -232,15 +232,15 @@ Remove any other Ruby build if it is still present:
 Download Ruby and compile it:
 
     mkdir /tmp/ruby && cd /tmp/ruby
-    curl --progress ftp://ftp.ruby-lang.org/pub/ruby/2.0/ruby-2.0.0-p451.tar.gz | tar xz
-    cd ruby-2.0.0-p451
+    curl --progress ftp://ftp.ruby-lang.org/pub/ruby/2.0/ruby-2.0.0-p481.tar.gz | tar xz
+    cd ruby-2.0.0-p481
     ./configure --disable-install-rdoc
     make
     make prefix=/usr/local install
 
 Install the Bundler Gem:
 
-    gem install bundler --no-ri --no-rdoc
+    gem install bundler --no-doc
 
 Logout and login again for the `$PATH` to take effect. Check that ruby is properly
 installed with:
@@ -272,40 +272,12 @@ and append `/usr/local/bin` like so:
 
 Save and exit.
 
-----------
-
-## 4. GitLab shell
-
-GitLab Shell is a ssh access and repository management application developed specifically for GitLab.
-
-
-    # Go to home directory
-    cd /home/git
-
-    # Clone gitlab shell
-    sudo -u git -H git clone https://gitlab.com/gitlab-org/gitlab-shell.git -b v1.9.3
-
-    cd gitlab-shell
-
-    sudo -u git -H cp config.yml.example config.yml
-
-    # Edit config and replace gitlab_url
-    # with something like 'https://domain.com/'
-    # also edit self_signed_cert to true if you are going to use a self signed cert
-    sudo -u git -H editor config.yml
-
-    # Do setup
-    sudo -u git -H /usr/local/bin/ruby ./bin/install
-
-    # Ensure the correct SELinux contexts are set
-    # Read http://wiki.centos.org/HowTos/Network/SecuringSSH
-    restorecon -Rv /home/git/.ssh
 
 ----------
 
-## 5. Database
+## 4. Database
 
-### 5.1 MySQL
+### 4.1 MySQL
 
 Install `mysql` and enable the `mysqld` service to start on boot:
 
@@ -356,7 +328,7 @@ Quit the database session:
 
     \q
 
-### 5.2 PostgreSQL
+### 4.2 PostgreSQL
 
 NOTE: because we need to make use of extensions we need at least pgsql 9.1 and the default 8.x on centos will not work.  We need to get the PGDG repositories enabled
 
@@ -431,7 +403,7 @@ Check the official [documentation][psql-doc-auth] for more information on
 authentication methods.
 
 ----------
-## 6. GitLab
+## 5. GitLab
 
     # We'll install GitLab into home directory of the user "git"
     cd /home/git
@@ -527,16 +499,31 @@ that were [fixed](https://github.com/bundler/bundler/pull/2817) in 1.5.2.
     sudo -u git -H bundle config build.pg --with-pg-config=/usr/pgsql-9.3/bin/pg_config
     sudo -u git -H bundle install --deployment --without development test mysql aws
 
+### Install GitLab shell
+
+GitLab Shell is an ssh access and repository management software developed specially for GitLab.
+
+```
+# Go to the Gitlab installation folder:
+cd /home/git/gitlab
+
+# Run the installation task for gitlab-shell (replace `REDIS_URL` if needed):
+sudo -u git -H bundle exec rake gitlab:shell:install[v1.9.4] REDIS_URL=redis://localhost:6379 RAILS_ENV=production
+
+# By default, the gitlab-shell config is generated from your main gitlab config. You can review (and modify) it as follows:
+sudo -u git -H editor /home/git/gitlab-shell/config.yml
+
+# Ensure the correct SELinux contexts are set
+# Read http://wiki.centos.org/HowTos/Network/SecuringSSH
+restorecon -Rv /home/git/.ssh
+```
+
 ### Initialize Database and Activate Advanced Features
 
     sudo -u git -H bundle exec rake gitlab:setup RAILS_ENV=production
 
-    # Type 'yes' to create the database tables.
-
-    # When done you see 'Administrator account created:'
-
-Type 'yes' to create the database.
-When done you see 'Administrator account created:'
+Type **yes** to create the database.
+When done you see **Administrator account created:**.
 
 ### Install Init Script
 
@@ -568,7 +555,7 @@ Check if GitLab and its environment are configured correctly:
 
     sudo -u git -H bundle exec rake assets:precompile RAILS_ENV=production
 
-## 7. Configure the web server
+## 6. Configure the web server
 
 Use either Nginx or Apache, not both. Official installation guide recommends nginx.
 
@@ -628,7 +615,7 @@ If you want to run other websites on the same system, you'll need to add in `/et
         Listen 443
     </IfModule>
 
-## 8. Configure the firewall
+## 7. Configure the firewall
 
 Poke an iptables hole so users can access the web server (http and https ports) and ssh.
 
@@ -676,6 +663,8 @@ nobody can access your GitLab by using this login information later on.
 
 **Enjoy!**
 
+You can also check some [Advanced Setup Tips][tips].
+
 ## Links used in this guide
 
 - [EPEL information](http://www.thegeekstuff.com/2012/06/enable-epel-repository/)
@@ -691,3 +680,4 @@ nobody can access your GitLab by using this login information later on.
 [issue-nginx]: https://github.com/gitlabhq/gitlabhq/issues/5774
 [nginx-centos]: http://wiki.nginx.org/Install#Official_Red_Hat.2FCentOS_packages
 [psql-doc-auth]: http://www.postgresql.org/docs/9.3/static/auth-methods.html
+[tips]: https://gitlab.com/gitlab-org/gitlab-ce/blob/master/doc/install/installation.md#advanced-setup-tips
