@@ -1,6 +1,6 @@
 ```
 Distribution      : CentOS 6.5 Minimal
-GitLab version    : 6.0 - 6.8
+GitLab version    : 6.0 - 6.9
 Web Server        : Apache, Nginx
 Init system       : sysvinit
 Database          : MySQL, PostgreSQL
@@ -439,9 +439,9 @@ authentication methods.
 ### Clone the Source
 
     # Clone GitLab repository
-    sudo -u git -H git clone https://gitlab.com/gitlab-org/gitlab-ce.git -b 6-8-stable gitlab
+    sudo -u git -H git clone https://gitlab.com/gitlab-org/gitlab-ce.git -b 6-9-stable gitlab
 
-**Note:** You can change `6-8-stable` to `master` if you want the *bleeding edge* version, but do so with caution!
+**Note:** You can change `6-9-stable` to `master` if you want the *bleeding edge* version, but do so with caution!
 
 ### Configure it
 
