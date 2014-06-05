@@ -1,3 +1,7 @@
+## Nginx config moved to official repository
+
+You can find the nginx config in [GitLab official repository][gitlab].
+
 ## CentOS related Nginx notes
 
 ### Different conf directories
@@ -25,3 +29,5 @@ or replace the default `nginx` user with `git` and group `root` in `/etc/nginx/n
 
     #user             nginx;
     user              git root;
+
+[gitlab]: https://gitlab.com/gitlab-org/gitlab-ce/tree/master/lib/support/nginx "Nginx config for GitLab"
