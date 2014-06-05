@@ -1,6 +1,5 @@
 ## GitLab
 ## Contributors: randx, yin8086, sashkab, orkoden, axilleas
-## App Version: 5.4 - 6.0
 ##
 ## Modified from nginx http version
 ## Modified from http://blog.phusion.nl/2012/04/21/tutorial-setting-up-gitlab-on-debian-6/
@@ -53,11 +52,11 @@
 
 upstream gitlab {
 
-  ## Uncomment if you have set up puma/unicorn to listen on a unix socket (recommended).
+  ## Uncomment if you have set up unicorn to listen on a unix socket (recommended).
   server unix:/home/git/gitlab/tmp/sockets/gitlab.socket;
 
-  ## Uncomment if puma/unicorn are configured to listen on a tcp port.
-  ## Check the port number in /home/git/gitlab/config/{puma.rb/unicorn.rb}
+  ## Uncomment if unicorn is configured to listen on a tcp port.
+  ## Check the port number in /home/git/gitlab/config/unicorn.rb
   # server 127.0.0.1:8080;
 }
 
@@ -67,8 +66,7 @@ server {
   ## Replace git.example.com with your FQDN.
   server_name git.example.com;
   server_tokens off;
-  ## This doesn't have to be a valid path since we are redirecting,
-  ## you don't have to change it.
+  ## root doesn't have to be a valid path since we are redirecting
   root /nowhere;
   rewrite ^ https://$server_name$request_uri permanent;
 }
@@ -140,17 +138,21 @@ server {
     proxy_connect_timeout   300;
     proxy_redirect          off;
 
-    proxy_set_header   Host              $http_host;
-    proxy_set_header   X-Real-IP         $remote_addr;
-    proxy_set_header   X-Forwarded-Ssl   on;
-    proxy_set_header   X-Forwarded-For   $proxy_add_x_forwarded_for;
-    proxy_set_header   X-Forwarded-Proto $scheme;
+    proxy_set_header    Host                $http_host;
+    proxy_set_header    X-Real-IP           $remote_addr;
+    proxy_set_header    X-Forwarded-Ssl     on;
+    proxy_set_header    X-Forwarded-For     $proxy_add_x_forwarded_for;
+    proxy_set_header    X-Forwarded-Proto   $scheme;
+    proxy_set_header    X-Frame-Options     SAMEORIGIN;
 
     proxy_pass http://gitlab;
   }
 
   ## Enable gzip compression as per rails guide:
   ## http://guides.rubyonrails.org/asset_pipeline.html#gzip-compression
+  ## WARNING: If you are using relative urls do remove the block below
+  ## See config/application.rb under "Relative url support" for the list of
+  ## other files that need to be changed for relative url support
   location ~ ^/(assets)/ {
     root /home/git/gitlab/public;
     gzip_static on; # to serve pre-gzipped version
