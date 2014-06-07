@@ -567,7 +567,7 @@ To do so, follow the instructions provided by the [nginx wiki][nginx-centos] and
     yum update
     yum -y install nginx
     chkconfig nginx on
-    wget -O /etc/nginx/conf.d/gitlab.conf https://gitlab.com/gitlab-org/gitlab-recipes/raw/master/web-server/nginx/gitlab-ssl
+    wget -O /etc/nginx/conf.d/gitlab.conf https://gitlab.com/gitlab-org/gitlab-ce/raw/master/lib/support/nginx/gitlab-ssl
 
 Edit `/etc/nginx/conf.d/gitlab.conf` and replace `git.example.com` with your FQDN. Make sure to read the comments in order to properly set up SSL.
 
