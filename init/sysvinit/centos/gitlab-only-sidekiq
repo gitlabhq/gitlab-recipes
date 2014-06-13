@@ -1,13 +1,12 @@
 #!/bin/bash
 #
 # GitLab
-# Contributors  : @elvanja, @troyanov, @eiyaya, @foyo23, @nielsbasjes, @relip, @JasonMing, @andronat, @axilleas, @mdirkse
+# Contributors  : @elvanja, @troyanov, @eiyaya, @foyo23, @nielsbasjes, @relip, @JasonMing, @andronat, @axilleas
 # App Version   : 6.x
 
 # chkconfig: 2345 82 55
-# processname: unicorn
 # processname: sidekiq
-# description: Runs unicorn and sidekiq for nginx integration.
+# description: Runs sidekiq for nginx integration.
 
 # Related (kudos @4sak3n0ne):
 # https://github.com/gitlabhq/gitlabhq/issues/1049#issuecomment-8386882
@@ -24,26 +23,17 @@ RAILS_ENV="production"
 
 # The username and path to the gitlab source
 USER=git
-APP_PATH=/home/$USER/gitlab
+APP_PATH=/home/git/gitlab
 
 # The PID and LOCK files used by unicorn and sidekiq
-UPID=$APP_PATH/tmp/pids/unicorn.pid
-ULOCK=/var/lock/subsys/unicorn
 SPID=$APP_PATH/tmp/pids/sidekiq.pid
 SLOCK=/var/lock/subsys/sidekiq
 
 # Evaluate the real path for the user (should already have RVM)
-PATH_PATCH="PATH=$(su $USER -s /bin/bash -l -c "echo \"\$PATH\"") && export PATH && "
+PATH_PATCH="PATH=$(su $USER -l -c "echo \"\$PATH\"") && export PATH && "
 
 start() {
   cd $APP_PATH
-
-  # Start unicorn
-  echo -n $"Starting unicorn: "
-  daemon --pidfile=$UPID --user=$USER "$PATH_PATCH RAILS_ENV=$RAILS_ENV script/web start"
-  unicorn=$?
-  [ $unicorn -eq 0 ] && touch $ULOCK
-  echo
 
   # Start sidekiq
   echo -n $"Starting sidekiq: "
@@ -52,19 +42,12 @@ start() {
   [ $sidekiq -eq 0 ] && touch $SLOCK
   echo
 
-  retval=$unicorn || $sidekiq
+  retval=$sidekiq
   return $retval
 }
 
 stop() {
   cd $APP_PATH
-
-  # Stop unicorn
-  echo -n $"Stopping unicorn: "
-  killproc -p $UPID
-  unicorn=$?
-  [ $unicorn -eq 0 ] && rm -f $ULOCK
-  echo
 
   # Stop sidekiq
   echo -n $"Stopping sidekiq: "
@@ -73,7 +56,7 @@ stop() {
   [ $sidekiq -eq 0 ] && rm -f $SLOCK
   echo
 
-  retval=$unicorn || $sidekiq
+  retval=$sidekiq
   return $retval
 }
 
@@ -83,13 +66,10 @@ restart() {
 }
 
 get_status() {
-  status -p $UPID unicorn
-  unicorn=$?
-
   status -p $SPID sidekiq
   sidekiq=$?
 
-  retval=$unicorn || $sidekiq
+  retval=$sidekiq
   return $retval
 }
 
@@ -101,14 +81,14 @@ query_status() {
 case "$1" in
   start)
     query_status && exit 0
-    start || exit 1
+    start
     ;;
   stop)
     query_status || exit 0
-    stop || exit 1
+    stop
     ;;
   restart)
-    restart || exit 1
+    restart
     ;;
   status)
     get_status
@@ -122,3 +102,4 @@ case "$1" in
 esac
 
 exit 0
+

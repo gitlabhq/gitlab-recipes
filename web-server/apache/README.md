@@ -1,3 +1,6 @@
+# Apache 2 version
+If you are using Apache version 2.4 or above, please use files [gitlab-apache2.4.conf](gitlab-apache2.4.conf) or [gitlab-ssl-apache2.4.conf](gitlab-ssl-apache2.4.conf) for the HTTP and HTTPS versions of the vhost repectively.
+
 # RHEL6/CentOS6 recommendations
 
 The up-to-date recommended [gitlab-ssl.conf](gitlab-ssl.conf) was configured on RHEL 6.4.
@@ -50,13 +53,16 @@ In a RHEL6 production environment it is assumed [SELinux is enabled](http://stop
 
     setsebool -P httpd_can_network_connect on
     setsebool -P httpd_can_network_relay on
-    setsebool -P httpd_enable_homedirs on
     setsebool -P httpd_read_user_content on
-    semanage fcontext -a -t user_home_dir_t '/home/git(/.*)?'
-    semanage fcontext -a -t ssh_home_t '/home/git/.ssh(/.*)?'
-    semanage fcontext -a -t httpd_sys_content_t '/home/git/gitlab/public(/.*)?'
-    semanage fcontext -a -t httpd_sys_content_t '/home/git/repositories(/.*)?'
+    semanage -i - <<EOF
+    fcontext -a -t user_home_dir_t '/home/git(/.*)?'
+    fcontext -a -t ssh_home_t '/home/git/.ssh(/.*)?'
+    fcontext -a -t httpd_sys_content_t '/home/git/gitlab/public(/.*)?'
+    fcontext -a -t httpd_sys_content_t '/home/git/repositories(/.*)?'
+    EOF
     restorecon -R /home/git
+
+**Note:** `semanage` is part of the `policycoreutils-python` package.
 
 ## Other httpd security considerations
 

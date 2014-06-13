@@ -22,7 +22,7 @@ information about GitLab version, OS tested on and any other relevant info.
 For example some good titles would be:
 
 * [Installation script] GitLab 6.x - Ubuntu 12.04 - Apache
-* [Guide] GitLab 6.1 - FreeBSD - postrges, rvm
+* [Guide] GitLab 6.1 - FreeBSD - postgres, rvm
 
 ## Guides
 
