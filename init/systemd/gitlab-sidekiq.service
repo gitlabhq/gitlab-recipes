@@ -17,9 +17,9 @@ Environment=RAILS_ENV=production
 SyslogIdentifier=gitlab-sidekiq
 PIDFile=/home/git/gitlab/tmp/pids/sidekiq.pid
 
-ExecStart=/home/git/gitlab/script/background_jobs start
-ExecStop=/home/git/gitlab/script/background_jobs stop
-ExecReload=/home/git/gitlab/script/background_jobs restart
+ExecStart=/home/git/gitlab/bin/background_jobs start
+ExecStop=/home/git/gitlab/bin/background_jobs stop
+ExecReload=/home/git/gitlab/bin/background_jobs restart
 
 [Install]
 WantedBy=gitlab.target
