@@ -5,12 +5,12 @@ Web Server        : Apache, Nginx
 Init system       : upstart, sysvinit
 Database          : PostgreSQL
 Contributors      : @crohr
-Additional Notes  : This install guide uses packages generated on https://pkgr.io
+Additional Notes  : This install guide uses packages generated on https://packager.io
 ```
 
 ## Overview
 
-This install guide makes use of prepackaged versions of Gitlab, available on <https://pkgr.io/apps/gitlabhq/gitlabhq>.
+This install guide makes use of prepackaged versions of Gitlab, available on <https://packager.io/gh/gitlabhq/gitlabhq>.
 
 ### Important Notes
 
@@ -44,22 +44,23 @@ We assume that you're starting from a clean install of any of the supported dist
 ### Ubuntu Trusty 14.04
 
 ```shell
-wget -qO - https://deb.pkgr.io/key | apt-key add -
-echo "deb https://deb.pkgr.io/gitlabhq/gitlabhq trusty 6-9-stable" | tee -a /etc/apt/sources.list.d/gitlabhq.list
+wget -qO - https://deb.packager.io/key | apt-key add -
+echo "deb https://deb.packager.io/gh/gitlabhq/gitlabhq trusty 6-9-stable" | tee -a /etc/apt/sources.list.d/gitlab-ce.list
 ```
 
 ### Ubuntu Precise 12.04
 
 ```shell
-wget -qO - https://deb.pkgr.io/key | apt-key add -
-echo "deb https://deb.pkgr.io/gitlabhq/gitlabhq precise 6-9-stable" | tee -a /etc/apt/sources.list.d/gitlabhq.list
+wget -qO - https://deb.packager.io/key | apt-key add -
+echo "deb https://deb.packager.io/gh/gitlabhq/gitlabhq precise 6-9-stable" | tee -a /etc/apt/sources.list.d/gitlab-ce.list
 ```
 
 ### Debian Wheezy 7.4
 
 ```shell
-wget -qO - https://deb.pkgr.io/key | apt-key add -
-echo "deb https://deb.pkgr.io/gitlabhq/gitlabhq wheezy 6-9-stable" | tee -a /etc/apt/sources.list.d/gitlabhq.list
+apt-get install -y apt-transport-https
+wget -qO - https://deb.packager.io/key | apt-key add -
+echo "deb https://deb.packager.io/gh/gitlabhq/gitlabhq wheezy 6-9-stable" | tee -a /etc/apt/sources.list.d/gitlab-ce.list
 ```
 
 For all distributions, install the package by doing:
@@ -81,8 +82,8 @@ Now create a new postgres user and database:
 
 ```shell
 echo "CREATE USER \"user\" SUPERUSER PASSWORD 'pass';" | su - postgres -c psql && \
-echo "CREATE DATABASE gitlabhq;" | su - postgres -c psql && \
-echo "GRANT ALL PRIVILEGES ON DATABASE \"gitlabhq\" TO \"user\";" | su - postgres -c psql
+echo "CREATE DATABASE gitlab;" | su - postgres -c psql && \
+echo "GRANT ALL PRIVILEGES ON DATABASE \"gitlab\" TO \"user\";" | su - postgres -c psql
 ```
 
 ## 3. Configure the package
@@ -93,7 +94,7 @@ In the rest of the guide, we will assume that the `SERVER_HOST` variable contain
 
 Set the url corresponding to the database we just created:
 
-    gitlab-ce config:set DATABASE_URL=postgres://user:pass@127.0.0.1/gitlabhq
+    gitlab-ce config:set DATABASE_URL=postgres://user:pass@127.0.0.1/gitlab
 
 Set the url to the redis server:
 
@@ -159,7 +160,7 @@ sudo service apache2 restart
 
 ## Done!
 
-Visit YOUR_SERVER in your web browser for your first GitLab login.
+Visit SERVER_HOST in your web browser for your first GitLab login.
 The setup has created an admin account for you. You can use it to log in:
 
     root
@@ -189,6 +190,12 @@ Finally, have a look at what the command-line utility that ships with the packag
 
     gitlab-ce [run|scale|logs|config|config:set|config:get]
 
-You can find out about all the latest releases at <https://pkgr.io/apps/gitlabhq/gitlabhq>.
+## Release cycle
+
+New packages are automatically generated whenever code is pushed into the `6-9-stable` branch of GitLab, so once you're pinned to a specific branch, only backwards compatible changes should get into the packages. 
+
+Whenever a new main branch is released (let's say `7-0-stable`), you can either modify your `gitlab-ce.list` file to upgrade, or just keep using the version you're pointing to.
+
+If you're feeling adventurous and want to test the latest an greatest, you can also try pointing to `master` branch. Find out about all the latest releases at <https://packager.io/gh/gitlabhq/gitlabhq>.
 
 **Enjoy!**
