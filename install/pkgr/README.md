@@ -190,6 +190,12 @@ Finally, have a look at what the command-line utility that ships with the packag
 
     gitlab-ce [run|scale|logs|config|config:set|config:get]
 
-You can find out about all the latest releases at <https://packager.io/gh/gitlabhq/gitlabhq>.
+## Release cycle
+
+New packages are automatically generated whenever code is pushed into the `6-9-stable` branch of GitLab, so once you're pinned to a specific branch, only backwards compatible changes should get into the packages. 
+
+Whenever a new main branch is released (let's say `7-0-stable`), you can either modify your `gitlab-ce.list` file to upgrade, or just keep using the version you're pointing to.
+
+If you're feeling adventurous and want to test the latest an greatest, you can also try pointing to `master` branch. Find out about all the latest releases at <https://packager.io/gh/gitlabhq/gitlabhq>.
 
 **Enjoy!**
