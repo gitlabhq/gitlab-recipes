@@ -160,7 +160,7 @@ sudo service apache2 restart
 
 ## Done!
 
-Visit YOUR_SERVER in your web browser for your first GitLab login.
+Visit SERVER_HOST in your web browser for your first GitLab login.
 The setup has created an admin account for you. You can use it to log in:
 
     root
