@@ -15,9 +15,9 @@ Copy files to `/etc/systemd/system/`:
 ```
 su -
 cd /etc/systemd/system/
-wget -O gitlab-sidekiq.service https://raw.github.com/gitlabhq/gitlab-recipes/master/init/systemd/gitlab-sidekiq.service
-wget -O gitlab-unicorn.service https://raw.github.com/gitlabhq/gitlab-recipes/master/init/systemd/gitlab-unicorn.service
-wget -O gitlab.target https://raw.github.com/gitlabhq/gitlab-recipes/master/init/systemd/gitlab.target
+wget -O gitlab-sidekiq.service https://gitlab.com/gitlab-org/gitlab-recipes/raw/master/init/systemd/gitlab-sidekiq.service
+wget -O gitlab-unicorn.service https://gitlab.com/gitlab-org/gitlab-recipes/raw/master/init/systemd/gitlab-unicorn.service
+wget -O gitlab.target https://gitlab.com/gitlab-org/gitlab-recipes/raw/master/init/systemd/gitlab.target
 ```
 
 Reload systemd:
