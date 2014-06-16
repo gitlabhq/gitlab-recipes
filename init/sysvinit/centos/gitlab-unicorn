@@ -2,7 +2,7 @@
 #
 # GitLab
 # Contributors  : @elvanja, @troyanov, @eiyaya, @foyo23, @nielsbasjes, @relip, @JasonMing, @andronat, @axilleas, @mdirkse
-# App Version   : 6.x
+# App Version   : 6.x - 7.x
 
 # chkconfig: 2345 82 55
 # processname: unicorn
@@ -40,14 +40,14 @@ start() {
 
   # Start unicorn
   echo -n $"Starting unicorn: "
-  daemon --pidfile=$UPID --user=$USER "$PATH_PATCH RAILS_ENV=$RAILS_ENV script/web start"
+  daemon --pidfile=$UPID --user=$USER "$PATH_PATCH RAILS_ENV=$RAILS_ENV bin/web start"
   unicorn=$?
   [ $unicorn -eq 0 ] && touch $ULOCK
   echo
 
   # Start sidekiq
   echo -n $"Starting sidekiq: "
-  daemon --pidfile=$SPID --user=$USER "$PATH_PATCH RAILS_ENV=$RAILS_ENV script/background_jobs start"
+  daemon --pidfile=$SPID --user=$USER "$PATH_PATCH RAILS_ENV=$RAILS_ENV bin/background_jobs start"
   sidekiq=$?
   [ $sidekiq -eq 0 ] && touch $SLOCK
   echo
