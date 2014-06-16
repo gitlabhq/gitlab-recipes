@@ -104,6 +104,21 @@ Once a certificate authority is self managed simply add the CA certificate to al
 
 In Ubuntu httpd is called Apache2 and apache logs are located under `/var/log/apache2`.  Log path names in the [gitlab-ssl.conf](gitlab-ssl.conf) configuration should reflect this.  Ubuntu runs [AppArmor][apparmor] instead of SELinux and by default doesn't affect GitLab operation.
 
+# General notes
+
+## mod_pagespeed
+
+There have been [reports][] regarding `mod_pagespeed`  on Apache.
+If you ever encounter such an issue, try disabling it. In `/etc/apache2/mods-available/pagespeed.conf`
+place the following:
+
+```bash
+ModPagespeed off
+```
+
+If you don't want to disable it completely, read [this article][digiocean]
+to better understand it.
+
 [startcom_ssl]: http://cert.startcom.org/
 [xca]: http://sourceforge.net/projects/xca/
 [ovpn_scripts]: http://openvpn.net/index.php/open-source/documentation/howto.html#pki
@@ -116,4 +131,5 @@ In Ubuntu httpd is called Apache2 and apache logs are located under `/var/log/ap
 [serversignature]: http://httpd.apache.org/docs/2.2/mod/core.html#serversignature
 [apparmor]: https://wiki.ubuntu.com/AppArmor
 [sock]: http://httpd.apache.org/docs/2.2/mod/mod_proxy.html
-
+[reports]: https://github.com/gitlabhq/gitlabhq/issues/5139
+[digiocean]: https://www.digitalocean.com/community/tutorials/how-to-get-started-with-mod_pagespeed-with-apache-on-an-ubuntu-and-debian-cloud-server
