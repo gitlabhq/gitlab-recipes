@@ -3,7 +3,7 @@ Make sure you have the `puma` gem installed and `puma.rb` in `/home/git/gitlab/c
 
 Get `gitlab-puma` in your `/etc/init.d/` directory:
 
-    wget -O /etc/init.d/gitlab https://raw.github.com/gitlabhq/gitlab-recipes/master/init/sysvinit/debian/gitlab-puma
+    wget -O /etc/init.d/gitlab https://gitlab.com/gitlab-org/gitlab-recipes/raw/master/init/sysvinit/debian/gitlab-puma
 
 Then start the service with:
 
