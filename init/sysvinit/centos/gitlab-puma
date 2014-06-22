@@ -2,7 +2,7 @@
 #
 # GitLab
 # Contributors  : @elvanja, @troyanov, @eiyaya, @foyo23, @nielsbasjes, @relip, @JasonMing, @andronat
-# App Version   : 6.x
+# App Version   : 6.x -7.x
 
 # chkconfig: 2345 82 55
 # processname: puma
@@ -24,6 +24,9 @@ ORIGINAL_PATH=$PATH
 # Restore original $PATH
 PATH=$ORIGINAL_PATH
 
+### Environment variables
+RAILS_ENV="production"
+
 # The name of the service
 NAME=git
 
@@ -32,8 +35,8 @@ USER=git
 APP_PATH=/home/$USER/gitlab
 
 # The PID and LOCK files used by puma and sidekiq
-UPID=$APP_PATH/tmp/pids/puma.pid
-ULOCK=/var/lock/subsys/puma
+PPID=$APP_PATH/tmp/pids/puma.pid
+PLOCK=/var/lock/subsys/puma
 SPID=$APP_PATH/tmp/pids/sidekiq.pid
 SLOCK=/var/lock/subsys/sidekiq
 
@@ -51,12 +54,12 @@ start() {
   echo -n $"Starting puma: "
   daemon --pidfile=$UPID --user=$USER "$RUBY_PATH_PATCH bundle exec puma $OPTS"
   puma=$?
-  [ $puma -eq 0 ] && touch $ULOCK
+  [ $puma -eq 0 ] && touch $PLOCK
   echo
 
   # Start sidekiq
   echo -n $"Starting sidekiq: "
-  daemon --pidfile=$SPID --user=$USER "$RUBY_PATH_PATCH RAILS_ENV=production bundle exec rake sidekiq:start"
+  daemon --pidfile=$SPID --user=$USER "$RUBY_PATH_PATCH RAILS_ENV=$RAILS_ENV bin/background_jobs start"
   sidekiq=$?
   [ $sidekiq -eq 0 ] && touch $SLOCK
   echo
@@ -72,7 +75,7 @@ stop() {
   echo -n $"Stopping puma: "
   killproc -p $UPID
   puma=$?
-  [ $puma -eq 0 ] && rm -f $ULOCK
+  [ $puma -eq 0 ] && rm -f $PLOCK
   echo
 
   # Stop sidekiq
@@ -92,7 +95,7 @@ restart() {
 }
 
 get_status() {
-  status -p $UPID puma
+  status -p $PPID puma
   status -p $SPID sidekiq
 }
 

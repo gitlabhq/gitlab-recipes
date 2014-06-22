@@ -2,7 +2,7 @@
 #
 # GitLab
 # Contributors  : @elvanja, @troyanov, @eiyaya, @foyo23, @nielsbasjes, @relip, @JasonMing, @andronat, @axilleas
-# App Version   : 6.x
+# App Version   : 6.x - 7.x
 
 # chkconfig: 2345 82 55
 # processname: sidekiq
@@ -37,7 +37,7 @@ start() {
 
   # Start sidekiq
   echo -n $"Starting sidekiq: "
-  daemon --pidfile=$SPID --user=$USER "$PATH_PATCH RAILS_ENV=$RAILS_ENV script/background_jobs start"
+  daemon --pidfile=$SPID --user=$USER "$PATH_PATCH RAILS_ENV=$RAILS_ENV bin/background_jobs start"
   sidekiq=$?
   [ $sidekiq -eq 0 ] && touch $SLOCK
   echo
