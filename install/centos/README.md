@@ -1,6 +1,6 @@
 ```
 Distribution      : CentOS 6.5 Minimal
-GitLab version    : 6.0 - 6.9
+GitLab version    : 6.0 - 7.0
 Web Server        : Apache, Nginx
 Init system       : sysvinit
 Database          : MySQL, PostgreSQL
@@ -248,7 +248,7 @@ installed with:
     which ruby
     # /usr/local/bin/ruby
     ruby -v
-    # ruby 2.0.0p451 (2014-02-24 revision 45167) [x86_64-linux]
+    # ruby 2.0.0p481 (2014-02-24 revision 45167) [x86_64-linux]
 
 ----------
 
@@ -411,9 +411,9 @@ authentication methods.
 ### Clone the Source
 
     # Clone GitLab repository
-    sudo -u git -H git clone https://gitlab.com/gitlab-org/gitlab-ce.git -b 6-9-stable gitlab
+    sudo -u git -H git clone https://gitlab.com/gitlab-org/gitlab-ce.git -b 7-0-stable gitlab
 
-**Note:** You can change `6-9-stable` to `master` if you want the *bleeding edge* version, but do so with caution!
+**Note:** You can change `7-0-stable` to `master` if you want the *bleeding edge* version, but do so with caution!
 
 ### Configure it
 
@@ -424,6 +424,8 @@ authentication methods.
 
     # Make sure to change "localhost" to the fully-qualified domain name of your
     # host serving GitLab where necessary
+    #
+    # If you want to use https make sure that you set `https` to `true`. See #using-https for all necessary details.
     #
     # If you installed Git from source, change the git bin_path to /usr/local/bin/git
     sudo -u git -H editor config/gitlab.yml
@@ -508,9 +510,17 @@ GitLab Shell is an ssh access and repository management software developed speci
 cd /home/git/gitlab
 
 # Run the installation task for gitlab-shell (replace `REDIS_URL` if needed):
-sudo -u git -H bundle exec rake gitlab:shell:install[v1.9.4] REDIS_URL=redis://localhost:6379 RAILS_ENV=production
+sudo -u git -H bundle exec rake gitlab:shell:install[v1.9.6] REDIS_URL=redis://localhost:6379 RAILS_ENV=production
 
-# By default, the gitlab-shell config is generated from your main gitlab config. You can review (and modify) it as follows:
+# By default, the gitlab-shell config is generated from your main gitlab config.
+#
+# Note: When using GitLab with HTTPS please change the following:
+# - Provide paths to the certificates under `ca_file` and `ca_path options.
+# - The `gitlab_url` option must point to the https endpoint of GitLab.
+# - In case you are using self signed certificate set `self_signed_cert` to `true`.
+# See #using-https for all necessary details.
+#
+# You can review (and modify) it as follows:
 sudo -u git -H editor /home/git/gitlab-shell/config.yml
 
 # Ensure the correct SELinux contexts are set
@@ -547,13 +557,13 @@ Check if GitLab and its environment are configured correctly:
 
     sudo -u git -H bundle exec rake gitlab:env:info RAILS_ENV=production
 
-### Start your GitLab instance
-
-    service gitlab start
-
 ### Compile assets
 
     sudo -u git -H bundle exec rake assets:precompile RAILS_ENV=production
+
+### Start your GitLab instance
+
+    service gitlab start
 
 ## 6. Configure the web server
 
@@ -647,7 +657,6 @@ Now, the output will complain that your init script is not up-to-date as follows
 Do not mind about that error if you are sure that you have downloaded the up-to-date file from https://gitlab.com/gitlab-org/gitlab-recipes/raw/master/init/sysvinit/centos/gitlab-unicorn and saved it to `/etc/init.d/gitlab`.
 
 If all other items are green, then congratulations on successfully installing GitLab!
-However there are still a few steps left.
 
 ## Initial Login
 
