@@ -10,5 +10,5 @@ guides, how-tos and some useful links that will help you install GitLab on Archl
 
 
 [GitLab Wiki]: https://wiki.archlinux.org/index.php/Gitlab
-[GitLab PKGBUILD]: https://github.com/mtorromeo/archlinux-packages/tree/master/gitlab
-[gitlab-shell PKGBUILD]: https://github.com/mtorromeo/archlinux-packages/tree/master/gitlab-shell
+[GitLab PKGBUILD]: https://aur.archlinux.org/packages/gitlab
+[gitlab-shell PKGBUILD]: https://aur.archlinux.org/packages/gitlab-shell
