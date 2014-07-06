@@ -52,7 +52,7 @@ mysqldump --compatible=postgresql --default-character-set=utf8 -r /tmp/gitlabhq_
 
 ```bash
 wget https://raw.github.com/lanyrd/mysql-postgresql-converter/master/db_converter.py -O /tmp/db_converter.py
-python /tmp/db_converter.py /tmp/gitlab_production.mysql /tmp/gitlab_production.psql
+python /tmp/db_converter.py /tmp/gitlabhq_production.mysql /tmp/gitlabhq_production.psql
 ```
 
 ***Note:*** This was tested using debian 7, with python 2.7.3
@@ -60,7 +60,7 @@ python /tmp/db_converter.py /tmp/gitlab_production.mysql /tmp/gitlab_production.
 # Import the database
 
 ```bash
-sudo -u git -H psql -d gitlabhq_production -f /tmp/gitlab_production.psql
+sudo -u git -H psql -d gitlabhq_production -f /tmp/gitlabhq_production.psql
 ```
 
 # Update database config
