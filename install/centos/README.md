@@ -1,6 +1,6 @@
 ```
 Distribution      : CentOS 6.5 Minimal
-GitLab version    : 6.0 - 7.0
+GitLab version    : 6.0 - 7.1
 Web Server        : Apache, Nginx
 Init system       : sysvinit
 Database          : MySQL, PostgreSQL
@@ -190,7 +190,7 @@ Make sure Git is version 1.7.10 or higher, for example 1.7.12 or 1.8.4
 
     git --version
 
-If not install it from source. Remove the system Git:
+If not, install it from source. First remove the system Git:
 
     yum -y remove git
 
@@ -201,8 +201,8 @@ Install the pre-requisite files for Git compilation:
 Download and extract it:
 
     mkdir /tmp/git && cd /tmp/git
-    curl --progress https://git-core.googlecode.com/files/git-1.9.0.tar.gz | tar xz
-    cd git-1.9.0/
+    curl --progress https://www.kernel.org/pub/software/scm/git/git-2.0.0.tar.gz | tar xz
+    cd git-2.0.0/
     ./configure
     make
     make prefix=/usr/local install
@@ -232,8 +232,8 @@ Remove any other Ruby build if it is still present:
 Download Ruby and compile it:
 
     mkdir /tmp/ruby && cd /tmp/ruby
-    curl --progress ftp://ftp.ruby-lang.org/pub/ruby/2.0/ruby-2.0.0-p481.tar.gz | tar xz
-    cd ruby-2.0.0-p481
+    curl --progress ftp://ftp.ruby-lang.org/pub/ruby/2.1/ruby-2.1.2.tar.gz | tar xz
+    cd ruby-2.1.2
     ./configure --disable-install-rdoc
     make
     make prefix=/usr/local install
@@ -277,58 +277,7 @@ Save and exit.
 
 ## 4. Database
 
-### 4.1 MySQL
-
-Install `mysql` and enable the `mysqld` service to start on boot:
-
-    yum install -y mysql-server mysql-devel
-    chkconfig mysqld on
-    service mysqld start
-
-Ensure you have MySQL version 5.5.14 or later:
-
-    mysql --version
-
-Secure your installation:
-
-    mysql_secure_installation
-
-Login to MySQL (type the database root password):
-
-    mysql -u root -p
-
-
-Create a user for GitLab (change $password in the command below to a real password you pick):
-
-    CREATE USER 'git'@'localhost' IDENTIFIED BY '$password';
-
-Ensure you can use the InnoDB engine which is necessary to support long indexes.
-If this fails, check your MySQL config files (e.g. `/etc/mysql/*.cnf`, `/etc/mysql/conf.d/*`) for the setting "innodb = off".
-
-    SET storage_engine=INNODB;
-
-Create the GitLab production database:
-
-    CREATE DATABASE IF NOT EXISTS `gitlabhq_production` DEFAULT CHARACTER SET `utf8` COLLATE `utf8_unicode_ci`;
-
-Grant the GitLab user necessary permissions on the table:
-
-    GRANT SELECT, LOCK TABLES, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER ON `gitlabhq_production`.* TO 'git'@'localhost';
-
-Quit the database session:
-
-    \q
-
-Try connecting to the new database with the new user:
-
-    sudo -u git -H mysql -u git -p -D gitlabhq_production
-
-Type the password you replaced $password with earlier.
-Quit the database session:
-
-    \q
-
-### 4.2 PostgreSQL
+### 4.1 PostgreSQL (recommended)
 
 NOTE: because we need to make use of extensions we need at least pgsql 9.1 and the default 8.x on centos will not work.  We need to get the PGDG repositories enabled
 
@@ -402,6 +351,57 @@ to not get ident issues (you can use trust over ident):
 Check the official [documentation][psql-doc-auth] for more information on
 authentication methods.
 
+### 4.2 MySQL
+
+Install `mysql` and enable the `mysqld` service to start on boot:
+
+    yum install -y mysql-server mysql-devel
+    chkconfig mysqld on
+    service mysqld start
+
+Ensure you have MySQL version 5.5.14 or later:
+
+    mysql --version
+
+Secure your installation:
+
+    mysql_secure_installation
+
+Login to MySQL (type the database root password):
+
+    mysql -u root -p
+
+
+Create a user for GitLab (change $password in the command below to a real password you pick):
+
+    CREATE USER 'git'@'localhost' IDENTIFIED BY '$password';
+
+Ensure you can use the InnoDB engine which is necessary to support long indexes.
+If this fails, check your MySQL config files (e.g. `/etc/mysql/*.cnf`, `/etc/mysql/conf.d/*`) for the setting "innodb = off".
+
+    SET storage_engine=INNODB;
+
+Create the GitLab production database:
+
+    CREATE DATABASE IF NOT EXISTS `gitlabhq_production` DEFAULT CHARACTER SET `utf8` COLLATE `utf8_unicode_ci`;
+
+Grant the GitLab user necessary permissions on the table:
+
+    GRANT SELECT, LOCK TABLES, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER ON `gitlabhq_production`.* TO 'git'@'localhost';
+
+Quit the database session:
+
+    \q
+
+Try connecting to the new database with the new user:
+
+    sudo -u git -H mysql -u git -p -D gitlabhq_production
+
+Type the password you replaced $password with earlier.
+Quit the database session:
+
+    \q
+
 ----------
 ## 5. GitLab
 
@@ -411,9 +411,9 @@ authentication methods.
 ### Clone the Source
 
     # Clone GitLab repository
-    sudo -u git -H git clone https://gitlab.com/gitlab-org/gitlab-ce.git -b 7-0-stable gitlab
+    sudo -u git -H git clone https://gitlab.com/gitlab-org/gitlab-ce.git -b 7-1-stable gitlab
 
-**Note:** You can change `7-0-stable` to `master` if you want the *bleeding edge* version, but do so with caution!
+**Note:** You can change `7-1-stable` to `master` if you want the *bleeding edge* version, but do so with caution!
 
 ### Configure it
 
@@ -658,12 +658,14 @@ Do not mind about that error if you are sure that you have downloaded the up-to-
 
 If all other items are green, then congratulations on successfully installing GitLab!
 
+**NOTE:** Supply `SANITIZE=true` environment variable to `gitlab:check` to omit project names from the output of the check command.
+
 ## Initial Login
 
 Visit YOUR_SERVER in your web browser for your first GitLab login.
 The setup has created an admin account for you. You can use it to log in:
 
-    admin@local.host
+    root
     5iveL!fe
 
 **Important Note:**
