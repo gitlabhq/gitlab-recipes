@@ -79,7 +79,7 @@ nano /home/git/gitlab/config/gitlab.yml
   gitlab:
     ## Web server settings
     host: source.jcid.nl
-    port: 80
+    port: 443
     https: true
 ```
 
