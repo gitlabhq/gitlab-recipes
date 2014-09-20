@@ -17,8 +17,9 @@ Environment=RAILS_ENV=production
 SyslogIdentifier=gitlab-sidekiq
 PIDFile=/home/git/gitlab/tmp/pids/sidekiq.pid
 
-ExecStart=/usr/bin/bundle exec "sidekiq -q post_receive,mailer,system_hook,project_web_hook,gitlab_shell,common,default -e production -P tmp/pids/sidekiq.pid -d -L log/sidekiq.log >> log/sidekiq.log 2>&1"
-ExecStop=/usr/bin/bundle exec "sidekiqctl stop /home/git/gitlab/tmp/pids/sidekiq.pid >> /home/git/gitlab/log/sidekiq.log 2>&1"
+ExecStart=/home/git/gitlab/bin/background_jobs start
+ExecStop=/home/git/gitlab/bin/background_jobs stop
+ExecReload=/home/git/gitlab/bin/background_jobs restart
 
 [Install]
 WantedBy=gitlab.target
