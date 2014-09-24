@@ -242,7 +242,7 @@ installed with:
     which ruby
     # /usr/local/bin/ruby
     ruby -v
-    # ruby 2.0.0p481 (2014-02-24 revision 45167) [x86_64-linux]
+    # ruby 2.1.2p95 (2014-05-08 revision 45877) [x86_64-linux]
 
 ----------
 
