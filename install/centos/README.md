@@ -405,19 +405,19 @@ Make sure redis is started on boot:
 
 Configure redis to use sockets:
 
-    cp /etc/redis/redis.conf /etc/redis/redis.conf.orig
+    cp /etc/redis.conf /etc/redis.conf.orig
 
 Disable Redis listening on TCP by setting 'port' to 0:
 
-    sed 's/^port .*/port 0/' /etc/redis/redis.conf.orig | sudo tee /etc/redis/redis.conf
+    sed 's/^port .*/port 0/' /etc/redis.conf.orig | sudo tee /etc/redis.conf
 
 Enable Redis socket for default CentOS path:
 
-    echo 'unixsocket /var/run/redis/redis.sock' | sudo tee -a /etc/redis/redis.conf
+    echo 'unixsocket /var/run/redis/redis.sock' | sudo tee -a /etc/redis.conf
 
 Activate the changes to redis.conf:
 
-    service redis start
+    service redis restart
 
 Add git to the redis group:
 
