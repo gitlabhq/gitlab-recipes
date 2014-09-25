@@ -488,7 +488,7 @@ Add git to the redis group:
     # Configure Redis connection settings
     sudo -u git -H cp config/resque.yml.example config/resque.yml
 
-    # Change the Redis socket path if you are not using the default Debian / Ubuntu configuration
+    # Change the Redis socket path if you are not using the default CentOS configuration
     sudo -u git -H editor config/resque.yml
 
 **Important Note:** Make sure to edit both `gitlab.yml` and `unicorn.rb` to match your setup.
