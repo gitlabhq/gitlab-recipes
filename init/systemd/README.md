@@ -13,31 +13,26 @@ GitLab requires a couple of services:
 Copy files to `/etc/systemd/system/`:
 
 ```
-su -
+sudo su
 cd /etc/systemd/system/
 wget -O gitlab-sidekiq.service https://gitlab.com/gitlab-org/gitlab-recipes/raw/master/init/systemd/gitlab-sidekiq.service
 wget -O gitlab-unicorn.service https://gitlab.com/gitlab-org/gitlab-recipes/raw/master/init/systemd/gitlab-unicorn.service
-wget -O gitlab.target https://gitlab.com/gitlab-org/gitlab-recipes/raw/master/init/systemd/gitlab.target
 ```
 
 Reload systemd:
 
-    sudo systemctl --system daemon-reload
+    sudo systemctl daemon-reload
 
 Start the services:
 
-    sudo systemctl start gitlab-sidekiq gitlab-unicorn
+    sudo systemctl start gitlab-sidekiq.service gitlab-unicorn.service
 
 Enable them to start at boot:
 
-    sudo systemctl enable gitlab.target gitlab-sidekiq gitlab-unicorn
+    sudo systemctl enable gitlab-sidekiq.service gitlab-unicorn.service
 
 ## Notes
 
 * If you installed GitLab in other path than `/home/git/gitlab` change the service files accordingly.
 
-* `/etc/systemd/system/` have a higher precedence over  `/lib/systemd/system`.
-
-* For older systemd versions you need to append `service` after the service name. For example:
-
-        sudo systemctl start gitlab-sidekiq.service
+* `/etc/systemd/system/` have a higher precedence over  `/usr/lib/systemd/system`.
