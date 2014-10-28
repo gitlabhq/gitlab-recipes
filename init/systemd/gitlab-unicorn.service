@@ -1,13 +1,16 @@
 #####################################################
 #
-# GitLab version    : 5.x - 6.x
-# Contributors      : davispuh, mtorromeo, axilleas, boeserwolf91
+# GitLab version    : 5.x - 7.x
+# Contributors      : davispuh, mtorromeo, axilleas, boeserwolf91, Stefan Tatschner (rumpelsepp)
 # Downloaded from   : https://gitlab.com/gitlab-org/gitlab-recipes/tree/master/init/systemd
 #
 ####################################################
 
 [Unit]
 Description=GitLab Unicorn Server
+Requires=redis.service
+Wants=mysqld.service postgresql.service
+After=redis.service mysqld.service postgresql.service
 
 [Service]
 User=git
@@ -16,9 +19,7 @@ Environment=RAILS_ENV=production
 SyslogIdentifier=gitlab-unicorn
 PIDFile=/home/git/gitlab/tmp/pids/unicorn.pid
 
-ExecStart=/usr/bin/bundle exec "unicorn_rails -c /home/git/gitlab/config/unicorn.rb -E production"
-ExecStop=/usr/bin/kill -QUIT $MAINPID
-ExecReload=/usr/bin/kill -USR2 $MAINPID
+ExecStart=/usr/bin/bundle exec "unicorn_rails -D -c /home/git/gitlab/config/unicorn.rb -E production"
 
 [Install]
-WantedBy=gitlab.target
+WantedBy=multi-user.target
