@@ -1,10 +1,10 @@
 ```
 Distribution      : CentOS 6.5 Minimal
-GitLab version    : 7.0 - 7.3
+GitLab version    : 7.0 - 7.4
 Web Server        : Apache, Nginx
 Init system       : sysvinit
 Database          : MySQL, PostgreSQL
-Contributors      : @nielsbasjes, @axilleas, @mairin, @ponsjuh, @yorn, @psftw, @etcet, @mdirkse, @nszceta
+Contributors      : @nielsbasjes, @axilleas, @mairin, @ponsjuh, @yorn, @psftw, @etcet, @mdirkse, @nszceta, @herkalurk
 Additional Notes  : In order to get a proper Ruby setup we build it from source
 ```
 
