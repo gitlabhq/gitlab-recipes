@@ -35,7 +35,7 @@ USER=git
 APP_PATH=/home/$USER/gitlab
 
 # The PID and LOCK files used by puma and sidekiq
-PPID=$APP_PATH/tmp/pids/puma.pid
+UPID=$APP_PATH/tmp/pids/puma.pid
 PLOCK=/var/lock/subsys/puma
 SPID=$APP_PATH/tmp/pids/sidekiq.pid
 SLOCK=/var/lock/subsys/sidekiq
