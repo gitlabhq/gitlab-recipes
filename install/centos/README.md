@@ -1,10 +1,10 @@
 ```
 Distribution      : CentOS 6.5 Minimal
-GitLab version    : 7.0 - 7.3
+GitLab version    : 7.0 - 7.4
 Web Server        : Apache, Nginx
 Init system       : sysvinit
 Database          : MySQL, PostgreSQL
-Contributors      : @nielsbasjes, @axilleas, @mairin, @ponsjuh, @yorn, @psftw, @etcet, @mdirkse, @nszceta
+Contributors      : @nielsbasjes, @axilleas, @mairin, @ponsjuh, @yorn, @psftw, @etcet, @mdirkse, @nszceta, @herkalurk
 Additional Notes  : In order to get a proper Ruby setup we build it from source
 ```
 
@@ -134,7 +134,7 @@ If you can't see them listed, use the folowing command (from `yum-utils` package
 
     yum -y update
     yum -y groupinstall 'Development Tools'
-    yum -y install readline readline-devel ncurses-devel gdbm-devel glibc-devel tcl-devel openssl-devel curl-devel expat-devel db4-devel byacc sqlite-devel libyaml libyaml-devel libffi libffi-devel libxml2 libxml2-devel libxslt libxslt-devel libicu libicu-devel system-config-firewall-tui redis sudo wget crontabs logwatch logrotate perl-Time-HiRes git cmake
+    yum -y install readline readline-devel ncurses-devel gdbm-devel glibc-devel tcl-devel openssl-devel curl-devel expat-devel db4-devel byacc sqlite-devel libyaml libyaml-devel libffi libffi-devel libxml2 libxml2-devel libxslt libxslt-devel libicu libicu-devel system-config-firewall-tui redis sudo wget crontabs logwatch logrotate perl-Time-HiRes git cmake libcom_err-devel.i686 libcom_err-devel.x86_64
 
 **RHEL Notes**
 
@@ -195,8 +195,8 @@ Install the pre-requisite files for Git compilation:
 Download and extract it:
 
     mkdir /tmp/git && cd /tmp/git
-    curl --progress https://www.kernel.org/pub/software/scm/git/git-2.0.0.tar.gz | tar xz
-    cd git-2.0.0/
+    curl --progress https://www.kernel.org/pub/software/scm/git/git-2.1.3.tar.gz | tar xz
+    cd git-2.1.3/
     ./configure
     make
     make prefix=/usr/local install
@@ -433,9 +433,9 @@ Add git to the redis group:
 ### Clone the Source
 
     # Clone GitLab repository
-    sudo -u git -H git clone https://gitlab.com/gitlab-org/gitlab-ce.git -b 7-3-stable gitlab
+    sudo -u git -H git clone https://gitlab.com/gitlab-org/gitlab-ce.git -b 7-4-stable gitlab
 
-**Note:** You can change `7-3-stable` to `master` if you want the *bleeding edge* version, but do so with caution!
+**Note:** You can change `7-4-stable` to `master` if you want the *bleeding edge* version, but do so with caution!
 
 ### Configure it
 
@@ -538,7 +538,7 @@ that were [fixed](https://github.com/bundler/bundler/pull/2817) in 1.5.2.
 GitLab Shell is an SSH access and repository management software developed specially for GitLab.
 
     # Run the installation task for gitlab-shell (replace `REDIS_URL` if needed):
-    sudo -u git -H bundle exec rake gitlab:shell:install[v2.0.0] REDIS_URL=unix:/var/run/redis/redis.sock RAILS_ENV=production
+    sudo -u git -H bundle exec rake gitlab:shell:install[v2.1.0] REDIS_URL=unix:/var/run/redis/redis.sock RAILS_ENV=production
 
     # By default, the gitlab-shell config is generated from your main GitLab config.
     # You can review (and modify) the gitlab-shell config as follows:
@@ -626,6 +626,10 @@ You should receive `syntax is okay` and `test is successful` messages. If you re
 
 ### Apache
 
+Httpd can be configured with or without SSL support.  Please choose appropriate commands in next steps.
+
+#### HTTPS
+
 We will configure apache with module `mod_proxy` which is loaded by default when
 installing apache and `mod_ssl` which will provide ssl support:
 
@@ -633,11 +637,23 @@ installing apache and `mod_ssl` which will provide ssl support:
     chkconfig httpd on
     wget -O /etc/httpd/conf.d/gitlab.conf https://gitlab.com/gitlab-org/gitlab-recipes/raw/master/web-server/apache/gitlab-ssl.conf
     mv /etc/httpd/conf.d/ssl.conf{,.bak}
-    mkdir /var/log/httpd/logs/
+    sed -i 's/logs\///g' /etc/httpd/conf.d/gitlab.conf
 
 Open `/etc/httpd/conf.d/gitlab.conf` with your editor and replace `git.example.org` with your FQDN. Also make sure the path to your certificates is valid.
 
 Add `LoadModule ssl_module /etc/httpd/modules/mod_ssl.so` in `/etc/httpd/conf/httpd.conf`.
+
+#### HTTP
+
+We will configure apache with module `mod_proxy` which is loaded by default when
+installing apache:
+
+    yum -y install httpd
+    chkconfig httpd on
+    wget -O /etc/httpd/conf.d/gitlab.conf https://gitlab.com/gitlab-org/gitlab-recipes/raw/master/web-server/apache/gitlab.conf
+    sed -i 's/logs\///g' /etc/httpd/conf.d/gitlab.conf
+
+Open `/etc/httpd/conf.d/gitlab.conf` with your editor and replace `git.example.org` with your FQDN.
 
 #### SELinux
 
