@@ -414,6 +414,7 @@ Disable Redis listening on TCP by setting 'port' to 0:
 Enable Redis socket for default CentOS path:
 
     echo 'unixsocket /var/run/redis/redis.sock' | sudo tee -a /etc/redis.conf
+    echo -e 'unixsocketperm 0775' | sudo tee -a /etc/redis.conf
 
 Activate the changes to redis.conf:
 
