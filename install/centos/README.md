@@ -164,7 +164,7 @@ mail server. The recommended one is postfix and you can install it with:
 
     yum -y install postfix
 
-To use and configure sendmail instead of postfix see [Advanced Email Configurations](e-mail/configure_email.md).
+To use and configure sendmail instead of postfix see [Advanced Email Configurations](../../e-mail/configure_email.md).
 
 ### Configure the default editor
 
