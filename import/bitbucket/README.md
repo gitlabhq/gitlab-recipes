@@ -22,4 +22,7 @@ Port your issues over from bitbucket.
 
 - It gets you the raw content (comments and issues) but things like milestones,
   assignments, create timestamps, etc. are lost.
-- Comments are in the order they are listed in the dump.
+- The order of the imported comments is probably wrong (should be sorted by timestamp).
+- There is no duplication check, which is annoying if the script breaks mid import
+  for whatever reason and you need to run it again.
+- Attachments are not supported currently.
