@@ -17,6 +17,9 @@ options = {:usr => nil,
            :web => 'https://github.com/',
            :enterprise => true,
            :space => nil,
+           :group => nil,
+           :ssh => false,
+           :private => false,
            :gitlab_api => 'http://gitlab.example.com/api/v3',
            :gitlab_token => 'secret'
            }
@@ -39,8 +42,18 @@ optparse = OptionParser.new do |opts|
   opts.on('--web', 'Web endpoint for GitHub') do |w|
     options[:web] = w
   end
+  opts.on('--ssh', 'Use ssh for GitHub') do |s|
+    options[:ssh] = s
+  end
+  opts.on('--private', 'Import only private GitHub repositories (enables ssh)') do |p|
+    options[:private] = p
+    options[:ssh] = true
+  end
   opts.on('-s', '--space SPACE', 'The space to import repositories from (User or Organization)') do |s|
     options[:space] = s
+  end
+  opts.on('-g', '--group GROUP', 'The GitLab group to import projects to') do |g|
+    options[:group] = g
   end
   opts.on('-h', '--help', 'Display this screen') do
     puts opts
@@ -53,6 +66,14 @@ if options[:usr].nil? or options[:pw].nil?
   puts "Missing parameter ..."
   puts options
   exit
+end
+
+if options[:group].nil?
+  if options[:space].nil?
+    raise 'Both group and space can\'t be empty!'
+  end
+  
+  options[:group] = options[:space]
 end
 
 #setup octokit to deal with github enterprise
@@ -73,7 +94,7 @@ end
 gh_client = Octokit::Client.new(:login => options[:usr], :password => options[:pw])
 gl_client = Gitlab.client()
 #get all of the repos that are in the specified space (user or org)
-gh_repos = gh_client.repositories(options[:space])
+gh_repos = gh_client.repositories(options[:space], {:type => options[:private] ? 'private' : 'all'})
 gh_repos.each do |gh_r|
   #
   ## clone the repo from the github server
@@ -83,7 +104,7 @@ gh_repos.each do |gh_r|
     git_repo = Git.open("/tmp/clones/#{gh_r.name}")
     git_repo.pull
   else
-    git_repo = Git.clone(gh_r.git_url, gh_r.name, :path => '/tmp/clones')
+    git_repo = Git.clone(options[:ssh] ? gh_r.ssh_url : gh_r.git_url, gh_r.name, :path => '/tmp/clones')
   end
   
   `for branch in $(git --git-dir /tmp/clones/#{gh_r.name}/.git branch -a | grep remotes | grep -v HEAD | grep -v master); do git --git-dir /tmp/clones/#{gh_r.name}/.git branch --track ${branch##*/} $branch;  done`
@@ -96,14 +117,14 @@ gh_repos.each do |gh_r|
   push_group = nil
   #I should be able to search for a group by name
   gl_client.groups.each do |g|
-    if g.name == options[:space]
+    if g.name == options[:group]
       push_group = g
     end
   end
 
   #if the group wasn't found, create it
   if push_group.nil?
-    push_group = gl_client.create_group(options[:space], options[:space])
+    push_group = gl_client.create_group(options[:group], options[:group])
   end
 
   #edge case, gitlab didn't like names that didn't start with an alpha. Can't remember how I ran into this.
