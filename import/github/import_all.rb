@@ -134,6 +134,12 @@ gh_repos.each do |gh_r|
   new_project = gl_client.create_project(name)
   git_repo.add_remote("gitlab", new_project.ssh_url_to_repo)
   git_repo.push('gitlab', '--all')
+  
+  # Copy labels for this project
+  labels = gh_client.labels(gh_r.full_name)
+  labels.each do |l|
+    gl_client.create_label(new_project.id, l.name, '#'+l.color)
+  end
 
   #
   ## Look for issues in GitHub for this project and push them to GitLab
@@ -150,7 +156,8 @@ gh_repos.each do |gh_r|
           body += "\n\n#{c.body}\nBy #{c.user.login} on #{c.created_at}"
         end
       end
-      gl_issue = gl_client.create_issue(new_project.id, i.title, :description => body)
+      labels = i.labels.map {|l| l.name }.join(sep=',')
+      gl_issue = gl_client.create_issue(new_project.id, i.title, :description => body, :labels => labels)
     end
   end
 
