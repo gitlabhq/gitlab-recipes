@@ -13,9 +13,8 @@ require 'pp'
 #deal with options from cli, like username and pw
 options = {:usr => nil,
            :pw => nil,
-           :api => 'https://github.com/api/v3',
+           :api => 'https://api.github.com',
            :web => 'https://github.com/',
-           :enterprise => true,
            :space => nil,
            :group => nil,
            :ssh => false,
@@ -76,12 +75,9 @@ if options[:group].nil?
   options[:group] = options[:space]
 end
 
-#setup octokit to deal with github enterprise
-if options[:enterprise]
-  Octokit.configure do |c|
-    c.api_endpoint = options[:api]
-    c.web_endpoint = options[:web]
-  end
+Octokit.configure do |c|
+  c.api_endpoint = options[:api]
+  c.web_endpoint = options[:web]
 end
 
 #set the gitlab options
