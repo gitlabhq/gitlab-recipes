@@ -79,6 +79,8 @@ gh_repos.each do |gh_r|
   else
     git_repo = Git.clone(gh_r.git_url, gh_r.name, :path => '/tmp/clones')
   end
+  
+  `for branch in $(git --git-dir /tmp/clones/#{gh_r.name}/.git branch -a | grep remotes | grep -v HEAD | grep -v master); do git --git-dir /tmp/clones/#{gh_r.name}/.git branch --track ${branch##*/} $branch;  done`
 
   #
   ## Push the cloned repo to gitlab
@@ -108,7 +110,7 @@ gh_repos.each do |gh_r|
   #create and push the project to GitLab
   new_project = gl_client.create_project(name)
   git_repo.add_remote("gitlab", new_project.ssh_url_to_repo)
-  git_repo.push('gitlab')
+  git_repo.push('gitlab', '--all')
 
   #
   ## Look for issues in GitHub for this project and push them to GitLab
