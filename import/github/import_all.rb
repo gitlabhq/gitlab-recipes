@@ -146,18 +146,47 @@ gh_repos.each do |gh_r|
   ## I wish the GitLab API let me create comments for issues. Oh well, smashing it all into the body of the issue.
   #
   if gh_r.has_issues
-    issues = gh_client.issues(gh_r.full_name)
+    issues = []
+    
+    # Get opened issues
+    page = 1
+    loop do
+      issues_ = gh_client.list_issues(gh_r.full_name, :page => page)
+      issues.concat(issues_)
+      page = page + 1
+      break if issues_.size() < 30 # Github returns 30 issues per page
+    end
+    
+    # Get closed issues
+    page = 1
+    loop do
+      issues_ = gh_client.list_issues(gh_r.full_name, :page => page, :state => 'closed')
+      issues.concat(issues_)
+      page = page + 1
+      break if issues_.size() < 30
+    end
+    
+    issues.sort_by! { |i| i.number } # Sorting isues by number
+    
     issues.each do |i|
       comments = gh_client.issue_comments(gh_r.full_name, i['number'])
       body = i.body
       if comments.any?
-        body += "\n\n\nComments from GitHub import:\n"
-        comments.each do |c|
-          body += "\n\n#{c.body}\nBy #{c.user.login} on #{c.created_at}"
-        end
+	body += "\n\n\nComments from GitHub import:\n"
+	comments.each do |c|
+	  body += "\n\n#{c.body}\nBy #{c.user.login} on #{c.created_at}"
+	end
       end
+      
       labels = i.labels.map {|l| l.name }.join(sep=',')
+      
       gl_issue = gl_client.create_issue(new_project.id, i.title, :description => body, :labels => labels)
+      
+      if i.state == 'closed'
+	gl_client.close_issue(new_project.id, gl_issue.id)
+      end
+      
+      pp i.number.to_s + ' ' + i.title + ' ' + i.state + ' ' + labels
     end
   end
 
