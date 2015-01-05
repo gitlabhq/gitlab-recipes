@@ -21,14 +21,20 @@ options = {:usr => nil,
            :gitlab_token => 'secret'
            }
 optparse = OptionParser.new do |opts|
-  opts.on('-u', '--user USER', "user to connect to github with") do |u|
+  opts.on('-u', '--user USER', "user to connect to GitHub with") do |u|
     options[:usr] = u
   end
-  opts.on('-p', '--pw PASSWORD', 'password for user to connect to github with') do |p|
+  opts.on('-p', '--pw PASSWORD', 'password for user to connect to GitHub with') do |p|
     options[:pw] = p
   end
-  opts.on('--api', 'API endpoint for github') do |a|
+  opts.on('--api API', String, 'API endpoint for GitHub') do |a|
     options[:api] = a
+  end
+  opts.on('--gitlab-api API', String, 'API endpoint for GitLab') do |a|
+    options[:gitlab_api] = a
+  end
+  opts.on('-t', '--gitlab-token TOKEN', String, 'Private token for GitLab') do |t|
+    options[:gitlab_token] = t
   end
   opts.on('--web', 'Web endpoint for GitHub') do |w|
     options[:web] = w
