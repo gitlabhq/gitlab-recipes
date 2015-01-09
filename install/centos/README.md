@@ -346,15 +346,29 @@ authentication methods.
 
 ### 4.2 MySQL
 
-Install `mysql` and enable the `mysqld` service to start on boot:
-
-    yum install -y mysql-server mysql-devel
-    chkconfig mysqld on
-    service mysqld start
-
-Ensure you have MySQL version 5.5.14 or later:
+If you already have MySQL installed, ensure you have MySQL version 5.5.14 or later:
 
     mysql --version
+    
+If installed version is less than 5.5.14, remove it:
+
+    # Also do remove mysql-libs-5.xxx
+    # We'll not be removing other packages that depend on mysql-lib as we'll be reinstalling a newer version of mysql-lib
+    yum -y remove mysql mysql-server mysql-devel
+    rpm -qa mysql-lib*
+    
+    # Insert package version number at xxx
+    rpm -e --nodeps mysql-libs-5.xxx
+
+Add the Webstatic repo to get MySQL 5.5
+
+    rpm -Uvh https://mirror.webtatic.com/yum/el6/latest.rpm
+
+Install `mysql` and enable the `mysqld` service to start on boot:
+
+    yum install -y mysql55w mysql55w-server mysql55w-devel
+    chkconfig mysqld on
+    service mysqld start
 
 Secure your installation:
 
