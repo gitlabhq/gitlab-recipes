@@ -213,7 +213,7 @@ bundle install --deployment --without development test mysql aws
 
 ```
 # Run the rake task for installing gitlab-shell
-bundle exec rake gitlab:shell:install[v2.4.0] REDIS_URL=unix:/var/run/redis/redis.sock RAILS_ENV=production
+bundle exec rake gitlab:shell:install[v2.4.0] REDIS_URL=unix:/usr/local/var/run/redis/redis.sock RAILS_ENV=production
 
 # Edit the gitlab-shell config
 # Change the 'socket' option to '/usr/local/var/run/redis/redis.sock'
