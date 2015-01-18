@@ -223,7 +223,29 @@ vim /home/git/gitlab-shell/config.yml
 ```
 
 
-8. Init script
+8. Initialise Database
+----------------------
+
+Initialize Database and Activate Advanced Features
+```
+sudo -u git -H bundle exec rake gitlab:setup RAILS_ENV=production
+# Type 'yes' to create the database tables.
+# When done you see 'Administrator account created:'
+```
+
+**Note**: You can set the Administrator/root password by supplying it in the
+environmental variable GITLAB_ROOT_PASSWORD as seen below. If you don't set the
+password (and it is set to the default one) please wait with exposing GitLab to
+the public internet until the installation is done and you've logged into the
+server the first time. During the first login you'll be forced to change the
+default password.
+
+```
+sudo -u git -H bundle exec rake gitlab:setup RAILS_ENV=production GITLAB_ROOT_PASSWORD=yourpassword
+```
+
+
+9. Init script
 --------------
 
 As root:
@@ -232,8 +254,8 @@ cp /home/git/gitlab/lib/support/init.d/gitlab /usr/local/etc/rc.d/gitlab
 ```
 
 
-9. Check Configuration and Compile Assets
------------------------------------------
+10. Check Configuration and Compile Assets
+------------------------------------------
 
 ```
 cd /home/git/gitlab
@@ -249,7 +271,7 @@ bundle exec rake assets:precompile RAILS_ENV=production
 ```
 
 
-10. Start GitLab service
+11. Start GitLab service
 ------------------------
 
 If all of the above steps complete with no errors and everything has gone
@@ -261,7 +283,7 @@ service gitlab start
 ```
 
 
-11. Nginx
+12. Nginx
 ---------
 
 The officially supported web server in GitLab is `nginx` - and GitLab provide
@@ -308,10 +330,10 @@ bundle exec rake gitlab:check RAILS_ENV=production
 ```
 
 
-12. Good to Go
---------------
+Good to Go
+----------
 
-If it's all green, then GitLab should work.
+If everything comes up green, then GitLab should work.
 
 If some things show up as red, blue, pink or any colour that's not green - read any error messages thoroughly before trying any suggested fixes. Google comes in extremely handy when trying to diagnose unhelpful Ruby error messages.
 
