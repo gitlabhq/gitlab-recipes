@@ -110,7 +110,7 @@ If this succeeds, quit the database session by typing `\q` or hitting CTRL-D.
 ---------------------------
 
 Back up the original Redis config file:
-`/usr/local/etc/redis.conf /usr/local/etc/redis.conf.orig`
+`cp /usr/local/etc/redis.conf /usr/local/etc/redis.conf.orig`
 
 Run the following commands to get Redis working:
 ```
