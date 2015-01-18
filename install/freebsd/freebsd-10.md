@@ -2,11 +2,10 @@ Installing GitLab on FreeBSD 10
 ===============================
 
 ##### Preface
-This is essentially a record of how I installed and configured GitLab 7.6 on my FreeBSD server. Your mileage with this guide may vary of course; different configurations of FreeBSD on different hardware and with different packages may introduce other unexpected issues. To make full use of this guide, I suggest reading the [official GitLab installation guide](https://github.com/gitlabhq/gitlabhq/blob/7-6-stable/doc/install/installation.md) fully before attempting anything in here. I also might have missed out some steps or made some typing errors, so this may not be perfect.
+This is essentially a record of how I installed and configured GitLab 7.6 on my FreeBSD server. Mileage with this guide may vary of course; different configurations of FreeBSD on different hardware and with different packages may introduce other unexpected issues. To make full use of this guide, I suggest reading the [official GitLab installation guide](https://github.com/gitlabhq/gitlabhq/blob/7-6-stable/doc/install/installation.md) fully before attempting anything in here.
 
-
-1. Update your system
----------------------
+1. Update system
+----------------
 
 ```
 pkg update
@@ -84,7 +83,7 @@ initdb /usr/local/pgsql/data
 psql -d template1
 ```
 
-When you're logged into the database:
+When logged into the database:
 ```
 # Create a user for GitLab
 # Do not type the 'template1=#', this is part of the prompt
@@ -125,7 +124,7 @@ echo 'unixsocket /usr/local/var/run/redis/redis.sock' | sudo tee -a /usr/local/e
 echo 'unixsocketperm 770' | sudo tee -a /usr/local/etc/redis.conf
 
 # Create the directory which contains the socket
-mkdir /usr/local/var/run/redis
+mkdir -p /usr/local/var/run/redis
 chown redis:redis /usr/local/var/run/redis
 chmod 755 /usr/local/var/run/redis
 
@@ -151,10 +150,10 @@ cd /home/git/gitlab
 sudo -u git -H cp config/gitlab.yml.example config/gitlab.yml
 ```
 
-You are going to need to edit the GitLab configuration file
+Edit the GitLab configuration file
 (`sudo -u git -H vim config/gitlab.yml`)
 * The option `host:` should be set to your domain, e.g. "gitlab.mysite.com".
-* The line `bin_path:` should be set to FreeBSD's `git` location: "/usr/local/bin/git".
+* The line `bin_path:` should be set to FreeBSD's `git` location: `/usr/local/bin/git`.
 
 As root:
 ```
@@ -242,8 +241,8 @@ su - git
 bundle exec rake gitlab:env:info RAILS_ENV=production
 ```
 
-If this all passes (all green and/or no errors are reported), then you can go
-ahead and compile all of the assets for GitLab. This can take ~10-15 minutes on
+If this all passes (all green and/or no errors are reported), then go ahead and
+compile all of the assets for GitLab. This can take ~10-15 minutes on a
 smaller machine, so don't panic if it takes a while!
 ```
 bundle exec rake assets:precompile RAILS_ENV=production
@@ -254,7 +253,7 @@ bundle exec rake assets:precompile RAILS_ENV=production
 ------------------------
 
 If all of the above steps complete with no errors and everything has gone
-smoothly, then you should be good to go.
+smoothly, then start the GitLab service.
 
 As root:
 ```
@@ -265,7 +264,9 @@ service gitlab start
 11. Nginx
 ---------
 
-The officially supported web server in GitLab is `nginx` - and GitLab provide an `nginx` configuration file in `/home/git/gitlab/lib/support/nginx/gitlab`, so you can copy that if you prefer, and modify their template.
+The officially supported web server in GitLab is `nginx` - and GitLab provide
+an `nginx` configuration file in `/home/git/gitlab/lib/support/nginx/gitlab`,
+so you can copy that if you prefer, and modify their template.
 
 I didn't want to do that, so this is the configuration I used:
 ```
@@ -310,7 +311,7 @@ bundle exec rake gitlab:check RAILS_ENV=production
 12. Good to Go
 --------------
 
-If it's all green, then do a little happy dance, because you should have a working GitLab installation!
+If it's all green, then GitLab should work.
 
 If some things show up as red, blue, pink or any colour that's not green - read any error messages thoroughly before trying any suggested fixes. Google comes in extremely handy when trying to diagnose unhelpful Ruby error messages.
 
@@ -321,28 +322,28 @@ Troubleshooting
 `504 - Gateway Timed Out` errors
 --------------------------------
 
-This can be caused by several different things with GitLab. Your best bet is to
+This can be caused by several different things with GitLab. The best bet is to
 go back up through the install guide and check each step has been properly
 executed.
 
-* Check your logs! Look in `/home/git/gitlab/log` for clues.
-* Check what's running! The command `sockstat -4l` usually gives you an idea of
+* Check the logs! Look in `/home/git/gitlab/log` for clues.
+* Check what's running! The command `sockstat -4l` usually gives an idea of
   which services are running on which ports. (Redis uses port `6379`,
   Unicorn uses port `8080`, and Postgres uses port `5432`).
 
 What it usually boils down to:
-    1. You've forgotten to precompile GitLab's assets
+    1. GitLab's assets haven't been precompiled (there is a command above)
     2. Postgres isn't running or the database isn't set up properly
     3. Redis isn't running
-    4. `nginx` isn't set up properly
+    4. Nginx isn't set up properly
 
 
 Gem `timfel-krb5-auth` fails to build
 -------------------------------------
 
 Install the Kerberos package: `pkg install krb5`. As far as I know, there's no
-way to disable the Kerberos authentication in GitLab (even if you don't use it)
-so unfortunately the only solution is to install the missing packages.
+way to disable the Kerberos authentication in GitLab (even if it's unused) so
+unfortunately the only solution is to install the missing packages.
 
 
 Postfix/sendmail: "postdrop: warning: unable to look up public/pickup: No such file or directory"
