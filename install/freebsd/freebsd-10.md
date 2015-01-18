@@ -20,9 +20,6 @@ pkg upgrade
 Install system packages:
 ```
 pkg install sudo git nginx ruby ruby20-gems logrotate redis postgresql94-server postfix krb5
-
-# Initialise Postgres db
-initdb /usr/local/pgsql/data
 ```
 
 Install bundler gem system-wide:
@@ -80,11 +77,14 @@ Set up the database:
 # Log in to Postgres user account
 su - pgsql
 
+# Initialise Postgres db
+initdb /usr/local/pgsql/data
+
 # Connect to Postgres database
 psql -d template1
 ```
 
-When you're logged into the database (`psql -d template1` as user `pgsql`):
+When you're logged into the database:
 ```
 # Create a user for GitLab
 # Do not type the 'template1=#', this is part of the prompt
@@ -97,6 +97,7 @@ template1=# CREATE DATABASE gitlabhq_production OWNER git;
 template1=# \q
 ```
 
+Then type `exit` to drop back to the `root` user.
 Try connecting to the new database with the `git` user:
 ```
 su - git
@@ -207,6 +208,7 @@ cp config/database.yml.postgresql config/database.yml
 bundle install --deployment --without development test mysql aws
 ```
 
+
 7. GitLab Shell
 ---------------
 
@@ -246,6 +248,7 @@ smaller machine, so don't panic if it takes a while!
 ```
 bundle exec rake assets:precompile RAILS_ENV=production
 ```
+
 
 10. Start GitLab service
 ------------------------
@@ -302,6 +305,7 @@ cd /home/git/gitlab
 
 bundle exec rake gitlab:check RAILS_ENV=production
 ```
+
 
 12. Good to Go
 --------------
