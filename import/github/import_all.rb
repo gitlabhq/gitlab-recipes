@@ -148,7 +148,16 @@ gh_repos.each do |gh_r|
   labels.each do |l|
     gl_client.create_label(new_project.id, l.name, '#'+l.color)
   end
-
+  
+  # Copy milestones for this project
+  milestone_hash = {}
+  milestones = gh_client.milestones(gh_r.full_name)
+  milestones.each do |m|
+    gl_milestone = gl_client.create_milestone(new_project.id, m.title, {:description => m.description, :due_date => m.due_on })
+    milestone_hash[gl_milestone.title] = gl_milestone.id
+    puts "Imported milestone #{gl_milestone.title}"
+  end
+  
   #
   ## Look for issues in GitHub for this project and push them to GitLab
   ## I wish the GitLab API let me create comments for issues. Oh well, smashing it all into the body of the issue.
@@ -188,13 +197,17 @@ gh_repos.each do |gh_r|
       
       labels = i.labels.map {|l| l.name }.join(sep=',')
       
-      gl_issue = gl_client.create_issue(new_project.id, i.title, :description => body, :labels => labels)
+      unless i.milestone.nil? or i.milestone.title.nil? or milestone_hash[i.milestone.title].nil?
+	milestone_id = milestone_hash[i.milestone.title]
+      end
+      
+      gl_issue = gl_client.create_issue(new_project.id, i.title, :description => body, :labels => labels, :milestone_id => milestone_id)
       
       if i.state == 'closed'
 	gl_client.close_issue(new_project.id, gl_issue.id)
       end
       
-      puts "Importing issue \##{i.number} '#{i.title}' \{#{i.state}\} [#{labels}]"
+      puts "Imported issue \##{i.number} '#{i.title}' \{#{i.state}\} [#{labels}]"
     end
   end
 
