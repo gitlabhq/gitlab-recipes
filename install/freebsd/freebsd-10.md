@@ -4,9 +4,14 @@ Installing GitLab on FreeBSD 10
 ##### Preface
 This is essentially a record of how I installed and configured GitLab 7.6 on my FreeBSD server. Mileage with this guide may vary of course; different configurations of FreeBSD on different hardware and with different packages may introduce other unexpected issues. To make full use of this guide, I suggest reading the [official GitLab installation guide](https://github.com/gitlabhq/gitlabhq/blob/7-6-stable/doc/install/installation.md) fully before attempting anything in here.
 
-1. Update system
-----------------
+1. Update system and Enable UTF-8
+---------------------------------
 
+Follow [this guide](https://www.b1c1l1.com/blog/2011/05/09/using-utf-8-unicode-on-freebsd/)
+to enable UTF-8 on your system. This will allow you to create the GitLab
+database later on.
+
+Update your system:
 ```
 pkg update
 pkg upgrade
@@ -67,7 +72,7 @@ pw user mod git -G redis
 ---------------------------
 
 As root, make sure that Postgres is running:
-`service postgresql restart`
+`service postgresql start`
 
 Check this with `service postgresql status`
 
@@ -90,7 +95,7 @@ When logged into the database:
 template1=# CREATE USER git CREATEDB;
 
 # Create the GitLab production database & grant all privileges on database
-template1=# CREATE DATABASE gitlabhq_production OWNER git;
+template1=# CREATE DATABASE gitlabhq_production OWNER git encoding='UTF8';
 
 # Quit the database session
 template1=# \q
@@ -250,7 +255,7 @@ sudo -u git -H bundle exec rake gitlab:setup RAILS_ENV=production GITLAB_ROOT_PA
 
 As root:
 ```
-cp /home/git/gitlab/lib/support/init.d/gitlab /usr/local/etc/rc.d/gitlab
+curl -L https://gist.githubusercontent.com/charlienewey/d027d27f8c4e6383475f/raw/701fc2bd76434283f8491b753c444829ca41b030/gitlab -o /usr/local/etc/rc.d/gitlab
 ```
 
 
@@ -290,13 +295,17 @@ The officially supported web server in GitLab is `nginx` - and GitLab provide
 an `nginx` configuration file in `/home/git/gitlab/lib/support/nginx/gitlab`,
 so you can copy that if you prefer, and modify their template.
 
-I didn't want to do that, so this is the configuration I used:
+The default version of `nginx` on FreeBSD is compiled without the `gzip_static`
+module, which means you need to remove the appropriate directives from the
+`nginx` configuration.
+
+This is the configuration I used:
 ```
 server {
     server_name yourserver.yourdomain;
     server_tokens off;
 
-    listen 80 default accept_filter=httpready;
+    listen 80 accept_filter=httpready;
 
     # Uncomment if you want to use SSL
     # listen 443 ssl;
