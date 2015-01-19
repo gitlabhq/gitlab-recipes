@@ -19,6 +19,7 @@ options = {:usr => nil,
            :group => nil,
            :ssh => false,
            :private => false,
+           :repository => nil,
            :gitlab_api => 'http://gitlab.example.com/api/v3',
            :gitlab_token => 'secret'
            }
@@ -53,6 +54,9 @@ optparse = OptionParser.new do |opts|
   end
   opts.on('-g', '--group GROUP', 'The GitLab group to import projects to') do |g|
     options[:group] = g
+  end
+  opts.on('--repository REPOSITORY', String, 'Imoprt only specified repository') do |r|
+    options[:repository] = r
   end
   opts.on('-h', '--help', 'Display this screen') do
     puts opts
@@ -89,8 +93,12 @@ end
 #setup the clients
 gh_client = Octokit::Client.new(:login => options[:usr], :password => options[:pw])
 gl_client = Gitlab.client()
-#get all of the repos that are in the specified space (user or org)
-gh_repos = gh_client.repositories(options[:space], {:type => options[:private] ? 'private' : 'all'})
+if options[:repository].nil?
+  #get all of the repos that are in the specified space (user or org)
+  gh_repos = gh_client.repositories(options[:space], {:type => options[:private] ? 'private' : 'all'})
+else
+  gh_repos = [gh_client.repository(options[:repository])]
+end
 gh_repos.each do |gh_r|
   #
   ## clone the repo from the github server
@@ -129,7 +137,7 @@ gh_repos.each do |gh_r|
     name = "gh-#{gh_r.name}"
   end
 
-  puts gh_r.name
+  puts "Importing repository '#{gh_r.name}'"
   #create and push the project to GitLab
   new_project = gl_client.create_project(name)
   git_repo.add_remote("gitlab", new_project.ssh_url_to_repo)
@@ -186,7 +194,7 @@ gh_repos.each do |gh_r|
 	gl_client.close_issue(new_project.id, gl_issue.id)
       end
       
-      pp i.number.to_s + ' ' + i.title + ' ' + i.state + ' ' + labels
+      puts "Importing issue \##{i.number} '#{i.title}' \{#{i.state}\} [#{labels}]"
     end
   end
 
