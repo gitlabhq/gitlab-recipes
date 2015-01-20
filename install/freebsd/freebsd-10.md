@@ -253,9 +253,10 @@ sudo -u git -H bundle exec rake gitlab:setup RAILS_ENV=production GITLAB_ROOT_PA
 9. Init script
 --------------
 
-As root:
+There is a [FreeBSD init script](../../init/init/gitlab) in this repository,
+under the `init/init` directory.
 ```
-curl -L https://gist.githubusercontent.com/charlienewey/d027d27f8c4e6383475f/raw/701fc2bd76434283f8491b753c444829ca41b030/gitlab -o /usr/local/etc/rc.d/gitlab
+cp /path/to/this/repository/init/init/gitlab /usr/local/etc/rc.d/gitlab
 ```
 
 
