@@ -20,6 +20,8 @@ options = {:usr => nil,
            :ssh => false,
            :private => false,
            :repository => nil,
+           :import_issues => true,
+           :import_milestones => true,
            :gitlab_api => 'http://gitlab.example.com/api/v3',
            :gitlab_token => 'secret'
            }
@@ -49,14 +51,24 @@ optparse = OptionParser.new do |opts|
     options[:private] = p
     options[:ssh] = true
   end
+  opts.on('--all', 'Import all GitHub repositories (enables ssh)') do |a|
+    options[:all] = a
+    options[:ssh] = true
+  end
   opts.on('-s', '--space SPACE', 'The space to import repositories from (User or Organization)') do |s|
     options[:space] = s
   end
   opts.on('-g', '--group GROUP', 'The GitLab group to import projects to') do |g|
     options[:group] = g
   end
-  opts.on('--repository REPOSITORY', String, 'Imoprt only specified repository') do |r|
+  opts.on('--repository REPOSITORY', String, 'Import only specified repository') do |r|
     options[:repository] = r
+  end
+  opts.on('--[no-]issues', '[do not] import issues') do |b|
+    options[:import_issues] = b
+  end
+  opts.on('--[no-]milestones', '[do not] import milestones') do |b|
+    options[:import_milestones] = b
   end
   opts.on('-h', '--help', 'Display this screen') do
     puts opts
@@ -69,6 +81,14 @@ if options[:usr].nil? or options[:pw].nil?
   puts "Missing parameter ..."
   puts options
   exit
+end
+
+if options[:private]
+  options[:space] = nil
+end
+
+if not options[:import_issues]
+  options[:import_milestones] = false
 end
 
 if options[:group].nil?
@@ -95,7 +115,7 @@ gh_client = Octokit::Client.new(:login => options[:usr], :password => options[:p
 gl_client = Gitlab.client()
 if options[:repository].nil?
   #get all of the repos that are in the specified space (user or org)
-  gh_repos = gh_client.repositories(options[:space], {:type => options[:private] ? 'private' : 'all'})
+  gh_repos = gh_client.repositories(options[:space], {:type => options[:private] ? 'private' : (options[:all] ? 'all' : 'public')})
 else
   gh_repos = [gh_client.repository(options[:repository])]
 end
@@ -151,18 +171,20 @@ gh_repos.each do |gh_r|
   
   # Copy milestones for this project
   milestone_hash = {}
-  milestones = gh_client.milestones(gh_r.full_name)
-  milestones.each do |m|
-    gl_milestone = gl_client.create_milestone(new_project.id, m.title, {:description => m.description, :due_date => m.due_on })
-    milestone_hash[gl_milestone.title] = gl_milestone.id
-    puts "Imported milestone #{gl_milestone.title}"
+  if options[:import_milestones]
+    milestones = gh_client.milestones(gh_r.full_name)
+    milestones.each do |m|
+      gl_milestone = gl_client.create_milestone(new_project.id, m.title, {:description => m.description, :due_date => m.due_on })
+      milestone_hash[gl_milestone.title] = gl_milestone.id
+      puts "Imported milestone #{gl_milestone.title}"
+    end
   end
   
   #
   ## Look for issues in GitHub for this project and push them to GitLab
   ## I wish the GitLab API let me create comments for issues. Oh well, smashing it all into the body of the issue.
   #
-  if gh_r.has_issues
+  if gh_r.has_issues and options[:import_issues]
     issues = []
     
     # Get opened issues
