@@ -2,7 +2,12 @@ Installing GitLab on FreeBSD 10
 ===============================
 
 ##### Preface
-This is essentially a record of how I installed and configured GitLab 7.6 on my FreeBSD server. Mileage with this guide may vary of course; different configurations of FreeBSD on different hardware and with different packages may introduce other unexpected issues. To make full use of this guide, I suggest reading the [official GitLab installation guide](https://github.com/gitlabhq/gitlabhq/blob/7-6-stable/doc/install/installation.md) fully before attempting anything in here.
+Mileage with this guide may vary; different configurations of FreeBSD on
+different hardware and with different packages may introduce other unexpected
+issues. To make full use of this guide, read the [official GitLab installation guide](https://github.com/gitlabhq/gitlabhq/blob/7-6-stable/doc/install/installation.md)
+before attempting anything in here.
+
+**Note:** These steps were tested on a FreeBSD droplet at DigitalOcean.
 
 1. Update system and Enable UTF-8
 ---------------------------------
@@ -17,7 +22,6 @@ pkg update
 pkg upgrade
 ```
 
-
 2. Install dependencies
 -----------------------
 
@@ -27,11 +31,13 @@ pkg install sudo bash icu cmake pkgconf git nginx ruby ruby20-gems logrotate red
 ```
 
 Install bundler gem system-wide:
-```
+
+```bash
 gem install bundler --no-ri --no-rdoc
 ```
 
 Add this to `/etc/rc.conf`:
+
 ```
 # Core services
 sshd_enable="YES"
@@ -54,11 +60,11 @@ sendmail_outbound_enable="NO"
 sendmail_msp_queue_enable="NO"
 ```
 
-
 3. Create `git` user for GitLab
 -------------------------------
 
 Set up user and groups:
+
 ```
 # Create user
 pw add user -n git -m -s /usr/local/bin/bash -c "GitLab"
@@ -67,16 +73,19 @@ pw add user -n git -m -s /usr/local/bin/bash -c "GitLab"
 pw user mod git -G redis
 ```
 
-
 4. Set up Postgres database
 ---------------------------
 
 As root, make sure that Postgres is running:
-`service postgresql start`
 
-Check this with `service postgresql status`
+```
+service postgresql start
+```
+
+Check this with `service postgresql status`.
 
 Set up the database:
+
 ```
 # Log in to Postgres user account
 su - pgsql
@@ -89,6 +98,7 @@ psql -d template1
 ```
 
 When logged into the database:
+
 ```
 # Create a user for GitLab
 # Do not type the 'template1=#', this is part of the prompt
@@ -103,6 +113,7 @@ template1=# \q
 
 Then type `exit` to drop back to the `root` user.
 Try connecting to the new database with the `git` user:
+
 ```
 su - git
 psql -d gitlabhq_production
@@ -110,14 +121,17 @@ psql -d gitlabhq_production
 
 If this succeeds, quit the database session by typing `\q` or hitting CTRL-D.
 
-
 5. Install and set up Redis
 ---------------------------
 
 Back up the original Redis config file:
-`cp /usr/local/etc/redis.conf /usr/local/etc/redis.conf.orig`
+
+```
+cp /usr/local/etc/redis.conf /usr/local/etc/redis.conf.orig
+```
 
 Run the following commands to get Redis working:
+
 ```
 # Disable Redis listening on TCP by setting 'port' to 0
 sed 's/^port .*/port 0/' /usr/local/etc/redis.conf.orig | sudo tee /usr/local/etc/redis.conf
@@ -137,7 +151,6 @@ chmod 755 /usr/local/var/run/redis
 sudo service redis restart
 ```
 
-
 6. Install and set up GitLab
 ----------------------------
 
@@ -146,7 +159,7 @@ sudo service redis restart
 cd /home/git
 
 # Clone GitLab source
-sudo -u git -H git clone https://gitlab.com/gitlab-org/gitlab-ce.git -b 7-6-stable gitlab
+sudo -u git -H git clone https://gitlab.com/gitlab-org/gitlab-ce.git -b 7-7-stable gitlab
 
 # Go to GitLab source folder
 cd /home/git/gitlab
@@ -161,6 +174,7 @@ Edit the GitLab configuration file
 * The line `bin_path:` should be set to FreeBSD's `git` location: `/usr/local/bin/git`.
 
 As root:
+
 ```
 cd /home/git/gitlab
 chown -R git log/
@@ -168,70 +182,65 @@ chown -R git tmp/
 chmod -R u+rwX,go-w log/
 chmod -R u+rwX tmp/
 
-# Change back to 'git' user
-su - git
-cd /home/git/gitlab
-
 # Make folder for satellites and set the right permissions
-mkdir /home/git/gitlab-satellites
-chmod u+rwx,g=rx,o-rwx /home/git/gitlab-satellites
+sudo -u git -H mkdir /home/git/gitlab-satellites
+sudo -u git -H chmod u+rwx,g=rx,o-rwx /home/git/gitlab-satellites
 
 # Make sure GitLab can write to the tmp/pids/ and tmp/sockets/ directories
-chmod -R u+rwX tmp/pids/
-chmod -R u+rwX tmp/sockets/
+sudo -u git -H chmod -R u+rwX tmp/pids/
+sudo -u git -H chmod -R u+rwX tmp/sockets/
 
 # Make sure GitLab can write to the public/uploads/ directory
-chmod -R u+rwX  public/uploads
+sudo -u git -H chmod -R u+rwX  public/uploads
 
 # Copy the example Unicorn config
-cp config/unicorn.rb.example config/unicorn.rb
+sudo -u git -H cp config/unicorn.rb.example config/unicorn.rb
 
 # Set the number of workers to at least the number of cores
-vim config/unicorn.rb
+sudo -u git -H vim config/unicorn.rb
 
 # Copy the example Rack attack config
-cp config/initializers/rack_attack.rb.example config/initializers/rack_attack.rb
+sudo -u git -H cp config/initializers/rack_attack.rb.example config/initializers/rack_attack.rb
 
 # Configure Git global settings for git user, useful when editing via web
 # Edit user.email according to what is set in gitlab.yml
-git config --global user.name "GitLab"
-git config --global user.email "example@example.com"
-git config --global core.autocrlf input
+sudo -u git -H git config --global user.name "GitLab"
+sudo -u git -H git config --global user.email "example@example.com"
+sudo -u git -H git config --global core.autocrlf input
 
 # Copy Redis connection settings
-cp config/resque.yml.example config/resque.yml
+sudo -u git -H cp config/resque.yml.example config/resque.yml
 
 # Configure Redis to use the modified socket path
 # Change 'production' line to 'unix:/usr/local/var/run/redis/redis.sock'
-vim config/resque.yml
+sudo -u git -H vim config/resque.yml
 
 # Copy database config
-cp config/database.yml.postgresql config/database.yml
+sudo -u git -H cp config/database.yml.postgresql config/database.yml
 
 # Install Ruby Gems
-bundle install --deployment --without development test mysql aws
+sudo -u git -H bundle install --deployment --without development test mysql aws
 ```
-
 
 7. GitLab Shell
 ---------------
 
 ```
 # Run the rake task for installing gitlab-shell
-bundle exec rake gitlab:shell:install[v2.4.0] REDIS_URL=unix:/usr/local/var/run/redis/redis.sock RAILS_ENV=production
+sudo -u git -H bundle exec rake gitlab:shell:install[v2.4.1] REDIS_URL=unix:/usr/local/var/run/redis/redis.sock RAILS_ENV=production
 
 # Edit the gitlab-shell config
 # Change the 'socket' option to '/usr/local/var/run/redis/redis.sock'
 # Change the 'gitlab_url' option to 'http://localhost:8080/'
 # Don't bother configuring any SSL stuff in here because it's used internally
-vim /home/git/gitlab-shell/config.yml
+sudo -u git -H vim /home/git/gitlab-shell/config.yml
 ```
-
 
 8. Initialise Database
 ----------------------
 
 Initialize Database and Activate Advanced Features
+
 ```
 sudo -u git -H bundle exec rake gitlab:setup RAILS_ENV=production
 # Type 'yes' to create the database tables.
@@ -249,33 +258,30 @@ default password.
 sudo -u git -H bundle exec rake gitlab:setup RAILS_ENV=production GITLAB_ROOT_PASSWORD=yourpassword
 ```
 
-
 9. Init script
 --------------
 
-There is a [FreeBSD init script](../../init/init/gitlab) in this repository,
-under the `init/init` directory.
-```
-cp /path/to/this/repository/init/init/gitlab /usr/local/etc/rc.d/gitlab
-```
+Download the FreeBSD init script as root:
 
+```
+wget -O /usr/local/etc/rc.d/gitlab https://gitlab.com/gitlab-org/gitlab-recipes/raw/master/init/init/freebsd/gitlab-unicorn
+```
 
 10. Check Configuration and Compile Assets
 ------------------------------------------
 
 ```
 cd /home/git/gitlab
-su - git
-bundle exec rake gitlab:env:info RAILS_ENV=production
+sudo -u git -H bundle exec rake gitlab:env:info RAILS_ENV=production
 ```
 
 If this all passes (all green and/or no errors are reported), then go ahead and
 compile all of the assets for GitLab. This can take ~10-15 minutes on a
 smaller machine, so don't panic if it takes a while!
-```
-bundle exec rake assets:precompile RAILS_ENV=production
-```
 
+```
+sudo -u git -H bundle exec rake assets:precompile RAILS_ENV=production
+```
 
 11. Start GitLab service
 ------------------------
@@ -288,60 +294,52 @@ As root:
 service gitlab start
 ```
 
-
 12. Nginx
 ---------
 
-The officially supported web server in GitLab is `nginx` - and GitLab provide
-an `nginx` configuration file in `/home/git/gitlab/lib/support/nginx/gitlab`,
-so you can copy that if you prefer, and modify their template.
+**Note:** The default version of `nginx` on FreeBSD is compiled without the
+`gzip_static` module, which means you need to remove the appropriate directives
+from the `nginx` configuration.
 
-The default version of `nginx` on FreeBSD is compiled without the `gzip_static`
-module, which means you need to remove the appropriate directives from the
-`nginx` configuration.
+You might want to create `/usr/local/etc/nginx/conf.d/` and include it in
+`nginx.conf` first.
 
-This is the configuration I used:
 ```
-server {
-    server_name yourserver.yourdomain;
-    server_tokens off;
-
-    listen 80 accept_filter=httpready;
-
-    # Uncomment if you want to use SSL
-    # listen 443 ssl;
-
-    # Configure your SSL certificate locations here
-    # ssl_certificate        /usr/local/etc/nginx/ssl/gitlab/ssl-bundle.crt;
-    # ssl_certificate_key  /usr/local/etc/nginx/ssl/gitlab/gitlab.key;
-
-    # Uncomment to force SSL connections
-    # if ($ssl_protocol = "") {
-    #    rewrite ^   https://$server_name$request_uri? permanent;
-    # }
-
-    location / {
-        proxy_set_header   X-Real-IP $remote_addr;
-        proxy_set_header   Host      $http_host;
-        proxy_pass         http://127.0.0.1:8080;
-    }
-}
+wget -O /usr/local/etc/nginx/conf.d/gitlab.conf https://gitlab.com/gitlab-org/gitlab-ce/raw/master/lib/support/nginx/gitlab-ssl
 ```
+
+Edit `/usr/local/etc/nginx/conf.d/gitlab.conf` and replace `git.example.com` with your FQDN. Make sure to read the comments in order to properly set up SSL.
+
+Add `nginx` user to `git` group:
+
+    usermod -a -G git nginx
+    chmod g+rx /home/git/
+
+Finally start nginx with:
+
+    service nginx start
+
+#### Test Configuration
+
+Validate your `gitlab` or `gitlab-ssl` Nginx config file with the following command:
+
+    nginx -t
+
+You should receive `syntax is okay` and `test is successful` messages. If you
+receive errors check your `gitlab` or `gitlab-ssl` Nginx config file for typos,
+etc. as indiciated in the error message given.
 
 Restart `nginx` with `sudo service nginx restart`, and you should be up and
 running.
 
-Check everything with this command just to be sure:
-```
-su - git
-cd /home/git/gitlab
-
-bundle exec rake gitlab:check RAILS_ENV=production
-```
-
-
 Good to Go
 ----------
+
+Check everything with this command just to be sure:
+```
+cd /home/git/gitlab
+sudo -u git -H bundle exec rake gitlab:check RAILS_ENV=production
+```
 
 If everything comes up green, then GitLab should work.
 
