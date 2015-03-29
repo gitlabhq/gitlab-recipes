@@ -1,0 +1,413 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          apache2
+# Required-Start:    $local_fs $remote_fs $network $syslog $named
+# Required-Stop:     $local_fs $remote_fs $network $syslog $named
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# X-Interactive:     true
+# Short-Description: Start/stop apache2 web server
+# Description:       Start the web server and associated helpers
+#  This script will start apache2, and possibly all associated instances.
+#  Moreover, it will set-up temporary directories and helper tools such as
+#  htcacheclean when required by the configuration.
+### END INIT INFO
+
+DESC="web server"
+NAME=apache2
+DAEMON=/usr/sbin/$NAME
+
+SCRIPTNAME="${0##*/}"
+SCRIPTNAME="${SCRIPTNAME##[KS][0-9][0-9]}"
+if [ -n "$APACHE_CONFDIR" ] ; then
+	if [ "${APACHE_CONFDIR##/etc/apache2-}" != "${APACHE_CONFDIR}" ] ; then
+	        DIR_SUFFIX="${APACHE_CONFDIR##/etc/apache2-}"
+	else
+	        DIR_SUFFIX=
+	fi
+elif [ "${SCRIPTNAME##apache2-}" != "$SCRIPTNAME" ] ; then
+	DIR_SUFFIX="-${SCRIPTNAME##apache2-}"
+	APACHE_CONFDIR=/etc/apache2$DIR_SUFFIX
+else
+	DIR_SUFFIX=
+	APACHE_CONFDIR=/etc/apache2
+fi
+if [ -z "$APACHE_ENVVARS" ] ; then
+	APACHE_ENVVARS=$APACHE_CONFDIR/envvars
+fi
+export APACHE_CONFDIR APACHE_ENVVARS
+
+ENV="env -i LANG=C PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+if [ "$APACHE_CONFDIR" != /etc/apache2 ] ; then
+	ENV="$ENV APACHE_CONFDIR=$APACHE_CONFDIR"
+fi
+if [ "$APACHE_ENVVARS" != "$APACHE_CONFDIR/envvars" ] ; then
+	ENV="$ENV APACHE_ENVVARS=$APACHE_ENVVARS"
+fi
+
+
+#edit /etc/default/apache2 to change this.
+HTCACHECLEAN_RUN=auto
+HTCACHECLEAN_MODE=daemon
+HTCACHECLEAN_SIZE=300M
+HTCACHECLEAN_DAEMON_INTERVAL=120
+HTCACHECLEAN_PATH=/var/cache/apache2$DIR_SUFFIX/mod_cache_disk
+HTCACHECLEAN_OPTIONS=""
+
+# Read configuration variable file if it is present
+if [ -f /etc/default/apache2$DIR_SUFFIX ] ; then
+	. /etc/default/apache2$DIR_SUFFIX
+elif [ -f /etc/default/apache2 ] ; then
+	. /etc/default/apache2
+fi
+
+PIDFILE=$(. $APACHE_ENVVARS && echo $APACHE_PID_FILE)
+
+VERBOSE=no
+if [ -f /etc/default/rcS ]; then
+	. /etc/default/rcS
+fi
+. /lib/lsb/init-functions
+
+
+# Now, set defaults:
+APACHE2CTL="$ENV apache2ctl"
+HTCACHECLEAN="$ENV htcacheclean"
+PIDFILE=$(. $APACHE_ENVVARS && echo $APACHE_PID_FILE)
+APACHE2_INIT_MESSAGE=""
+
+CONFTEST_OUTFILE=
+cleanup() {
+	if [ -n "$CONFTEST_OUTFILE" ] ; then
+		rm -f "$CONFTEST_OUTFILE"
+	fi
+}
+trap cleanup 0  # "0" means "EXIT", but "EXIT" is not portable
+
+
+apache_conftest() {
+	[ -z "$CONFTEST_OUTFILE" ] || rm -f "$CONFTEST_OUTFILE"
+	CONFTEST_OUTFILE=$(mktemp)
+	if ! $APACHE2CTL configtest > "$CONFTEST_OUTFILE" 2>&1 ; then
+		return 1
+	else
+		rm -f "$CONFTEST_OUTFILE"
+		CONFTEST_OUTFILE=
+		return 0
+	fi
+}
+
+clear_error_msg() {
+	[ -z "$CONFTEST_OUTFILE" ] || rm -f "$CONFTEST_OUTFILE"
+	CONFTEST_OUTFILE=
+	APACHE2_INIT_MESSAGE=
+}
+
+print_error_msg() {
+	[ -z "$APACHE2_INIT_MESSAGE" ] || log_warning_msg "$APACHE2_INIT_MESSAGE"
+	if [ -n "$CONFTEST_OUTFILE" ] ; then
+		echo "Output of config test was:" >&2
+		cat "$CONFTEST_OUTFILE" >&2
+		rm -f "$CONFTEST_OUTFILE"
+		CONFTEST_OUTFILE=
+	fi
+}
+
+apache_wait_start() {
+	local STATUS=$1
+	local i=0
+	while : ; do
+	        PIDTMP=$(pidofproc -p $PIDFILE $DAEMON)
+	        if [ -n "${PIDTMP:-}" ] && kill -0 "${PIDTMP:-}" 2> /dev/null; then
+	                return $STATUS
+	        fi
+
+	        if [ $i = "20" ] ; then
+	                APACHE2_INIT_MESSAGE="The apache2$DIR_SUFFIX instance did not start within 20 seconds. Please read the log files to discover problems"
+	                return 2
+	        fi
+
+	        [ "$VERBOSE" != no ] && log_progress_msg "."
+	        sleep 1
+	        i=$(($i+1))
+	done
+}
+
+apache_wait_stop() {
+	local STATUS=$1
+
+	PIDTMP=$(pidofproc -p $PIDFILE $DAEMON)
+	if [ -n "${PIDTMP:-}" ] && kill -0 "${PIDTMP:-}" 2> /dev/null; then
+	        local i=0
+	        while kill -0 "${PIDTMP:-}" 2> /dev/null;  do
+	                if [ $i = '60' ]; then
+	                        break
+	                        STATUS=2
+	                fi
+	                [ "$VERBOSE" != no ] && log_progress_msg "."
+	                sleep 1
+	                i=$(($i+1))
+	        done
+	        return $STATUS
+	else
+	    return $STATUS
+	fi
+}
+
+
+#
+# Function that starts the daemon/service
+#
+do_start()
+{
+	# Return
+	#   0 if daemon has been started
+	#   1 if daemon was already running
+	#   2 if daemon could not be started
+
+	if pidofproc -p $PIDFILE "$DAEMON" > /dev/null 2>&1 ; then
+	        return 1
+	fi
+
+	if apache_conftest ; then
+		#make sure apache starts before gitlab
+		gitlab-ctl stop
+	        $APACHE2CTL start
+	        apache_wait_start $?
+		gitlab-ctl start
+	        return $?
+	else
+	        APACHE2_INIT_MESSAGE="The apache2$DIR_SUFFIX configtest failed."
+	        return 2
+	fi
+}
+
+#
+# Function that stops the daemon/service
+#
+do_stop()
+{
+	# Return
+	#   0 if daemon has been stopped
+	#   1 if daemon was already stopped
+	#   2 if daemon could not be stopped
+	#   other if a failure occurred
+
+	# either "stop" or "graceful-stop"
+	local STOP=$1
+	# can't use pidofproc from LSB here
+	local AP_RET=0
+
+	if pidof $DAEMON > /dev/null 2>&1 ; then
+	        if [ -e $PIDFILE ] && pidof $DAEMON | tr ' ' '\n' | grep -w $(cat $PIDFILE) > /dev/null 2>&1 ; then
+	                AP_RET=2
+	        else
+	                AP_RET=1
+	        fi
+	else
+	    AP_RET=0
+	fi
+
+	# AP_RET is:
+	# 0 if Apache (whichever) is not running
+	# 1 if Apache (whichever) is running
+	# 2 if Apache from the PIDFILE is running
+
+	if [ $AP_RET = 0 ] ; then
+	        return 1
+	fi
+
+	if [ $AP_RET = 2 ] && apache_conftest ; then
+	        $APACHE2CTL $STOP > /dev/null 2>&1
+	        apache_wait_stop $?
+	        return $?
+	else
+	        if [ $AP_RET = 2 ]; then
+					clear_error_msg
+	                APACHE2_INIT_MESSAGE="The apache2$DIR_SUFFIX configtest failed, so we are trying to kill it manually. This is almost certainly suboptimal, so please make sure your system is working as you'd expect now!"
+	                killproc -p $PIDFILE $DAEMON
+	                apache_wait_stop $?
+	                return $?
+	        elif [ $AP_RET = 1 ] ; then
+	                APACHE2_INIT_MESSAGE="There are processes named 'apache2' running which do not match your pid file which are left untouched in the name of safety, Please review the situation by hand".
+	                return 2
+	        fi
+	fi
+
+}
+
+
+#
+# Function that sends a SIGHUP to the daemon/service
+#
+do_reload() {
+	if apache_conftest; then
+	        if ! pidofproc -p $PIDFILE "$DAEMON" > /dev/null 2>&1 ; then
+	                APACHE2_INIT_MESSAGE="Apache2 is not running"
+	                return 2
+	        fi
+	        $APACHE2CTL graceful > /dev/null 2>&1
+	        return $?
+	else
+	        APACHE2_INIT_MESSAGE="The apache2$DIR_SUFFIX configtest failed. Not doing anything."
+	        return 2
+	fi
+}
+
+
+check_htcacheclean() {
+	[ "$HTCACHECLEAN_MODE" = "daemon" ] || return 1
+	[ "$HTCACHECLEAN_RUN"  = "yes"    ] && return 0
+
+	MODSDIR=$(. $APACHE_ENVVARS && echo $APACHE_MODS_ENABLED)
+	        [ "$HTCACHECLEAN_RUN"  = "auto" \
+	                -a -e ${MODSDIR:-$APACHE_CONFDIR/mods-enabled}/cache_disk.load ] && \
+	                return 0
+	return 1
+}
+
+start_htcacheclean() {
+       $HTCACHECLEAN $HTCACHECLEAN_OPTIONS -d$HTCACHECLEAN_DAEMON_INTERVAL \
+	        -i -p$HTCACHECLEAN_PATH -l$HTCACHECLEAN_SIZE
+}
+
+stop_htcacheclean() {
+	pkill -P 1 -f "htcacheclean.* -p$HTCACHECLEAN_PATH " 2> /dev/null || return 1
+}
+
+
+# Sanity checks. They need to occur after function declarations
+[ -x $DAEMON ] || exit 0
+
+if [ ! -x $DAEMON ] ; then
+	echo "No apache-bin package installed"
+	exit 0
+fi
+
+if [ -z "$PIDFILE" ] ; then
+	echo ERROR: APACHE_PID_FILE needs to be defined in $APACHE_ENVVARS >&2
+	exit 2
+fi
+
+if check_htcacheclean ; then
+	if [ ! -d "$HTCACHECLEAN_PATH" ] ; then
+	        echo "htcacheclean is configured, but directory $HTCACHECLEAN_PATH does not exist!" >&2
+	        exit 2
+	fi
+fi
+
+
+
+case "$1" in
+  start)
+	log_daemon_msg "Starting $DESC" "$NAME"
+	do_start
+	RET_STATUS=$?
+	case "$RET_STATUS" in
+		0|1)
+			log_success_msg
+			[ "$VERBOSE" != no ] && [ $RET_STATUS = 1 ] && log_warning_msg "Server was already running"
+			if check_htcacheclean ; then
+				[ "$VERBOSE" != no ] && log_daemon_msg "Starting HTTP cache cleaning daemon" "htcacheclean"
+				start_htcacheclean
+				[ "$VERBOSE" != no ] && log_end_msg $?
+			fi
+	        ;;
+		2)
+			log_failure_msg
+			print_error_msg
+			exit 1
+			;;
+	esac
+	;;
+  stop|graceful-stop)
+	log_daemon_msg "Stopping $DESC" "$NAME"
+	do_stop "$1"
+	RET_STATUS=$?
+	case "$RET_STATUS" in
+		0|1)
+			log_success_msg
+			[ "$VERBOSE" != no ] && [ $RET_STATUS = 1 ] && log_warning_msg "Server was not running"
+	        ;;
+		2)
+			log_failure_msg
+			print_error_msg
+			exit 1
+	        ;;
+	esac
+	print_error_msg
+
+	if check_htcacheclean ; then
+		[ "$VERBOSE" != no ] && log_daemon_msg "Stopping HTTP cache cleaning daemon" "htcacheclean"
+		stop_htcacheclean
+		[ "$VERBOSE" != no ] && log_end_msg $?
+	fi
+
+	;;
+  status)
+	status_of_proc -p $PIDFILE "apache2" "$NAME"
+	exit $?
+	;;
+  reload|force-reload|graceful)
+	log_daemon_msg "Reloading $DESC" "$NAME"
+	do_reload
+	RET_STATUS=$?
+	case "$RET_STATUS" in
+		0|1)
+			log_success_msg
+			[ "$VERBOSE" != no ] && [ $RET_STATUS = 1 ] && log_warning_msg "Server was already running"
+			;;
+		2)
+			log_failure_msg
+			print_error_msg
+			exit 1
+			;;
+	esac
+	print_error_msg
+	;;
+  restart)
+	log_daemon_msg "Restarting $DESC" "$NAME"
+	do_stop stop
+	case "$?" in
+		0|1)
+			do_start
+			case "$?" in
+				0)
+					log_end_msg 0
+					;;
+				1|*)
+					log_end_msg 1 # Old process is still or failed to running
+					print_error_msg
+					exit 1
+					;;
+			esac
+			;;
+		*)
+			# Failed to stop
+			log_end_msg 1
+			print_error_msg
+			exit 1
+			;;
+	esac
+	;;
+  start-htcacheclean)
+	log_daemon_msg "Starting htcacheclean"
+	start_htcacheclean
+	log_end_msg $?
+	exit $?
+	;;
+  stop-htcacheclean)
+	log_daemon_msg "Stopping htcacheclean"
+	stop_htcacheclean
+	log_end_msg $?
+	exit $?
+	;;
+  *)
+	echo "Usage: $SCRIPTNAME {start|stop|graceful-stop|restart|reload|force-reload|start-htcacheclean|stop-htcacheclean}" >&2
+	exit 3
+	;;
+esac
+
+exit 0
+
+# vim: syntax=sh ts=4 sw=4 sts=4 sr noet
