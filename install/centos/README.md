@@ -620,6 +620,8 @@ To do so, follow the instructions provided by the [nginx wiki][nginx-centos] and
 
 Edit `/etc/nginx/conf.d/gitlab.conf` and replace `git.example.com` with your FQDN. Make sure to read the comments in order to properly set up SSL.
 
+Since the `location /uploads/` part of the gitlab.conf file proxy pass the static files to the gitlab server, you need to make sure that changing `gitlab/config/environments/production.rb` from `config.serve_static_assets = false` to `config.serve_static_assets = true`
+
 Add `nginx` user to `git` group:
 
     usermod -a -G git nginx
