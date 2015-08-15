@@ -27,7 +27,7 @@ pkg upgrade
 
 Install system packages:
 ```
-pkg install sudo bash icu cmake pkgconf git nginx ruby ruby20-gems logrotate redis postgresql94-server postfix krb5
+pkg install sudo bash icu cmake pkgconf git nginx ruby ruby21-gems logrotate redis postgresql94-server postfix krb5
 ```
 
 Install bundler gem system-wide:
@@ -312,7 +312,7 @@ Edit `/usr/local/etc/nginx/conf.d/gitlab.conf` and replace `git.example.com` wit
 
 Add `nginx` user to `git` group:
 
-    usermod -a -G git nginx
+    pw usermod -a -G git nginx
     chmod g+rx /home/git/
 
 Finally start nginx with:
@@ -375,6 +375,8 @@ Install the Kerberos package: `pkg install krb5`. As far as I know, there's no
 way to disable the Kerberos authentication in GitLab (even if it's unused) so
 unfortunately the only solution is to install the missing packages.
 
+EDIT: The new version of timfel-krb5-auth fails to build even with `krb5` installed. The only solution is to change the package version to `0.8.2`. [(More info here)](https://github.com/gitlabhq/gitlabhq/issues/8478#issuecomment-71328552)
+
 
 Postfix/sendmail: "postdrop: warning: unable to look up public/pickup: No such file or directory"
 -------------------------------------------------------------------------------------------------
@@ -405,6 +407,14 @@ sudo service nginx restart
 ```
 [(Source)](http://www.cyberciti.biz/faq/failed-to-enable-the-httpready-accept-filter/)
 
+PostgreSQL: "FATAL: could not create shared memory segment: Function not implemented"
+-------------------------------------------------------------------------------------
+
+You're trying to run PostgreSQL in a FreeBSD jail, which needs some sysctl tweaks. Set the following options in your jail's config (assuming you're using ezjail):
+```
+export jail_**MY_JAIL_NAME**_parameters="allow.raw_sockets=1 allow.sysvipc=1"
+```
+[(Source)](https://dan.langille.org/2013/07/09/fatal-could-not-create-shared-memory-segment-function-not-implemented/)
 
 References
 ==========
