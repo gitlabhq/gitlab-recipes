@@ -17,6 +17,7 @@ sudo su
 cd /etc/systemd/system/
 wget -O gitlab-sidekiq.service https://gitlab.com/gitlab-org/gitlab-recipes/raw/master/init/systemd/gitlab-sidekiq.service
 wget -O gitlab-unicorn.service https://gitlab.com/gitlab-org/gitlab-recipes/raw/master/init/systemd/gitlab-unicorn.service
+wget -O gitlab-git-http.service https://gitlab.com/gitlab-org/gitlab-recipes/raw/master/init/systemd/gitlab-git-http.service
 ```
 
 Reload systemd:
@@ -25,11 +26,11 @@ Reload systemd:
 
 Start the services:
 
-    sudo systemctl start gitlab-sidekiq.service gitlab-unicorn.service
+    sudo systemctl start gitlab-sidekiq.service gitlab-unicorn.service gitlab-git-http.service
 
 Enable them to start at boot:
 
-    sudo systemctl enable gitlab-sidekiq.service gitlab-unicorn.service
+    sudo systemctl enable gitlab-sidekiq.service gitlab-unicorn.service gitlab-git-http.service
 
 ## Notes
 
