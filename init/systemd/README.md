@@ -18,7 +18,7 @@ cd /etc/systemd/system/
 wget -O gitlab-sidekiq.service https://gitlab.com/gitlab-org/gitlab-recipes/raw/master/init/systemd/gitlab-sidekiq.service
 wget -O gitlab-unicorn.service https://gitlab.com/gitlab-org/gitlab-recipes/raw/master/init/systemd/gitlab-unicorn.service
 wget -O gitlab-git-http.service https://gitlab.com/gitlab-org/gitlab-recipes/raw/master/init/systemd/gitlab-git-http.service
-wget -O gitlab-git-http.service https://gitlab.com/gitlab-org/gitlab-recipes/raw/master/init/systemd/gitlab-mailroom.service
+wget -O gitlab-mailroom.service https://gitlab.com/gitlab-org/gitlab-recipes/raw/master/init/systemd/gitlab-mailroom.service
 ```
 
 Reload systemd:
