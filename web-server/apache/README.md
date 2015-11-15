@@ -17,22 +17,15 @@ To allow `gitlab-workhorse` to listen on port 8181, edit or create
 `/etc/default/gitlab` and change or add the following:
 
 ```
-gitlab_workhorse_options="-listenUmask 0 -listenNetwork tcp -listenAddr http://127.0.01:8181 -authBackend http://127.0.0.1:8080"
+gitlab_workhorse_options="-listenUmask 0 -listenNetwork tcp -listenAddr 127.0.0.1:8181 -authBackend http://127.0.0.1:8080"
 ```
 
 ## Installations unsing the Omnibus packages
 
-[Omnibus packages][] use their own bundled nginx server. If you want to use your
-own external Nginx server, follow the 4 steps to
-[configure GitLab][omnibuswebext] and then download the appropriate config file
-from this directory which has `omnibus` in its name.
+[Omnibus packages][] use their own bundled Nginx server. If you want to use your
+own external Apache server, follow the steps to [configure GitLab][omnibuswebext].
 
-Usually the location where Apache reads its configs from, is either
-`/etc/apache2/sites-enabled/` (Debian/Ubuntu) or `/etc/httpd/conf.d/` (RHEL/CentOS).
-
-If you are using Debian, the de facto way is to store the configs in
-`/etc/apache2/sites-available/` and then make a symlink to
-`/etc/apache2/sites-enabled/` using the `a2ensite` command.
+In the last step you will need to download the config from this repository.
 
 # RHEL6/CentOS6 recommendations
 
