@@ -3,13 +3,36 @@
 The configuration files in this directory were tested with GitLab 8.1. For
 versions of GitLab older than 8.0, check the `apache-old` branch.
 
+## Installations from source
+
 If you are using Apache version 2.4 or above, please use files
 [gitlab-apache24.conf](gitlab-apache24.conf) or [gitlab-ssl-apache24.conf](gitlab-ssl-apache24.conf)
 for the HTTP and HTTPS versions of the vhost repectively.
 
-If you are using Apache version 2.2 or above, please use files
+If you are using Apache version 2.2, please use files
 [gitlab-apache22.conf](gitlab-apache22.conf) or [gitlab-ssl-apache22.conf](gitlab-ssl-apache22.conf)
 for the HTTP and HTTPS versions of the vhost repectively.
+
+To allow `gitlab-workhorse` to listen on port 8181, edit or create
+`/etc/default/gitlab` and change or add the following:
+
+```
+gitlab_workhorse_options="-listenUmask 0 -listenNetwork tcp -listenAddr http://127.0.01:8181 -authBackend http://127.0.0.1:8080"
+```
+
+## Installations unsing the Omnibus packages
+
+[Omnibus packages][] use their own bundled nginx server. If you want to use your
+own external Nginx server, follow the 4 steps to
+[configure GitLab][omnibuswebext] and then download the appropriate config file
+from this directory which has `omnibus` in its name.
+
+Usually the location where Apache reads its configs from, is either
+`/etc/apache2/sites-enabled/` (Debian/Ubuntu) or `/etc/httpd/conf.d/` (RHEL/CentOS).
+
+If you are using Debian, the de facto way is to store the configs in
+`/etc/apache2/sites-available/` and then make a symlink to
+`/etc/apache2/sites-enabled/` using the `a2ensite` command.
 
 # RHEL6/CentOS6 recommendations
 
@@ -214,3 +237,5 @@ to better understand it.
 [sock]: http://httpd.apache.org/docs/2.2/mod/mod_proxy.html
 [reports]: https://github.com/gitlabhq/gitlabhq/issues/5139
 [digiocean]: https://www.digitalocean.com/community/tutorials/how-to-get-started-with-mod_pagespeed-with-apache-on-an-ubuntu-and-debian-cloud-server
+[Omnibus packages]: https://about.gitlab.com/downloads/
+[omnibuswebext]: http://doc.gitlab.com/omnibus/settings/nginx.html#using-a-non-bundled-web-server

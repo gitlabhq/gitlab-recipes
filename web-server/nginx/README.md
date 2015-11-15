@@ -1,12 +1,24 @@
 ## Nginx config moved to official repository
 
-You can find the nginx config in [GitLab official repository][gitlab].
+You can find the nginx config in [GitLab official repository][gitlab] which can
+be used for source installations.
+
+## Omnibus configs
+
+[Omnibus packages][] use their own bundled nginx server. If you want to use your
+own external Nginx server, follow the first 3 steps to
+[configure GitLab][omnibusnginxext] and then download the appropriate config
+file (ssl or non-ssl) from this directory.
+
+After placing the configs in their appropriate location
+(read [Different conf directories](#different-conf-directories)), make sure to
+restart Nginx.
 
 ## CentOS related Nginx notes
 
 ### Different conf directories
 
-If nginx is installed through the package manager, adjust sites in `/etc/nginx/conf.d/` 
+If nginx is installed through the package manager, adjust sites in `/etc/nginx/conf.d/`
 instead of `/etc/nginx/sites-available/` or create those directories and tell `nginx`
 to monitor them:
 
@@ -31,3 +43,5 @@ or replace the default `nginx` user with `git` and group `root` in `/etc/nginx/n
     user              git root;
 
 [gitlab]: https://gitlab.com/gitlab-org/gitlab-ce/tree/master/lib/support/nginx "Nginx config for GitLab"
+[Omnibus packages]: https://about.gitlab.com/downloads/
+[omnibusnginxext]: http://doc.gitlab.com/omnibus/settings/nginx.html#using-a-non-bundled-web-server
