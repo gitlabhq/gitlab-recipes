@@ -1,7 +1,10 @@
 # Apache 2 version
 
-The configuration files in this directory were tested with GitLab 8.1. For
-versions of GitLab older than 8.0, check the `apache-old` branch.
+The configuration files in this directory are known to work  with GitLab 8.2
+and newer versions.
+
+For versions of GitLab 8.0 and 8.1, check the `stable-8-1` branch.
+For versions of GitLab older than 8.0, check the `apache-old` branch.
 
 ## Installations from source
 
