@@ -5,6 +5,13 @@ be used for source installations.
 
 ## Omnibus configs
 
+The configuration files in this directory are known to work  with GitLab 8.2
+and newer versions.
+
+For versions of GitLab 8.0 and 8.1, check the `stable-8-1` branch.
+
+---
+
 [Omnibus packages][] use their own bundled nginx server. If you want to use your
 own external Nginx server, follow the first 3 steps to
 [configure GitLab][omnibusnginxext] and then download the appropriate config
