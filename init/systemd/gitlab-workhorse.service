@@ -1,0 +1,25 @@
+#####################################################
+#
+# GitLab version    : 8.2 - 8.x
+# Contributors      : bjorn-oivind
+# Downloaded from   : https://gitlab.com/gitlab-org/gitlab-recipes/tree/master/init/systemd
+#
+####################################################
+
+[Unit]
+Description=Gitlab Workhorse handles slow HTTP requests for Gitlab.
+Requires=gitlab-unicorn.service
+Wants=gitlab-unicorn.service
+After=gitlab-unicorn.service
+
+[Service]
+Type=forking
+User=git
+WorkingDirectory=/home/git/gitlab-workhorse
+SyslogIdentifier=gitlab-workhorse
+PIDFile=/home/git/gitlab/tmp/pids/gitlab-workhorse.pid
+
+ExecStart=/home/git/gitlab/bin/daemon_with_pidfile /home/git/gitlab/tmp/pids/gitlab-workhorse.pid /home/git/gitlab-workhorse/gitlab-workhorse -listenUmask 0 -listenNetwork unix -listenAddr /home/git/gitlab/tmp/sockets/gitlab-workhorse.socket -authBackend http://127.0.0.1:8080 >> /home/git/gitlab/log/gitlab-workhorse.log 2>&1
+
+[Install]
+WantedBy=multi-user.target
