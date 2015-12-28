@@ -19,7 +19,7 @@ WorkingDirectory=/home/git/gitlab-workhorse
 SyslogIdentifier=gitlab-workhorse
 PIDFile=/home/git/gitlab/tmp/pids/gitlab-workhorse.pid
 
-ExecStart=/home/git/gitlab/bin/daemon_with_pidfile /home/git/gitlab/tmp/pids/gitlab-workhorse.pid /home/git/gitlab-workhorse/gitlab-workhorse -listenUmask 0 -listenNetwork unix -listenAddr /home/git/gitlab/tmp/sockets/gitlab-workhorse.socket -authBackend http://127.0.0.1:8080 >> /home/git/gitlab/log/gitlab-workhorse.log 2>&1
+ExecStart=/home/git/gitlab/bin/daemon_with_pidfile /home/git/gitlab/tmp/pids/gitlab-workhorse.pid /home/git/gitlab-workhorse/gitlab-workhorse -listenUmask 0 -listenNetwork unix -listenAddr /home/git/gitlab/tmp/sockets/gitlab-workhorse.socket -authBackend http://127.0.0.1:8080 -authSocket /home/git/gitlab/tmp/sockets/gitlab.socket -documentRoot /home/git/gitlab/public >> /home/git/gitlab/log/gitlab-workhorse.log 2>&1
 
 [Install]
 WantedBy=multi-user.target
