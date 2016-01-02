@@ -39,5 +39,3 @@ Enable them to start at boot:
 * If you installed GitLab in other path than `/home/git/gitlab` change the service files accordingly.
 
 * `/etc/systemd/system/` have a higher precedence over  `/usr/lib/systemd/system`.
-
-* If you are running Gitlab 8.0-8.1, use `gitlab-git-http-server.service` instead of `gitlab-workhorse.service`.
