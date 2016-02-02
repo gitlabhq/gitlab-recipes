@@ -8,9 +8,16 @@ be used for source installations.
 The configuration files in this directory are known to work  with GitLab 8.2
 and newer versions.
 
-For versions of GitLab 8.0 and 8.1, check the `stable-8-1` branch.
+For versions of GitLab 8.0 and 8.1, check the `8-1-stable` branch.
+
+For versions of GitLab 8.2, check the `8-2-stable` branch.
 
 ---
+
+GitLab 8.3 introduces major changes in the NGINX configuration. Because all
+HTTP requests now pass through gitlab-workhorse, a lot of directives need to be
+removed from NGINX. During future upgrades there should be much less changes in
+the NGINX configuration because of this.
 
 [Omnibus packages][] use their own bundled nginx server. If you want to use your
 own external Nginx server, follow the first 3 steps to
