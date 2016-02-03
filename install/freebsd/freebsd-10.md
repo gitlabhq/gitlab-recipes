@@ -172,6 +172,7 @@ Edit the GitLab configuration file
 (`sudo -u git -H vim config/gitlab.yml`)
 * The option `host:` should be set to your domain, e.g. "gitlab.mysite.com".
 * The line `bin_path:` should be set to FreeBSD's `git` location: `/usr/local/bin/git`.
+* Change /home/* to be /usr/home/*  (home is a symbolic link that doesn't work)
 
 As root:
 
@@ -230,6 +231,7 @@ sudo -u git -H bundle install --deployment --without development test mysql aws
 sudo -u git -H bundle exec rake gitlab:shell:install[v2.4.1] REDIS_URL=unix:/usr/local/var/run/redis/redis.sock RAILS_ENV=production
 
 # Edit the gitlab-shell config
+# Change /home/* to be /usr/home/*  (home is a symbolic link that doesn't work)
 # Change the 'socket' option to '/usr/local/var/run/redis/redis.sock'
 # Change the 'gitlab_url' option to 'http://localhost:8080/'
 # Don't bother configuring any SSL stuff in here because it's used internally
