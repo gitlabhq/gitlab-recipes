@@ -1,5 +1,7 @@
 ## GitLab recipes: unofficial guides for using GitLab with different software
 
+For configuring the Omnibus packages with a non-packaged webservers, database, redis please see the [Omnibus docs](http://doc.gitlab.com/omnibus/) 
+
 Here you will find unofficial guides for using GitLab with different software (operating systems, web servers, etc.)
 provided by the community, for systems other than the officially supported (Debian/Ubuntu).
 
