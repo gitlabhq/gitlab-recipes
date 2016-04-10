@@ -551,7 +551,7 @@ that were [fixed](https://github.com/bundler/bundler/pull/2817) in 1.5.2.
 GitLab Shell is an SSH access and repository management software developed specially for GitLab.
 
     # Run the installation task for gitlab-shell (replace `REDIS_URL` if needed):
-    sudo -u git -H bundle exec rake gitlab:shell:install[v2.1.0] REDIS_URL=unix:/var/run/redis/redis.sock RAILS_ENV=production
+    sudo -u git -H bundle exec rake gitlab:shell:install[v2.0.1] REDIS_URL=unix:/var/run/redis/redis.sock RAILS_ENV=production
 
     # By default, the gitlab-shell config is generated from your main GitLab config.
     # You can review (and modify) the gitlab-shell config as follows:
@@ -619,6 +619,8 @@ To do so, follow the instructions provided by the [nginx wiki][nginx-centos] and
     wget -O /etc/nginx/conf.d/gitlab.conf https://gitlab.com/gitlab-org/gitlab-ce/raw/master/lib/support/nginx/gitlab-ssl
 
 Edit `/etc/nginx/conf.d/gitlab.conf` and replace `git.example.com` with your FQDN. Make sure to read the comments in order to properly set up SSL.
+
+Since the `location /uploads/` part of the gitlab.conf file proxy pass the static files to the gitlab server, you need to make sure that changing `gitlab/config/environments/production.rb` from `config.serve_static_assets = false` to `config.serve_static_assets = true`
 
 Add `nginx` user to `git` group:
 
