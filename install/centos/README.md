@@ -1,11 +1,11 @@
 ```
-Distribution      : CentOS 6.5 Minimal
-GitLab version    : 7.0 - 7.4
+Distribution      : CentOS 6.8 Minimal
+GitLab version    : 8.9
 Web Server        : Apache, Nginx
 Init system       : sysvinit
 Database          : MySQL, PostgreSQL
-Contributors      : @nielsbasjes, @axilleas, @mairin, @ponsjuh, @yorn, @psftw, @etcet, @mdirkse, @nszceta, @herkalurk
-Additional Notes  : In order to get a proper Ruby setup we build it from source
+Contributors      : @nielsbasjes, @axilleas, @mairin, @ponsjuh, @yorn, @psftw, @etcet, @mdirkse, @nszceta, @herkalurk, @mjmaenpaa
+Additional Notes  : In order to get a proper Ruby & Git setup we build them from source
 ```
 
 ## Overview
@@ -37,8 +37,9 @@ This guide does not disable any of them, we simply configure them as they were i
 
 The GitLab installation consists of setting up the following components:
 
-1. Install the base operating system (CentOS 6.5 Minimal) and Packages / Dependencies
+1. Install the base operating system (CentOS 6.8 Minimal) and Packages / Dependencies
 1. Ruby
+1. Go
 1. System Users
 1. Database
 1. Redis
@@ -48,9 +49,9 @@ The GitLab installation consists of setting up the following components:
 
 ----------
 
-## 1. Installing the operating system (CentOS 6.5 Minimal)
+## 1. Installing the operating system (CentOS 6.8 Minimal)
 
-We start with a completely clean CentOS 6.5 "minimal" installation which can be
+We start with a completely clean CentOS 6.8 "minimal" installation which can be
 accomplished by downloading the appropriate installation iso file. Just boot the
 system of the iso file and install the system.
 
@@ -89,52 +90,45 @@ Now install the `epel-release-6-8.noarch` package, which will enable EPEL reposi
 
 **Note:** Don't mind the `x86_64`, if you install on a i686 system you can use the same commands.
 
-### Add PUIAS Computational repository
+### Add Remi's RPM repository
 
-The [PUIAS Computational][PUIAS] repository is a part of [PUIAS/Springdale Linux][SDL],
-a custom Red Hat&reg; distribution maintained by [Princeton University][PU] and the
-[Institute for Advanced Study][IAS].  We take advantage of the PUIAS
-Computational repository to obtain a git v1.8.x package since the base CentOS
-repositories only provide v1.7.1 which is not compatible with GitLab.
-Although the PUIAS offers an RPM to install the repo, it requires the
-other PUIAS repos as a dependency, so you'll have to add it manually.
-Otherwise you can install git from source (instructions below).
+[Remi's RPM Repository][REMI] is unofficial repository for Centos/RHEL that provides latest versions of some software. We take advantage of Remi's RPM repository to obtain up-to-date version of Redis.
 
-Download PUIAS repo:
+Download the GPG key for Remi's repository and install it on your system:
 
-    wget -O /etc/yum.repos.d/PUIAS_6_computational.repo https://gitlab.com/gitlab-org/gitlab-recipes/raw/master/install/centos/PUIAS_6_computational.repo
-
-Next download and install the gpg key:
-
-    wget -O /etc/pki/rpm-gpg/RPM-GPG-KEY-puias http://springdale.math.ias.edu/data/puias/6/x86_64/os/RPM-GPG-KEY-puias
-    rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-puias
+    wget -O /etc/pki/rpm-gpg/RPM-GPG-KEY-remi http://rpms.famillecollet.com/RPM-GPG-KEY-remi
+    rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-remi
 
 Verify that the key got installed successfully:
 
     rpm -qa gpg*
-    gpg-pubkey-41a40948-4ce19266
+    gpg-pubkey-00f97f56-467e318a
 
-Verify that the EPEL and PUIAS Computational repositories are enabled as shown below:
+Now install the `remi-release-6` package, which will enable remi-safe repository on your system:
+
+    rpm -Uvh http://rpms.famillecollet.com/enterprise/remi-release-6.rpm
+
+Verify that the EPEL and remi-safe repositories are enabled as shown below:
 
     yum repolist
 
-    repo id                 repo name                                                status
-    PUIAS_6_computational   PUIAS computational Base 6 - x86_64                      2,018
-    base                    CentOS-6 - Base                                          4,802
-    epel                    Extra Packages for Enterprise Linux 6 - x86_64           7,879
-    extras                  CentOS-6 - Extras                                           12
-    updates                 CentOS-6 - Updates                                         814
-    repolist: 15,525
+    repo id        repo name                                                       status
+    base           CentOS-6 - Base                                                  6696
+    epel           Extra Packages for Enterprise Linux 6 - x86_64                  12125
+    extras         CentOS-6 - Extras                                                  61
+    remi-safe      Safe Remi's RPM repository for Enterprise Linux 6 - x86_64        827
+    updates        CentOS-6 - Updates                                                137
+    repolist: 19846
 
 If you can't see them listed, use the folowing command (from `yum-utils` package) to enable them:
 
-    yum-config-manager --enable epel --enable PUIAS_6_computational
+    yum-config-manager --enable epel --enable remi-safe
 
 ### Install the required tools for GitLab
 
     yum -y update
     yum -y groupinstall 'Development Tools'
-    yum -y install readline readline-devel ncurses-devel gdbm-devel glibc-devel tcl-devel openssl-devel curl-devel expat-devel db4-devel byacc sqlite-devel libyaml libyaml-devel libffi libffi-devel libxml2 libxml2-devel libxslt libxslt-devel libicu libicu-devel system-config-firewall-tui redis sudo wget crontabs logwatch logrotate perl-Time-HiRes git cmake libcom_err-devel.i686 libcom_err-devel.x86_64 nodejs
+    yum -y install readline readline-devel ncurses-devel gdbm-devel glibc-devel tcl-devel openssl-devel curl-devel expat-devel db4-devel byacc sqlite-devel libyaml libyaml-devel libffi libffi-devel libxml2 libxml2-devel libxslt libxslt-devel libicu libicu-devel system-config-firewall-tui redis sudo wget crontabs logwatch logrotate perl-Time-HiRes git cmake libcom_err-devel.i686 libcom_err-devel.x86_64 nodejs python-docutils
 
 **RHEL Notes**
 
@@ -144,18 +138,6 @@ add the rhel6 optional packages repo to your server to get those packages:
     yum-config-manager --enable rhel-6-server-optional-rpms
 
 Tip taken from [here](https://github.com/gitlabhq/gitlab-recipes/issues/62).
-
-**Note:**
-During this installation some files will need to be edited manually.
-If you are familiar with vim set it as default editor with the commands below.
-If you are not familiar with vim please skip this and keep using the default editor.
-
-    # Install vim and set as default editor
-    yum -y install vim-enhanced
-    update-alternatives --set editor /usr/bin/vim.basic
-
-    # For reStructuredText markup language support, install required package:
-    yum -y install python-docutils
 
 ### Install mail server
 
@@ -168,19 +150,23 @@ To use and configure sendmail instead of postfix see [Advanced Email Configurati
 
 ### Configure the default editor
 
+During this installation some files will need to be edited manually.
 You can choose between editors such as nano, vi, vim, etc.
-In this case we will use vim as the default editor for consistency.
 
+In this case we will use vim as the default editor for consistency.
+If you are familiar with vim set it as default editor with the commands below.
+
+    # Install vim and set as default editor
+    yum -y install vim-enhanced
     ln -s /usr/bin/vim /usr/bin/editor
 
 To remove this alias in the future:
 
     rm -i /usr/bin/editor
 
+### Install Git from Source
 
-### Install Git from Source (optional)
-
-Make sure Git is version 1.7.10 or higher, for example 1.7.12 or 1.8.4
+Make sure Git is version 2.7.4 or higher
 
     git --version
 
@@ -195,8 +181,8 @@ Install the pre-requisite files for Git compilation:
 Download and extract it:
 
     mkdir /tmp/git && cd /tmp/git
-    curl --progress https://www.kernel.org/pub/software/scm/git/git-2.1.3.tar.gz | tar xz
-    cd git-2.1.3/
+    curl --progress https://www.kernel.org/pub/software/scm/git/git-2.9.0.tar.gz | tar xz
+    cd git-2.9.0
     ./configure
     make
     make prefix=/usr/local install
@@ -206,7 +192,7 @@ Make sure Git is in your `$PATH`:
     which git
 
 You might have to logout and login again for the `$PATH` to take effect.
-**Note:** When editing `config/gitlab.yml` (step 6), change the git `bin_path` to `/usr/local/bin/git`.
+**Note:** When editing `config/gitlab.yml` (step 7), change the git `bin_path` to `/usr/local/bin/git`.
 
 ----------
 
@@ -214,7 +200,7 @@ You might have to logout and login again for the `$PATH` to take effect.
 
 The use of ruby version managers such as [RVM](http://rvm.io/), [rbenv](https://github.com/sstephenson/rbenv) or [chruby](https://github.com/postmodern/chruby) with GitLab in production frequently leads to hard to diagnose problems. Version managers are not supported and we strongly advise everyone to follow the instructions below to use a system ruby.
 
-Remove the old Ruby 1.8 package if present. GitLab only supports the Ruby 2.0+ release series:
+Remove the old Ruby 1.8 package if present. GitLab only supports the Ruby 2.1 release series:
 
     yum remove ruby
 
@@ -226,15 +212,15 @@ Remove any other Ruby build if it is still present:
 Download Ruby and compile it:
 
     mkdir /tmp/ruby && cd /tmp/ruby
-    curl --progress ftp://ftp.ruby-lang.org/pub/ruby/2.1/ruby-2.1.2.tar.gz | tar xz
-    cd ruby-2.1.2
+    curl --progress ftp://ftp.ruby-lang.org/pub/ruby/2.1/ruby-2.1.10.tar.gz | tar xz
+    cd ruby-2.1.10
     ./configure --disable-install-rdoc
     make
     make prefix=/usr/local install
 
 Install the Bundler Gem:
 
-    gem install bundler --no-doc
+    gem install bundler --no-ri --no-rdoc
 
 Logout and login again for the `$PATH` to take effect. Check that ruby is properly
 installed with:
@@ -242,11 +228,20 @@ installed with:
     which ruby
     # /usr/local/bin/ruby
     ruby -v
-    # ruby 2.1.2p95 (2014-05-08 revision 45877) [x86_64-linux]
+    # ruby 2.1.10p492 (2016-04-01 revision 54464) [x86_64-linux]
+
 
 ----------
 
-## 3. System Users
+## 3. Go
+
+Since GitLab 8.0, Git HTTP requests are handled by gitlab-workhorse (formerly gitlab-git-http-server). This is a small daemon written in Go. To install gitlab-workhorse we need a Go compiler.
+
+    yum install golang golang-bin golang-src
+
+----------
+
+## 4. System Users
 
 Create a `git` user for Gitlab:
 
@@ -268,9 +263,9 @@ Save and exit.
 
 ----------
 
-## 4. Database
+## 5. Database
 
-### 4.1 PostgreSQL (recommended)
+### 5.1 PostgreSQL (recommended)
 
 NOTE: because we need to make use of extensions we need at least pgsql 9.1 and the default 8.x on centos will not work.  We need to get the PGDG repositories enabled
 
@@ -280,19 +275,11 @@ If there are any previous versions remove them:
 
 Install the pgdg repositories:
 
-    rpm -Uvh http://yum.postgresql.org/9.3/redhat/rhel-6-x86_64/pgdg-centos93-9.3-1.noarch.rpm
+    rpm -Uvh http://yum.postgresql.org/9.3/redhat/rhel-6-x86_64/pgdg-centos93-9.3-2.noarch.rpm
 
-Install `postgresql93-server` and the `postgreqsql93-devel` libraries:
+Install `postgresql93-server`, `postgreqsql93-devel` and the `postgresql93-contrib` libraries:
 
-    yum install postgresql93-server postgresql93-devel
-
-The executables are installed in `/usr/pgsql-9.3/bin/`. In order to be able to run them,
-you have to either add this path to your `$PATH` or make symlinks. Here, we will make
-symlinks to the commands used by GitLab:
-
-    ln -s /usr/pgsql-9.3/bin/pg_dump /usr/bin/pg_dump
-    ln -s /usr/pgsql-9.3/bin/pg_restore /usr/bin/pg_restore
-    ln -s /usr/pgsql-9.3/bin/psql /usr/bin/psql
+    yum install postgresql93-server postgresql93-devel postgresql93-contrib
 
 Rename the service script:
 
@@ -310,7 +297,6 @@ Start the service and configure service to start on boot:
 Configure the database user and password:
 
     su - postgres
-    export PATH=$PATH:/usr/pgsql-9.3/bin/
     psql -d template1
 
     psql (9.4.3)
@@ -319,6 +305,7 @@ Configure the database user and password:
     CREATE ROLE
     template1=# CREATE DATABASE gitlabhq_production OWNER git;
     CREATE DATABASE
+    template1=# CREATE EXTENSION IF NOT EXISTS pg_trgm;
     template1=# \q
     exit # exit uid=postgres, return to root
 
@@ -336,6 +323,20 @@ If you see the following:
 
 your password has been accepted successfully and you can type \q to quit.
 
+Check if the `pg_trgm` extension is enabled:
+
+    SELECT true AS enabled
+    FROM pg_available_extensions
+    WHERE name = 'pg_trgm'
+    AND installed_version IS NOT NULL;
+
+If the extension is enabled this will produce the following output:
+
+    enabled
+    ---------
+     t
+     (1 row)
+
 Ensure you are using the right settings in your `/var/lib/pgsql/9.3/data/pg_hba.conf`
 to not get ident issues (you can use trust over ident):
 
@@ -344,7 +345,13 @@ to not get ident issues (you can use trust over ident):
 Check the official [documentation][psql-doc-auth] for more information on
 authentication methods.
 
-### 4.2 MySQL
+### 5.2 MySQL
+
+#### Note
+
+We do not recommend using MySQL due to various issues. For example, case [(in)sensitivity](https://dev.mysql.com/doc/refman/5.0/en/case-sensitivity.html) and [problems](https://bugs.mysql.com/bug.php?id=65830) that [suggested](https://bugs.mysql.com/bug.php?id=50909) [fixes](https://bugs.mysql.com/bug.php?id=65830) [have](https://bugs.mysql.com/bug.php?id=63164).
+
+#### MySQL
 
 Install `mysql` and enable the `mysqld` service to start on boot:
 
@@ -380,7 +387,7 @@ Create the GitLab production database:
 
 Grant the GitLab user necessary permissions on the table:
 
-    GRANT SELECT, LOCK TABLES, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER ON `gitlabhq_production`.* TO 'git'@'localhost';
+    GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, CREATE TEMPORARY TABLES, DROP, INDEX, ALTER, LOCK TABLES ON `gitlabhq_production`.* TO 'git'@'localhost';
 
 Quit the database session:
 
@@ -397,7 +404,17 @@ Quit the database session:
 
 ----------
 
-## 5. Redis
+## 6. Redis
+
+GitLab requires at least Redis 2.8.
+
+Remove old version:
+
+    yum remove redis
+
+Install new version from Remi's RPM repository:
+
+    yum --enablerepo=remi,remi-test install redis
 
 Make sure redis is started on boot:
 
@@ -438,7 +455,7 @@ Add git to the redis group:
 
 ------
 
-## 6. GitLab
+## 7. GitLab
 
     # We'll install GitLab into home directory of the user "git"
     cd /home/git
@@ -446,9 +463,9 @@ Add git to the redis group:
 ### Clone the Source
 
     # Clone GitLab repository
-    sudo -u git -H git clone https://gitlab.com/gitlab-org/gitlab-ce.git -b 7-4-stable gitlab
+    sudo -u git -H git clone https://gitlab.com/gitlab-org/gitlab-ce.git -b 8-9-stable gitlab
 
-**Note:** You can change `7-4-stable` to `master` if you want the *bleeding edge* version, but do so with caution!
+**Note:** You can change `8-9-stable` to `master` if you want the *bleeding edge* version, but do so with caution!
 
 ### Configure it
 
@@ -461,22 +478,34 @@ Add git to the redis group:
     # Update GitLab config file, follow the directions at top of file
     sudo -u git -H editor config/gitlab.yml
 
-    # Make sure GitLab can write to the log/ and tmp/ directories
-    chown -R git log/
-    chown -R git tmp/
-    chmod -R u+rwX log/
-    chmod -R u+rwX tmp/
+    # Copy the example secrets file
+    sudo -u git -H cp config/secrets.yml.example config/secrets.yml
+    sudo -u git -H chmod 0600 config/secrets.yml
 
-    # Create directory for satellites
-    sudo -u git -H mkdir /home/git/gitlab-satellites
-    chmod u+rwx,g=rx,o-rwx /home/git/gitlab-satellites
+    # Make sure GitLab can write to the log/ and tmp/ directories
+    sudo chown -R git log/
+    sudo chown -R git tmp/
+    sudo chmod -R u+rwX,go-w log/
+    sudo chmod -R u+rwX tmp/
 
     # Make sure GitLab can write to the tmp/pids/ and tmp/sockets/ directories
-    chmod -R u+rwX tmp/pids/
-    chmod -R u+rwX tmp/sockets/
+    sudo chmod -R u+rwX tmp/pids/
+    sudo chmod -R u+rwX tmp/sockets/
 
-    # Make sure GitLab can write to the public/uploads/ directory
-    chmod -R u+rwX  public/uploads
+    # Create the public/uploads/ directory
+    sudo -u git -H mkdir public/uploads/
+
+    # Make sure only the GitLab user has access to the public/uploads/ directory
+    # now that files in public/uploads are served by gitlab-workhorse
+    sudo chmod 0700 public/uploads
+
+    sudo chmod ug+rwX,o-rwx /home/git/repositories/
+
+    # Change the permissions of the directory where CI build traces are stored
+    sudo chmod -R u+rwX builds/
+
+    # Change the permissions of the directory where CI artifacts are stored
+    sudo chmod -R u+rwX shared/artifacts/
 
     # Copy the example Unicorn config
     sudo -u git -H cp config/unicorn.rb.example config/unicorn.rb
@@ -492,11 +521,12 @@ Add git to the redis group:
     # Copy the example Rack attack config
     sudo -u git -H cp config/initializers/rack_attack.rb.example config/initializers/rack_attack.rb
 
-    # Configure Git global settings for git user, useful when editing via web
-    # Edit user.email according to what is set in gitlab.yml
-    sudo -u git -H git config --global user.name "GitLab"
-    sudo -u git -H git config --global user.email "example@example.com"
+    # Configure Git global settings for git user
+    # 'autocrlf' is needed for the web editor
     sudo -u git -H git config --global core.autocrlf input
+
+    # Disable 'git gc --auto' because GitLab already runs 'git gc' when needed
+    sudo -u git -H git config --global gc.auto 0
 
     # Configure Redis connection settings
     sudo -u git -H cp config/resque.yml.example config/resque.yml
@@ -541,17 +571,20 @@ that were [fixed](https://github.com/bundler/bundler/pull/2817) in 1.5.2.
 
     # For PostgreSQL (note, the option says "without ... mysql")
     sudo -u git -H bundle config build.pg --with-pg-config=/usr/pgsql-9.3/bin/pg_config
-    sudo -u git -H bundle install --deployment --without development test mysql aws
+    sudo -u git -H bundle install --deployment --without development test mysql aws kerberos
 
     # Or for MySQL (note, the option says "without ... postgres")
-    sudo -u git -H bundle install --deployment --without development test postgres aws
+    sudo -u git -H bundle install --deployment --without development test postgres aws kerberos
+
+**Note:** If you want to use Kerberos for user authentication, then omit `kerberos`
+in the `--without` option above.
 
 ### Install GitLab shell
 
 GitLab Shell is an SSH access and repository management software developed specially for GitLab.
 
     # Run the installation task for gitlab-shell (replace `REDIS_URL` if needed):
-    sudo -u git -H bundle exec rake gitlab:shell:install[v2.1.0] REDIS_URL=unix:/var/run/redis/redis.sock RAILS_ENV=production
+    sudo -u git -H bundle exec rake gitlab:shell:install[v3.0.0] REDIS_URL=unix:/var/run/redis/redis.sock RAILS_ENV=production
 
     # By default, the gitlab-shell config is generated from your main GitLab config.
     # You can review (and modify) the gitlab-shell config as follows:
@@ -563,24 +596,62 @@ GitLab Shell is an SSH access and repository management software developed speci
 
 **Note:** If you want to use HTTPS, see [Using HTTPS](#using-https) for the additional steps.
 
+**Note:** Make sure your hostname can be resolved on the machine itself by either a
+proper DNS record or an additional line in /etc/hosts ("127.0.0.1
+hostname"). This might be necessary for example if you set up GitLab behind a
+reverse proxy. If the hostname cannot be resolved, the final installation check
+will fail with "Check GitLab API access: FAILED. code: 401" and pushing commits
+will be rejected with "[remote rejected] master -> master (hook declined)".
+
+### Install gitlab-workhorse
+
+    cd /home/git
+    sudo -u git -H git clone https://gitlab.com/gitlab-org/gitlab-workhorse.git
+    cd gitlab-workhorse
+    sudo -u git -H git checkout v0.7.5
+    sudo -u git -H make
+
 ### Initialize Database and Activate Advanced Features
+
+    # Go to GitLab installation folder
+
+    cd /home/git/gitlab
 
     sudo -u git -H bundle exec rake gitlab:setup RAILS_ENV=production
 
-Type **yes** to create the database.
-When done you see **Administrator account created:**.
+    # Type 'yes' to create the database tables.
 
-**Note:** You can set the Administrator password by supplying it in environmental variable `GITLAB_ROOT_PASSWORD`, eg.:
+    # When done you see 'Administrator account created:'
 
-    sudo -u git -H bundle exec rake gitlab:setup RAILS_ENV=production GITLAB_ROOT_PASSWORD=newpassword
+**Note:** You can set the Administrator/root password and e-mail by supplying
+  them in environmental variables, `GITLAB_ROOT_PASSWORD` and
+  `GITLAB_ROOT_EMAIL` respectively, as seen below. If you don't set the
+  password (and it is set to the default one) please wait with exposing GitLab
+  to the public internet until the installation is done and you've logged into
+  the server the first time. During the first login you'll be forced to change
+  the default password.
+
+    sudo -u git -H bundle exec rake gitlab:setup RAILS_ENV=production GITLAB_ROOT_PASSWORD=yourpassword GITLAB_ROOT_EMAIL=youremail
+
+### Secure secrets.yml
+
+The `secrets.yml` file stores encryption keys for sessions and secure variables.
+Backup `secrets.yml` someplace safe, but don't store it in the same place as your
+database backups. Otherwise your secrets are exposed if one of your backups is
+compromised.
 
 ### Install Init Script
 
-Download the init script (will be /etc/init.d/gitlab):
+Download the init script (will be `/etc/init.d/gitlab`):
 
-    wget -O /etc/init.d/gitlab https://gitlab.com/gitlab-org/gitlab-recipes/raw/master/init/sysvinit/centos/gitlab-unicorn
-    chmod +x /etc/init.d/gitlab
-    chkconfig --add gitlab
+    cp lib/support/init.d/gitlab /etc/init.d/gitlab
+
+And if you are installing with a non-default folder or user copy and edit the defaults file:
+
+    cp lib/support/init.d/gitlab.default.example /etc/default/gitlab
+
+If you installed GitLab in another directory or as a user other than the default you should change these settings in `/etc/default/gitlab`. Do not edit `/etc/init.d/gitlab` as it will be
+changed on upgrade.
 
 Make GitLab start on boot:
 
@@ -604,11 +675,15 @@ Check if GitLab and its environment are configured correctly:
 
     service gitlab start
 
-## 7. Configure the web server
+------
+
+## 8. Configure the web server
 
 Use either Nginx or Apache, not both. Official installation guide recommends nginx.
 
 ### Nginx
+
+#### Installation
 
 You will need a new version of nginx otherwise you might encounter an issue like [this][issue-nginx].
 To do so, follow the instructions provided by the [nginx wiki][nginx-centos] and then install nginx with:
@@ -616,18 +691,22 @@ To do so, follow the instructions provided by the [nginx wiki][nginx-centos] and
     yum update
     yum -y install nginx
     chkconfig nginx on
-    wget -O /etc/nginx/conf.d/gitlab.conf https://gitlab.com/gitlab-org/gitlab-ce/raw/master/lib/support/nginx/gitlab-ssl
 
-Edit `/etc/nginx/conf.d/gitlab.conf` and replace `git.example.com` with your FQDN. Make sure to read the comments in order to properly set up SSL.
+#### Site Configuration
+
+    cp lib/support/nginx/gitlab /etc/nginx/conf.d/gitlab.conf
+
+Make sure to edit the config file to match your setup:
+
+    # Change YOUR_SERVER_FQDN to the fully-qualified
+    # domain name of your host serving GitLab.
+
+**Note:** If you want to use HTTPS, replace the `gitlab` Nginx config with `gitlab-ssl`. See [Using HTTPS](#using-https) for HTTPS configuration details.
 
 Add `nginx` user to `git` group:
 
     usermod -a -G git nginx
     chmod g+rx /home/git/
-
-Finally start nginx with:
-
-    service nginx start
 
 #### Test Configuration
 
@@ -637,9 +716,24 @@ Validate your `gitlab` or `gitlab-ssl` Nginx config file with the following comm
 
 You should receive `syntax is okay` and `test is successful` messages. If you receive errors check your `gitlab` or `gitlab-ssl` Nginx config file for typos, etc. as indiciated in the error message given.
 
+
+#### Restart
+
+    service nginx restart
+
 ### Apache
 
 Httpd can be configured with or without SSL support.  Please choose appropriate commands in next steps.
+
+#### GitLab-Workhorse
+
+Apache installation requires changes to gitlab-workhorse configuration. Change `gitlab_workhorse_options` in `/etc/default/gitlab` to following.
+
+    gitlab_workhorse_options="-listenUmask 0 -listenNetwork tcp -listenAddr 127.0.0.1:8181 -authBackend http://127.0.0.1:8080"
+
+And restart:
+
+    service gitlab restart
 
 #### HTTPS
 
@@ -648,11 +742,11 @@ installing apache and `mod_ssl` which will provide ssl support:
 
     yum -y install httpd mod_ssl
     chkconfig httpd on
-    wget -O /etc/httpd/conf.d/gitlab.conf https://gitlab.com/gitlab-org/gitlab-recipes/raw/master/web-server/apache/gitlab-ssl.conf
+    wget -O /etc/httpd/conf.d/gitlab.conf https://gitlab.com/gitlab-org/gitlab-recipes/raw/master/web-server/apache/gitlab-ssl-apache22.conf
     mv /etc/httpd/conf.d/ssl.conf{,.bak}
     sed -i 's/logs\///g' /etc/httpd/conf.d/gitlab.conf
 
-Open `/etc/httpd/conf.d/gitlab.conf` with your editor and replace `git.example.org` with your FQDN. Also make sure the path to your certificates is valid.
+Open `/etc/httpd/conf.d/gitlab.conf` with your editor and replace `YOUR_SERVER_FQDN` with your FQDN. Also make sure the path to your certificates is valid.
 
 Add `LoadModule ssl_module /etc/httpd/modules/mod_ssl.so` in `/etc/httpd/conf/httpd.conf`.
 
@@ -663,10 +757,10 @@ installing apache:
 
     yum -y install httpd
     chkconfig httpd on
-    wget -O /etc/httpd/conf.d/gitlab.conf https://gitlab.com/gitlab-org/gitlab-recipes/raw/master/web-server/apache/gitlab.conf
+    wget -O /etc/httpd/conf.d/gitlab.conf https://gitlab.com/gitlab-org/gitlab-recipes/raw/master/web-server/apache/gitlab-apache22.conf
     sed -i 's/logs\///g' /etc/httpd/conf.d/gitlab.conf
 
-Open `/etc/httpd/conf.d/gitlab.conf` with your editor and replace `git.example.org` with your FQDN.
+Open `/etc/httpd/conf.d/gitlab.conf` with your editor and replace `YOUR_SERVER_FQDN` with your FQDN.
 
 #### SELinux
 
@@ -688,7 +782,9 @@ If you want to run other websites on the same system, you'll need to add in `/et
         Listen 443
     </IfModule>
 
-## 8. Configure the firewall
+------
+
+## 9. Configure the firewall
 
 Poke an iptables hole so users can access the web server (http and https ports) and ssh.
 
@@ -707,34 +803,23 @@ To make sure you didn't miss anything run a more thorough check with:
     cd /home/git/gitlab
     sudo -u git -H bundle exec rake gitlab:check RAILS_ENV=production
 
-Now, the output will complain that your init script is not up-to-date as follows:
-
-    Init script up-to-date? ... no
-      Try fixing it:
-      Redownload the init script
-      For more information see:
-      doc/install/installation.md in section "Install Init Script"
-      Please fix the error above and rerun the checks.
-
-Do not mind about that error if you are sure that you have downloaded the up-to-date file from https://gitlab.com/gitlab-org/gitlab-recipes/raw/master/init/sysvinit/centos/gitlab-unicorn and saved it to `/etc/init.d/gitlab`.
-
-If all other items are green, then congratulations on successfully installing GitLab!
+If all items are green, then congratulations on successfully installing GitLab!
 
 **NOTE:** Supply `SANITIZE=true` environment variable to `gitlab:check` to omit project names from the output of the check command.
 
 ## Initial Login
 
-Visit YOUR_SERVER in your web browser for your first GitLab login.
-The setup has created an admin account for you. You can use it to log in:
+If you didn't [provide a root password during setup](#initialize-database-and-activate-advanced-features),
+you'll be redirected to a password reset screen to provide the password for the
+initial administrator account. Enter your desired password and you'll be
+redirected back to the login screen.
 
-    root
-    5iveL!fe
-
-**Important Note:**
-Please go over to your profile page and immediately change the password, so
-nobody can access your GitLab by using this login information later on.
+The default account's username is **root**. Provide the password you created
+earlier and login. After login you can change the username if you wish.
 
 **Enjoy!**
+
+You can use `sudo service gitlab start` and `sudo service gitlab stop` to start and stop GitLab.
 
 You can also check some [Advanced Setup Tips][tips].
 
@@ -745,6 +830,7 @@ You can also check some [Advanced Setup Tips][tips].
 
 [https]: https://gitlab.com/gitlab-org/gitlab-ce/blob/master/doc/install/installation.md#using-https
 [EPEL]: https://fedoraproject.org/wiki/EPEL
+[REMI]: http://rpms.famillecollet.com/
 [PUIAS]: https://puias.math.ias.edu/wiki/YumRepositories6#Computational
 [SDL]: https://puias.math.ias.edu
 [PU]: http://www.princeton.edu/
