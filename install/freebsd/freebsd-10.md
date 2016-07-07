@@ -27,7 +27,7 @@ pkg upgrade
 
 Install system packages:
 ```
-pkg install sudo bash icu cmake pkgconf git nginx node ruby ruby21-gems logrotate redis postgresql94-server postfix krb5
+pkg install sudo bash icu cmake pkgconf git nginx node ruby ruby22-gems logrotate redis postgresql95-server postgresql95-contrib postfix krb5 gmake go
 ```
 
 Install bundler gem system-wide:
@@ -70,19 +70,11 @@ Set up user and groups:
 pw add user -n git -m -s /usr/local/bin/bash -c "GitLab"
 
 # Add 'git' user to 'redis' group (this will come in useful later!)
-pw user mod git -G redis
+pw groupmod git -m redis
 ```
 
 4. Set up Postgres database
 ---------------------------
-
-As root, make sure that Postgres is running:
-
-```
-service postgresql start
-```
-
-Check this with `service postgresql status`.
 
 Set up the database:
 
@@ -103,8 +95,12 @@ psql -d template1
 When logged into the database:
 
 ```
-# Create a user for GitLab
 # Do not type the 'template1=#', this is part of the prompt
+
+# Set up pg_trgm extension (required for GitLab 8.6+)
+template1=# CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
+# Create a user for GitLab
 template1=# CREATE USER git CREATEDB;
 
 # Create the GitLab production database & grant all privileges on database
@@ -162,7 +158,7 @@ sudo service redis restart
 cd /home/git
 
 # Clone GitLab source
-sudo -u git -H git clone https://gitlab.com/gitlab-org/gitlab-ce.git -b 7-7-stable gitlab
+sudo -u git -H git clone https://gitlab.com/gitlab-org/gitlab-ce.git -b 8-9-stable gitlab
 
 # Go to GitLab source folder
 cd /home/git/gitlab
@@ -181,49 +177,76 @@ As root:
 
 ```
 cd /home/git/gitlab
-chown -R git log/
-chown -R git tmp/
-chmod -R u+rwX,go-w log/
-chmod -R u+rwX tmp/
 
-# Make folder for satellites and set the right permissions
-sudo -u git -H mkdir /home/git/gitlab-satellites
-sudo -u git -H chmod u+rwx,g=rx,o-rwx /home/git/gitlab-satellites
+# Copy the example secrets file
+sudo -u git -H cp config/secrets.yml.example config/secrets.yml
+sudo -u git -H chmod 0600 config/secrets.yml
+
+# Make sure GitLab can write to the log/ and tmp/ directories
+sudo chown -R git log/
+sudo chown -R git tmp/
+sudo chmod -R u+rwX,go-w log/
+sudo chmod -R u+rwX tmp/
 
 # Make sure GitLab can write to the tmp/pids/ and tmp/sockets/ directories
-sudo -u git -H chmod -R u+rwX tmp/pids/
-sudo -u git -H chmod -R u+rwX tmp/sockets/
+sudo chmod -R u+rwX tmp/pids/
+sudo chmod -R u+rwX tmp/sockets/
 
-# Make sure GitLab can write to the public/uploads/ directory
-sudo -u git -H chmod -R u+rwX  public/uploads
+# Create the public/uploads/ directory
+sudo -u git -H mkdir public/uploads/
+
+# Make sure only the GitLab user has access to the public/uploads/ directory
+# now that files in public/uploads are served by gitlab-workhorse
+sudo chmod 0700 public/uploads
+
+# Change the permissions of the directory where CI build traces are stored
+sudo chmod -R u+rwX builds/
+
+# Change the permissions of the directory where CI artifacts are stored
+sudo chmod -R u+rwX shared/artifacts/
 
 # Copy the example Unicorn config
 sudo -u git -H cp config/unicorn.rb.example config/unicorn.rb
 
+# Find number of cores
+sysctl hw.ncpu
+
+# Enable cluster mode if you expect to have a high load instance
 # Set the number of workers to at least the number of cores
+# Ex. change amount of workers to 3 for 2GB RAM server
 sudo -u git -H vim config/unicorn.rb
 
 # Copy the example Rack attack config
 sudo -u git -H cp config/initializers/rack_attack.rb.example config/initializers/rack_attack.rb
 
-# Configure Git global settings for git user, useful when editing via web
-# Edit user.email according to what is set in gitlab.yml
-sudo -u git -H git config --global user.name "GitLab"
-sudo -u git -H git config --global user.email "example@example.com"
+# Configure Git global settings for git user
+# 'autocrlf' is needed for the web editor
 sudo -u git -H git config --global core.autocrlf input
 
-# Copy Redis connection settings
+# Disable 'git gc --auto' because GitLab already runs 'git gc' when needed
+sudo -u git -H git config --global gc.auto 0
+
+# Configure Redis connection settings
 sudo -u git -H cp config/resque.yml.example config/resque.yml
 
-# Configure Redis to use the modified socket path
-# Change 'production' line to 'unix:/usr/local/var/run/redis/redis.sock'
-sudo -u git -H vim config/resque.yml
+# Change the Redis socket path to /usr/local/var/run/redis/redis.sock
+sudo -u git -H sed -i '' 's|/var/run/redis/redis.sock|/usr/local/var/run/redis/redis.sock|g' config/resque.yml
+```
 
-# Copy database config
-sudo -u git -H cp config/database.yml.postgresql config/database.yml
+Configure the GitLab DB Settings:
 
-# Install Ruby Gems
-sudo -u git -H bundle install --deployment --without development test mysql aws
+```
+sudo -u git cp config/database.yml.postgresql config/database.yml
+
+# Make config/database.yml readable to git only
+sudo -u git -H chmod o-rwx config/database.yml
+```
+
+Install Gems:
+
+```
+sudo -u git -H bundle install --deployment --without development test mysql aws kerberos
+
 ```
 
 7. GitLab Shell
@@ -231,22 +254,34 @@ sudo -u git -H bundle install --deployment --without development test mysql aws
 
 ```
 # Run the rake task for installing gitlab-shell
-sudo -u git -H bundle exec rake gitlab:shell:install[v2.4.1] REDIS_URL=unix:/usr/local/var/run/redis/redis.sock RAILS_ENV=production
+sudo -u git -H bundle exec rake gitlab:shell:install REDIS_URL=unix:/usr/local/var/run/redis/redis.sock RAILS_ENV=production
 
 # Edit the gitlab-shell config
 # Change /home/* to be /usr/home/*  (home is a symbolic link that doesn't work)
-# Change the 'socket' option to '/usr/local/var/run/redis/redis.sock'
 # Change the 'gitlab_url' option to 'http://localhost:8080/'
 # Don't bother configuring any SSL stuff in here because it's used internally
 sudo -u git -H vim /home/git/gitlab-shell/config.yml
 ```
 
-8. Initialise Database
+8. Gitlab Workhorse
+----------------------
+
+```
+cd /home/git
+sudo -u git -H git clone https://gitlab.com/gitlab-org/gitlab-workhorse.git
+cd gitlab-workhorse
+sudo -u git -H git checkout v0.7.5
+sudo -u git -H gmake
+```
+
+
+9. Initialize Database
 ----------------------
 
 Initialize Database and Activate Advanced Features
 
 ```
+cd /home/git/gitlab
 sudo -u git -H bundle exec rake gitlab:setup RAILS_ENV=production
 # Type 'yes' to create the database tables.
 # When done you see 'Administrator account created:'
@@ -263,16 +298,17 @@ default password.
 sudo -u git -H bundle exec rake gitlab:setup RAILS_ENV=production GITLAB_ROOT_PASSWORD=yourpassword
 ```
 
-9. Init script
+10. Init script
 --------------
 
 Download the FreeBSD init script as root:
 
 ```
-wget -O /usr/local/etc/rc.d/gitlab https://gitlab.com/gitlab-org/gitlab-recipes/raw/master/init/init/freebsd/gitlab-unicorn
+fetch -o /usr/local/etc/rc.d/gitlab https://gitlab.com/gitlab-org/gitlab-recipes/raw/master/init/init/freebsd/gitlab-unicorn
+chmod 555 /usr/local/etc/rc.d/gitlab
 ```
 
-10. Check Configuration and Compile Assets
+11. Check Configuration and Compile Assets
 ------------------------------------------
 
 ```
@@ -288,7 +324,7 @@ smaller machine, so don't panic if it takes a while!
 sudo -u git -H bundle exec rake assets:precompile RAILS_ENV=production
 ```
 
-11. Start GitLab service
+12. Start GitLab service
 ------------------------
 
 If all of the above steps complete with no errors and everything has gone
@@ -299,26 +335,89 @@ As root:
 service gitlab start
 ```
 
-12. Nginx
+13. Nginx
 ---------
 
 **Note:** The default version of `nginx` on FreeBSD is compiled without the
 `gzip_static` module, which means you need to remove the appropriate directives
 from the `nginx` configuration.
 
-You might want to create `/usr/local/etc/nginx/conf.d/` and include it in
-`nginx.conf` first.
-
 ```
-wget -O /usr/local/etc/nginx/conf.d/gitlab.conf https://gitlab.com/gitlab-org/gitlab-ce/raw/master/lib/support/nginx/gitlab-ssl
+mkdir -p /usr/local/etc/nginx/conf.d
+mkdir -p /usr/local/etc/nginx/ssl
+mkdir -p /var/log/nginx
+
+# SSL
+fetch -o /usr/local/etc/nginx/conf.d/gitlab.conf https://gitlab.com/gitlab-org/gitlab-ce/raw/master/lib/support/nginx/gitlab-ssl
+
+# HTTP
+fetch -o /usr/local/etc/nginx/conf.d/gitlab.conf https://gitlab.com/gitlab-org/gitlab-ce/raw/master/lib/support/nginx/gitlab
 ```
 
-Edit `/usr/local/etc/nginx/conf.d/gitlab.conf` and replace `git.example.com` with your FQDN. Make sure to read the comments in order to properly set up SSL.
+Edit `/usr/local/etc/nginx/nginx.conf`:
+```
+load_module /usr/local/libexec/nginx/ngx_mail_module.so;
+load_module /usr/local/libexec/nginx/ngx_stream_module.so;
 
-Add `nginx` user to `git` group:
+#user  nobody;
+worker_processes  1;
 
-    pw usermod -a -G git nginx
+#error_log  logs/error.log;
+#error_log  logs/error.log  notice;
+#error_log  logs/error.log  info;
+
+#pid        logs/nginx.pid;
+
+
+events {
+    worker_connections  1024;
+}
+
+
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+
+    #log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+    #                  '$status $body_bytes_sent "$http_referer" '
+    #                  '"$http_user_agent" "$http_x_forwarded_for"';
+
+    #access_log  logs/access.log  main;
+
+    sendfile        on;
+    #tcp_nopush     on;
+
+    #keepalive_timeout  0;
+    keepalive_timeout  65;
+
+    #gzip  on;
+
+    include /usr/local/etc/nginx/conf.d/*;
+}
+```
+
+Edit `/usr/local/etc/nginx/conf.d/gitlab.conf`
+  * Change any reference to /etc/* to /usr/local/etc/*
+  * Replace `git.example.com` with your FQDN.
+
+Make sure to read the comments in order to properly set up SSL.
+
+Example to set up self-signed SSL:
+```
+cd /usr/local/etc/nginx/ssl
+openssl genrsa -out gitlab.key
+openssl req -new -batch -subj "/C=US/ST=gitlab/L=gitlab/O=gitlab/CN=gitlab" -key gitlab.key -out gitlab.csr
+openssl x509 -req -days 3650 -in gitlab.csr -signkey gitlab.key -out gitlab.crt
+```
+
+Add `www` user to `git` group:
+
+    pw groupmod git -m www
     chmod g+rx /home/git/
+
+Set up the log directory
+
+	 mkdir /var/log/nginx
 
 Finally start nginx with:
 
