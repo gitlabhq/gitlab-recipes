@@ -128,7 +128,10 @@ If you can't see them listed, use the folowing command (from `yum-utils` package
 
     yum -y update
     yum -y groupinstall 'Development Tools'
-    yum -y install readline readline-devel ncurses-devel gdbm-devel glibc-devel tcl-devel openssl-devel curl-devel expat-devel db4-devel byacc sqlite-devel libyaml libyaml-devel libffi libffi-devel libxml2 libxml2-devel libxslt libxslt-devel libicu libicu-devel system-config-firewall-tui redis sudo wget crontabs logwatch logrotate perl-Time-HiRes git cmake libcom_err-devel.i686 libcom_err-devel.x86_64 nodejs python-docutils
+    yum -y install readline readline-devel ncurses-devel gdbm-devel glibc-devel tcl-devel openssl-devel curl-devel expat-devel db4-devel byacc sqlite-devel libyaml libyaml-devel libffi libffi-devel libxml2 libxml2-devel libxslt libxslt-devel libicu libicu-devel system-config-firewall-tui redis sudo wget crontabs logwatch logrotate perl-Time-HiRes git cmake libcom_err-devel.i686 libcom_err-devel.x86_64 nodejs
+
+    # For reStructuredText markup language support, install required package:
+    yum -y install python-docutils
 
 **RHEL Notes**
 
@@ -212,15 +215,15 @@ Remove any other Ruby build if it is still present:
 Download Ruby and compile it:
 
     mkdir /tmp/ruby && cd /tmp/ruby
-    curl --progress ftp://ftp.ruby-lang.org/pub/ruby/2.1/ruby-2.1.10.tar.gz | tar xz
-    cd ruby-2.1.10
+    curl --progress https://cache.ruby-lang.org/pub/ruby/2.1/ruby-2.1.9.tar.gz | tar xz
+    cd ruby-2.1.9
     ./configure --disable-install-rdoc
     make
     make prefix=/usr/local install
 
 Install the Bundler Gem:
 
-    gem install bundler --no-ri --no-rdoc
+    gem install bundler --no-doc
 
 Logout and login again for the `$PATH` to take effect. Check that ruby is properly
 installed with:
@@ -387,7 +390,7 @@ Create the GitLab production database:
 
 Grant the GitLab user necessary permissions on the table:
 
-    GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, CREATE TEMPORARY TABLES, DROP, INDEX, ALTER, LOCK TABLES ON `gitlabhq_production`.* TO 'git'@'localhost';
+    GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, CREATE TEMPORARY TABLES, DROP, INDEX, ALTER, LOCK TABLES, REFERENCES ON `gitlabhq_production`.* TO 'git'@'localhost';
 
 Quit the database session:
 
@@ -727,7 +730,8 @@ Httpd can be configured with or without SSL support.  Please choose appropriate 
 
 #### GitLab-Workhorse
 
-Apache installation requires changes to gitlab-workhorse configuration. Change `gitlab_workhorse_options` in `/etc/default/gitlab` to following.
+Apache installation requires changes to gitlab-workhorse configuration. Change
+`gitlab_workhorse_options` in `/etc/default/gitlab` to the following:
 
     gitlab_workhorse_options="-listenUmask 0 -listenNetwork tcp -listenAddr 127.0.0.1:8181 -authBackend http://127.0.0.1:8080"
 
