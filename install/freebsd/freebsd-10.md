@@ -87,11 +87,14 @@ Check this with `service postgresql status`.
 Set up the database:
 
 ```
-# Log in to Postgres user account
-su - pgsql
+# Initialize First start of PG DB
+service postgresql initdb
 
 # Initialise Postgres db
-initdb /usr/local/pgsql/data
+service postgresql start
+
+# Log in to Postgres user account
+su - pgsql
 
 # Connect to Postgres database
 psql -d template1
