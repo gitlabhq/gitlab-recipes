@@ -70,7 +70,7 @@ Set up user and groups:
 pw add user -n git -m -s /usr/local/bin/bash -c "GitLab"
 
 # Add 'git' user to 'redis' group (this will come in useful later!)
-pw groupmod git -m redis
+pw groupmod redis -m git
 ```
 
 4. Set up Postgres database
