@@ -158,7 +158,7 @@ sudo service redis restart
 cd /home/git
 
 # Clone GitLab source
-sudo -u git -H git clone https://gitlab.com/gitlab-org/gitlab-ce.git -b 8-9-stable gitlab
+sudo -u git -H git clone https://gitlab.com/gitlab-org/gitlab-ce.git -b 8-10-stable gitlab
 
 # Go to GitLab source folder
 cd /home/git/gitlab
@@ -273,7 +273,7 @@ sudo -u git -H vim /home/git/gitlab-shell/config.yml
 cd /home/git
 sudo -u git -H git clone https://gitlab.com/gitlab-org/gitlab-workhorse.git
 cd gitlab-workhorse
-sudo -u git -H git checkout v0.7.5
+sudo -u git -H git checkout v0.7.9
 sudo -u git -H gmake
 ```
 
