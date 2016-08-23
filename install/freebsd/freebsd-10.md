@@ -253,6 +253,9 @@ sudo -u git -H bundle install --deployment --without development test mysql aws 
 ---------------
 
 ```
+# create repositories path 
+sudo -u git -H mkdir /home/git/repositories
+
 # Run the rake task for installing gitlab-shell
 sudo -u git -H bundle exec rake gitlab:shell:install REDIS_URL=unix:/usr/local/var/run/redis/redis.sock RAILS_ENV=production
 
