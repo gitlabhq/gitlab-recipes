@@ -70,7 +70,7 @@ Set up user and groups:
 pw add user -n git -m -s /usr/local/bin/bash -c "GitLab"
 
 # Add 'git' user to 'redis' group (this will come in useful later!)
-pw groupmod git -m redis
+pw groupmod redis -m git
 ```
 
 4. Set up Postgres database
@@ -158,7 +158,7 @@ sudo service redis restart
 cd /home/git
 
 # Clone GitLab source
-sudo -u git -H git clone https://gitlab.com/gitlab-org/gitlab-ce.git -b 8-9-stable gitlab
+sudo -u git -H git clone https://gitlab.com/gitlab-org/gitlab-ce.git -b 8-10-stable gitlab
 
 # Go to GitLab source folder
 cd /home/git/gitlab
@@ -253,6 +253,9 @@ sudo -u git -H bundle install --deployment --without development test mysql aws 
 ---------------
 
 ```
+# create repositories path 
+sudo -u git -H mkdir /home/git/repositories
+
 # Run the rake task for installing gitlab-shell
 sudo -u git -H bundle exec rake gitlab:shell:install REDIS_URL=unix:/usr/local/var/run/redis/redis.sock RAILS_ENV=production
 
@@ -270,7 +273,7 @@ sudo -u git -H vim /home/git/gitlab-shell/config.yml
 cd /home/git
 sudo -u git -H git clone https://gitlab.com/gitlab-org/gitlab-workhorse.git
 cd gitlab-workhorse
-sudo -u git -H git checkout v0.7.5
+sudo -u git -H git checkout v0.7.9
 sudo -u git -H gmake
 ```
 
