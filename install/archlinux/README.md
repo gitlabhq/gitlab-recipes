@@ -1,14 +1,8 @@
-Welcome to the Archlinux GitLab recipes. Here you will find installation scripts,
-guides, how-tos and some useful links that will help you install GitLab on Archlinux.
+Welcome to the Arch Linux GitLab recipes. GitLab is now part of the `[community]`
+repository, follow the installation guide in the ArchWiki.
 
+If you have any questions, please write them in the talk section
+https://wiki.archlinux.org/index.php/Talk:Gitlab.
 
-## Useful links
-
-* [GitLab Wiki][]
-* [GitLab PKGBUILD][]
-* [gitlab-shell PKGBUILD][]
-
-
-[GitLab Wiki]: https://wiki.archlinux.org/index.php/Gitlab
-[GitLab PKGBUILD]: https://aur.archlinux.org/packages/gitlab
-[gitlab-shell PKGBUILD]: https://aur.archlinux.org/packages/gitlab-shell
+- [GitLab ArchWiki](https://wiki.archlinux.org/index.php/Gitlab)
+- [GitLab package in [community]](https://www.archlinux.org/packages/?q=gitlab)
