@@ -3,7 +3,7 @@
 The configuration files in this directory are known to work  with GitLab 8.3
 and newer versions.
 
-Fir versions of GitLab 8.2, check the `8-2-stable` branch.
+For versions of GitLab 8.2, check the `8-2-stable` branch.
 For versions of GitLab 8.0 and 8.1, check the `8-1-stable` branch.
 For versions of GitLab older than 8.0, check the `apache-old` branch.
 
