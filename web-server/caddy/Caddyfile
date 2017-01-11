@@ -12,7 +12,7 @@ https://gitlab.example.com {
     }
 
     proxy / http://127.0.0.1:8181 {
-        fail_timeout 300s
+        fail_timeout 0s
 
         header_upstream Host {host}
         header_upstream X-Real-IP {remote}
