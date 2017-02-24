@@ -20,3 +20,14 @@ https://gitlab.example.com {
         header_upstream X-Forwarded-Ssl on
     }
 }
+
+# Optional GitLab Pages config
+*.example.io {
+    tls {
+        max_certs 10
+    }
+    proxy / http://127.0.0.1:8090 {
+        fail_timeout 0s
+        transparent
+    }
+}
