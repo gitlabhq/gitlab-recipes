@@ -1,7 +1,7 @@
 #####################################################
 #
-# GitLab version    : 8.2 - 8.x
-# Contributors      : bjorn-oivind
+# GitLab version    : 8.2 - 9.x
+# Contributors      : bjorn-oivind, Keruspe
 # Downloaded from   : https://gitlab.com/gitlab-org/gitlab-recipes/tree/master/init/systemd
 #
 ####################################################
@@ -9,17 +9,16 @@
 [Unit]
 Description=Gitlab Workhorse handles slow HTTP requests for Gitlab.
 Requires=gitlab-unicorn.service
-Wants=gitlab-unicorn.service
 After=gitlab-unicorn.service
 
 [Service]
 Type=forking
 User=git
-WorkingDirectory=/home/git/gitlab-workhorse
+WorkingDirectory=/home/git/gitlab
 SyslogIdentifier=gitlab-workhorse
+Environment=RAILS_ENV=production
 PIDFile=/home/git/gitlab/tmp/pids/gitlab-workhorse.pid
-
-ExecStart=/home/git/gitlab/bin/daemon_with_pidfile /home/git/gitlab/tmp/pids/gitlab-workhorse.pid /home/git/gitlab-workhorse/gitlab-workhorse -listenUmask 0 -listenNetwork unix -listenAddr /home/git/gitlab/tmp/sockets/gitlab-workhorse.socket -authBackend http://127.0.0.1:8080 -authSocket /home/git/gitlab/tmp/sockets/gitlab.socket -secretPath /home/git/gitlab/.gitlab_workhorse_secret -documentRoot /home/git/gitlab/public >> /home/git/gitlab/log/gitlab-workhorse.log 2>&1
+ExecStart=/home/git/gitlab/bin/daemon_with_pidfile /home/git/gitlab/tmp/pids/gitlab-workhorse.pid /home/git/gitlab-workhorse/gitlab-workhorse -listenUmask 0 -listenNetwork unix -listenAddr /home/git/gitlab/tmp/sockets/gitlab-workhorse.socket -authBackend http://127.0.0.1:8080 -authSocket /home/git/gitlab/tmp/sockets/gitlab.socket -documentRoot /home/git/gitlab/public >> /home/git/gitlab/log/gitlab-workhorse.log 2>&1
 
 [Install]
 WantedBy=multi-user.target
