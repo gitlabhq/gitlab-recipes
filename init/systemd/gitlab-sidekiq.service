@@ -1,7 +1,7 @@
 #####################################################
 #
-# GitLab version    : 5.x - 7.x
-# Contributors      : davispuh, mtorromeo, axilleas, boeserwolf91, Stefan Tatschner (rumpelsepp)
+# GitLab version    : 5.x - 9.x
+# Contributors      : davispuh, mtorromeo, axilleas, boeserwolf91, Stefan Tatschner (rumpelsepp), Keruspe
 # Downloaded from   : https://gitlab.com/gitlab-org/gitlab-recipes/tree/master/init/systemd
 #
 ####################################################
@@ -19,7 +19,8 @@ WorkingDirectory=/home/git/gitlab
 Environment=RAILS_ENV=production
 SyslogIdentifier=gitlab-sidekiq
 PIDFile=/home/git/gitlab/tmp/pids/sidekiq.pid
-
+Restart=on-failure
+RestartSec=5
 ExecStart=/usr/bin/bundle exec "sidekiq -C config/sidekiq_queues.yml -c 5 -e production -P tmp/pids/sidekiq.pid -d -L log/sidekiq.log >> log/sidekiq.log 2>&1"
 ExecStop=/usr/bin/bundle exec "sidekiqctl stop /home/git/gitlab/tmp/pids/sidekiq.pid >> /home/git/gitlab/log/sidekiq.log 2>&1"
 
