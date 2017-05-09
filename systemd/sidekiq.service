@@ -1,0 +1,20 @@
+#
+# GITLAB
+# Maintainer: @davispuh
+# App Version: 4.1
+#
+[Unit]
+Description=GitLab Sidekiq Service
+After=syslog.target network.target remote-fs.target nss-lookup.target redis.service
+Wants=redis.service
+
+[Service]
+Type=simple
+PIDFile=/home/gitlab/gitlab/tmp/pids/sidekiq.pid
+WorkingDirectory=/home/gitlab/gitlab/
+ExecStart=/bin/su - gitlab -c "bundle exec rake sidekiq:start RAILS_ENV=production"
+ExecStop=/bin/su - gitlab -c "bundle exec rake sidekiq:stop RAILS_ENV=production"
+
+[Install]
+WantedBy=multi-user.target
+
