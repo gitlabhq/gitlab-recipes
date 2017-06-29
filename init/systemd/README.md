@@ -7,7 +7,7 @@ GitLab requires a couple of services:
 * GitLab Sidekiq service (`gitlab-sidekiq.service`)
 * Unicorn service (`gitlab-unicorn.service`)
 * Gitlab Workhorse server for slow HTTP requests (`gitlab-workhorse.service`)
-
+* Gitaly, the Git RPC service for handling all the git calls made by GitLab (`gitlab.gitaly.service`)
 
 ## Setup GitLab services
 
@@ -20,6 +20,7 @@ wget -O gitlab-sidekiq.service https://gitlab.com/gitlab-org/gitlab-recipes/raw/
 wget -O gitlab-unicorn.service https://gitlab.com/gitlab-org/gitlab-recipes/raw/master/init/systemd/gitlab-unicorn.service
 wget -O gitlab-workhorse.service https://gitlab.com/gitlab-org/gitlab-recipes/raw/master/init/systemd/gitlab-workhorse.service
 wget -O gitlab-mailroom.service https://gitlab.com/gitlab-org/gitlab-recipes/raw/master/init/systemd/gitlab-mailroom.service
+wget -O gitlab-gitaly.service https://gitlab.com/gitlab-org/gitlab-recipes/raw/master/init/systemd/gitlab-gitaly.service
 ```
 
 Reload systemd:
