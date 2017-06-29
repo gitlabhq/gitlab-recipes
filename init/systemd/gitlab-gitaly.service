@@ -19,7 +19,7 @@ WorkingDirectory=/home/git/gitaly
 SyslogIdentifier=gitlab-gitaly
 PIDFile=/home/git/gitlab/tmp/pids/gitaly.pid
 
-ExecStart=/home/git/gitlab/bin/daemon_with_pidfile /home/git/gitlab/tmp/pids/gitaly.pid /home/git/gitaly/bin/gitaly /home/git/gitaly/config.toml >> /home/git/gitlab/log/gitaly.log 2>&1
+ExecStart=/home/git/gitlab/bin/daemon_with_pidfile /home/git/gitlab/tmp/pids/gitaly.pid /home/git/gitaly/gitaly /home/git/gitaly/config.toml >> /home/git/gitlab/log/gitaly.log 2>&1
 
 [Install]
 WantedBy=multi-user.target
