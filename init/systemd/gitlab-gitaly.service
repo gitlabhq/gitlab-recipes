@@ -1,0 +1,25 @@
+#####################################################
+#
+# GitLab version    : 9.x
+# Contributors      : axil
+# Downloaded from   : https://gitlab.com/gitlab-org/gitlab-recipes/tree/master/init/systemd
+#
+####################################################
+
+[Unit]
+Description=Gitaly is a Git RPC service for handling all the git calls made by GitLab.
+Requires=gitlab-unicorn.service
+Wants=gitlab-unicorn.service
+After=gitlab-unicorn.service
+
+[Service]
+Type=forking
+User=git
+WorkingDirectory=/home/git/gitaly
+SyslogIdentifier=gitlab-gitaly
+PIDFile=/home/git/gitlab/tmp/pids/gitaly.pid
+
+ExecStart=/home/git/gitlab/bin/daemon_with_pidfile /home/git/gitlab/tmp/pids/gitaly.pid /home/git/gitaly/bin/gitaly /home/git/gitaly/config.toml >> /home/git/gitlab/log/gitaly.log 2>&1
+
+[Install]
+WantedBy=multi-user.target
