@@ -7,7 +7,7 @@ GitLab requires a couple of services:
 * GitLab Sidekiq service (`gitlab-sidekiq.service`)
 * Unicorn service (`gitlab-unicorn.service`)
 * Gitlab Workhorse server for slow HTTP requests (`gitlab-workhorse.service`)
-* Gitaly, the Git RPC service for handling all the git calls made by GitLab (`gitlab.gitaly.service`)
+* Gitaly, the Git RPC service for handling all the git calls made by GitLab (`gitlab-gitaly.service`)
 
 ## Setup GitLab services
 
