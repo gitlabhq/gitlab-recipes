@@ -220,6 +220,10 @@ ModPagespeed off
 If you don't want to disable it completely, read [this article][digiocean]
 to better understand it.
 
+#Gitlab Omnibus
+
+Use gitlab-omnibus.conf and replace your /etc/init.d/apache2 with apache2-init-omnibus. apache2-init-omnibus is designed to prevent gitlab from overriding your other apache websites on a server reboot.
+
 [startcom_ssl]: http://cert.startcom.org/
 [xca]: http://sourceforge.net/projects/xca/
 [ovpn_scripts]: http://openvpn.net/index.php/open-source/documentation/howto.html#pki
