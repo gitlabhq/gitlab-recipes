@@ -58,6 +58,13 @@ def close_issue(id)
   puts response.body
 end
 
+def post_comment(id,content)
+  uri = URI("#{@base_url}/api/v3/projects/#{@project}/issues/#{id}/notes")
+  res = Net::HTTP.post_form(uri, 'body' => content,'private_token' => @token)
+  created=JSON.parse(res.body)
+  puts created.to_json
+end
+
 def import(bitbucket_json)
   id_map={}
   bitbucket_json['issues'].each do |issue|
@@ -77,13 +84,6 @@ def import(bitbucket_json)
 end
 
 import(load_bitbucket())
-
-def post_comment(id,content)
-  uri = URI("#{@base_url}/api/v3/projects/#{@project}/issues/#{id}/notes")
-  res = Net::HTTP.post_form(uri, 'body' => content,'private_token' => @token)
-  created=JSON.parse(res.body)
-  puts created.to_json
-end
 
 def get_issues()
   request = Net::HTTP::Get.new("/api/v3/projects/#{@project}/issues?private_token=#{@token}")
