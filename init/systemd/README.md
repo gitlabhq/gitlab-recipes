@@ -29,11 +29,11 @@ Reload systemd:
 
 Start the services:
 
-    sudo systemctl start gitlab-sidekiq.service gitlab-unicorn.service gitlab-workhorse.service gitlab-mailroom.service
+    sudo systemctl start gitlab-sidekiq.service gitlab-unicorn.service gitlab-workhorse.service gitlab-mailroom.service gitlab-gitaly.service
 
 Enable them to start at boot:
 
-    sudo systemctl enable gitlab-sidekiq.service gitlab-unicorn.service gitlab-workhorse.service gitlab-mailroom.service
+    sudo systemctl enable gitlab-sidekiq.service gitlab-unicorn.service gitlab-workhorse.service gitlab-mailroom.service gitlab-gitaly.service
 
 ## Notes
 
