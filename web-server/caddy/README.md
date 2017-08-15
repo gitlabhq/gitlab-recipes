@@ -15,6 +15,14 @@ Open `/etc/gitlab/gitlab.rb` using your favourite text editor and update the fol
 * Change `nginx['enable'] = "true"` to `nginx['enable'] = "false"`
 * Save and exit the configuration file and run `gitlab-ctl reconfigure` to update gitlabs configuration
 
+#### Issues
+
+With some repository you can get the following [error](https://gitlab.com/gitlab-org/gitlab-ci-multi-runner/issues/1587)
+in order to fix ensure to modify this line in `/etc/gitlab/gitlab.rb`
+
+*  `nginx['custom_gitlab_server_config'] = 'proxy_buffering off;'`
+* Save and exit the configuration file and run `gitlab-ctl reconfigure` to update gitlabs configuration
+
 ### Updating the Caddyfile
 
 Simply change gitlab.example.com to point to your FQDN.
