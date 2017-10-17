@@ -169,7 +169,7 @@ To remove this alias in the future:
 
 ### Install Git from Source
 
-Make sure Git is version 2.7.4 or higher
+Make sure Git is version 2.13.6 or higher
 
     git --version
 
