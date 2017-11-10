@@ -1,10 +1,12 @@
 https://gitlab.example.com {
     log git.access.log {
-        rotate
+        rotate_size     50
+	    rotate_age      90
+	    rotate_keep     20
+	    rotate_compress
     }
 
-    errors {
-        log git.errors.log
+    errors git.errors.log {
         404 /opt/gitlab/embedded/service/gitlab-rails/public/404.html
         422 /opt/gitlab/embedded/service/gitlab-rails/public/422.html
         500 /opt/gitlab/embedded/service/gitlab-rails/public/500.html
@@ -14,10 +16,9 @@ https://gitlab.example.com {
     proxy / http://127.0.0.1:8181 {
         fail_timeout 0s
 
-        header_upstream Host {host}
-        header_upstream X-Real-IP {remote}
-        header_upstream X-Forwarded-Proto {scheme}
         header_upstream X-Forwarded-Ssl on
+        
+        transparent
     }
 }
 
@@ -26,8 +27,10 @@ https://gitlab.example.com {
     tls {
         max_certs 10
     }
+    
     proxy / http://127.0.0.1:8090 {
         fail_timeout 0s
+        
         transparent
     }
 }
