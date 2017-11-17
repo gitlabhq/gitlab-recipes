@@ -1,3 +1,16 @@
+## Developer Certificate of Origin + License
+
+By contributing to GitLab B.V., You accept and agree to the following terms and
+conditions for Your present and future Contributions submitted to GitLab B.V.
+Except for the license granted herein to GitLab B.V. and recipients of software
+distributed by GitLab B.V., You reserve all right, title, and interest in and to
+Your Contributions. All Contributions are subject to the following DCO + License
+terms.
+
+[DCO + License](https://gitlab.com/gitlab-org/dco/blob/master/README.md)
+
+_This notice should stay as the first item in the CONTRIBUTING.md file._
+
 # Contribute to GitLab recipes
 
 This guide details how to use issues and pull requests to improve GitLab recipes.
@@ -12,20 +25,13 @@ as possible, so don't get intimidated by the extent of the guidelines :)
 For better maintainance and clarity, some naming guidelines should be followed.
 See details in each section below.
 
-## Contributor license agreement
+## License
 
-By submitting code as an individual you agree to the [individual contributor
-license agreement][individual-agreement].
+MIT, see [LICENSE](LICENSE).
 
-By submitting code as an entity you agree to the [corporate contributor license
-agreement][corporate-agreement].
+## Merge Request title
 
-[individual-agreement]: https://docs.gitlab.com/ee/legal/individual_contributor_license_agreement.html
-[corporate-agreement]: https://docs.gitlab.com/ee/legal/corporate_contributor_license_agreement.html
-
-## Pull Request title
-
-Try to be as more descriptive as you can in your Pull Request title.
+Try to be as more descriptive as you can in your Merge Request title.
 
 Particularly if you are submitting a new script or guide, include in the title,
 information about GitLab version, OS tested on and any other relevant info.
